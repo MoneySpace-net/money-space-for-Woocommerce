@@ -96,7 +96,7 @@ if ($order && $pid) {
             $order->update_status("wc-failed");
             wp_redirect(wc_get_order($order->id)->get_checkout_order_received_url());
         } else if ($ms_status->status == "Cancel") {
-            $order->update_status("wc-failed");
+            $order->update_status("wc-cancelled");
             wp_redirect(wc_get_order($order->id)->get_checkout_order_received_url());
         } else {
             $order->update_status("wc-failed");

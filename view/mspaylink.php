@@ -1,5 +1,7 @@
 <?php
 
+date_default_timezone_set("Asia/Bangkok");
+
 global $wpdb;
 
 global $woocommerce;
@@ -7,9 +9,18 @@ global $woocommerce;
 $order = wc_get_order($pid);
 
 if ($order && $pid) {
+
     $payment_gateway_id = MS_ID;
+    $payment_gateway_qr_id = MS_ID_QRPROM;
+    $payment_gateway_installment_id = MS_ID_INSTALLMENT;
+
+    
     $payment_gateways = WC_Payment_Gateways::instance();
+
     $payment_gateway = $payment_gateways->payment_gateways()[$payment_gateway_id];
+    $payment_gateway_qr = $payment_gateways->payment_gateways()[$payment_gateway_qr_id];
+    $payment_gateway_installment = $payment_gateways->payment_gateways()[$payment_gateway_installment_id];
+
     $gateways = WC()->payment_gateways->get_available_payment_gateways();
     $ms_secret_id = $gateways['moneyspace']->settings['secret_id'];
     $ms_secret_key = $gateways['moneyspace']->settings['secret_key'];
@@ -19,6 +30,7 @@ if ($order && $pid) {
 
     $ms_time = date("YmdHis");
     $MS_transaction_orderid = get_post_meta($order->id, 'MS_transaction_orderid', true);
+    $MS_transaction = get_post_meta($order->id, 'MS_transaction', true);
     $order_amount = $order->get_total();
     $MS_PAYMENT_TYPE = get_post_meta($order->id, 'MS_PAYMENT_TYPE', true);
     $MS_PAYMENT_KEY = get_post_meta($order->id, 'MS_PAYMENT_KEY', true);
@@ -32,7 +44,23 @@ if ($order && $pid) {
     if ($MS_PAYMENT_TYPE == "Card") {
         $ms_title = $gateways['moneyspace']->settings['title'];
     } else if ($MS_PAYMENT_TYPE == "Qrnone") {
+
         $ms_title = $gateways['moneyspace_qrprom']->settings['title'];
+        $MS_QR_TIME = get_post_meta($order->id, 'MS_QR_TIME', true);
+        $auto_cancel = $payment_gateway_qr->settings['auto_cancel'];
+
+        if(empty($auto_cancel)){
+            $limit_time = 1200;
+        }else{
+            $limit_time = $auto_cancel;
+        }
+        
+
+        if ((time() - $MS_QR_TIME) > $limit_time){
+            wp_redirect(get_site_url() . "/ms/cancel/" . $order->id);
+        }
+
+
     } else if ($MS_PAYMENT_TYPE == "Installment") {
         $ms_title = $gateways['moneyspace_installment']->settings['title'];
     }
@@ -47,8 +75,43 @@ if ($order && $pid) {
 </head>
 <body>
 <?php if ($ms_template_payment == "1") { ?>
-    <div align="left">
+    <div align="center">
         <div id="moneyspace-payment" lang="eng" ms-title="<?= $ms_title ?> " ms-key="<?= $MS_PAYMENT_KEY ?>"></div>
+        <br>
+        <?php if ($MS_PAYMENT_TYPE == "Qrnone") { ?>
+
+
+            <h3>
+                QR Code จะหมดอายุวันที่ : <?=date('d/m/Y H:i', $MS_QR_TIME + $limit_time);?>
+            </h3>
+
+            <script>
+                                    function startTimer(duration, display) {
+                                        var timer = duration, minutes, seconds;
+                                        setInterval(function () {
+                                            minutes = parseInt(timer / 60, 10);
+                                            seconds = parseInt(timer % 60, 10);
+                                    
+                                            minutes = minutes < 10 ? "0" + minutes : minutes;
+                                            seconds = seconds < 10 ? "0" + seconds : seconds;
+                                    
+                                          
+                                    
+                                            if (--timer < 0) {
+                                                timer = duration;
+                                                window.location="<?=get_site_url() . "/ms/cancel/" . $order->id?>";
+                                            }
+                                        }, 1000);
+                                    }
+                                    
+                                    window.onload = function () {
+                                        var fiveMinutes = <?=$limit_time?>,
+                                            display = document.querySelector("#time");
+                                        startTimer(fiveMinutes, display);
+                                    };
+            </script>
+
+        <?php } ?>
     </div>
     <script type="text/javascript" src="<?= MS_PAYMENT_FORM_JS ?>"></script>
 <?php }else if ($ms_template_payment == "2"){ ?>
@@ -65,6 +128,41 @@ if ($order && $pid) {
 <?php } else { ?>
     <div align="left">
         <div id="moneyspace-payment" lang="eng" ms-title="<?= $ms_title ?>" ms-key="<?= $MS_PAYMENT_KEY ?>"></div>
+        <br>
+        <?php if ($MS_PAYMENT_TYPE == "Qrnone") { ?>
+
+
+            <h3>
+                QR Code จะหมดอายุวันที่ : <?=date('d/m/Y H:i', $MS_QR_TIME + $limit_time);?>
+            </h3>
+
+            <script>
+                                    function startTimer(duration, display) {
+                                        var timer = duration, minutes, seconds;
+                                        setInterval(function () {
+                                            minutes = parseInt(timer / 60, 10);
+                                            seconds = parseInt(timer % 60, 10);
+                                    
+                                            minutes = minutes < 10 ? "0" + minutes : minutes;
+                                            seconds = seconds < 10 ? "0" + seconds : seconds;
+                                    
+                                          
+                                    
+                                            if (--timer < 0) {
+                                                timer = duration;
+                                                window.location="<?=get_site_url() . "/ms/cancel/" . $order->id?>";
+                                            }
+                                        }, 1000);
+                                    }
+                                    
+                                    window.onload = function () {
+                                        var fiveMinutes = <?=$limit_time?>,
+                                            display = document.querySelector("#time");
+                                        startTimer(fiveMinutes, display);
+                                    };
+            </script>
+
+        <?php } ?>
     </div>
     <script type="text/javascript" src="<?= MS_PAYMENT_FORM_JS ?>"></script>
 <?php } ?>

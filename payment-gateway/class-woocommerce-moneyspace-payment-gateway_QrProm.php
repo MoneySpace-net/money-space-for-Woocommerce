@@ -54,6 +54,14 @@ class MS_Payment_Gateway_QR extends WC_Payment_Gateway
                 'desc_tip' => true,
                 'options' => wc_get_order_statuses()
             ),
+            'auto_cancel' => array(
+                'title' => __("ตั้งเวลาหมดอายุ", $this->domain),
+                'type' => 'select',
+                'class' => 'wc-enhanced-select',
+                'default' => 1200,
+                'desc_tip' => true,
+                'options' => [1200 => "20 นาที",1500 => "25 นาที" ,1800 => "30 นาที"]
+            ),
             'description' => array(
                 'title' => __(MS_FORM_FIELD_DESCRIPTION, $this->domain),
                 'type' => 'textarea',
@@ -124,10 +132,12 @@ class MS_Payment_Gateway_QR extends WC_Payment_Gateway
         $order_amount = $order->get_total();
 
         $payment_gateway_id = MS_ID;
+        $payment_gateway_qr_id = MS_ID_QRPROM;
 
         $payment_gateways = WC_Payment_Gateways::instance();
 
         $payment_gateway = $payment_gateways->payment_gateways()[$payment_gateway_id];
+        $payment_gateway_qr = $payment_gateways->payment_gateways()[$payment_gateway_qr_id];
 
         $gateways = WC()->payment_gateways->get_available_payment_gateways();
         $ms_order_select = $payment_gateway->settings['order_status_if_success'];
@@ -228,11 +238,24 @@ class MS_Payment_Gateway_QR extends WC_Payment_Gateway
                         update_post_meta($order_id, 'MS_transaction_orderid', $body_post["customer_order_id"]);
                         update_post_meta($order_id, 'MS_transaction', $tranId);
                         update_post_meta($order_id, 'MS_PAYMENT_KEY', $mskey);
+                        update_post_meta($order_id, 'MS_QR_TIME', time());
 
                         if ($ms_template_payment == "1") {
                             wp_redirect(get_site_url() . "/mspaylink/" . $order_id);
                             exit;
                         } else if ($ms_template_payment == "2") {
+
+                            date_default_timezone_set("Asia/Bangkok");
+                            $MS_QR_TIME = get_post_meta($order->id, 'MS_QR_TIME', true);
+                            $auto_cancel = $payment_gateway_qr->settings['auto_cancel'];
+
+                            if(empty($auto_cancel)){
+                                $limit_time = 1200;
+                            }else{
+                                $limit_time = $auto_cancel;
+                            }
+
+
                             echo '<div align="center">
                                         <div id="moneyspace-payment" 
                                                 template="2"
@@ -241,8 +264,36 @@ class MS_Payment_Gateway_QR extends WC_Payment_Gateway
                                                 ms-key="' . $mskey . '" 
                                                 description="false">
                                         </div>
+                                        <br>
+                                        <h3> QR Code จะหมดอายุวันที่ : '.date('d/m/Y H:i', $MS_QR_TIME + $limit_time).'</h3>
                                     </div>
-                                    <script type="text/javascript" src="' . MS_PAYMENT_JS . '"></script>';
+                                    <script type="text/javascript" src="' . MS_PAYMENT_JS . '"></script>
+                                    <script>
+                                    function startTimer(duration, display) {
+                                        var timer = duration, minutes, seconds;
+                                        setInterval(function () {
+                                            minutes = parseInt(timer / 60, 10);
+                                            seconds = parseInt(timer % 60, 10);
+                                    
+                                            minutes = minutes < 10 ? "0" + minutes : minutes;
+                                            seconds = seconds < 10 ? "0" + seconds : seconds;
+                                    
+                                          
+                                    
+                                            if (--timer < 0) {
+                                                timer = duration;
+                                                window.location="'.get_site_url() . "/ms/cancel/" . $order_id.'";
+                                            }
+                                        }, 1000);
+                                    }
+                                    
+                                    window.onload = function () {
+                                        var fiveMinutes = '.$limit_time.',
+                                            display = document.querySelector("#time");
+                                        startTimer(fiveMinutes, display);
+                                    };
+            </script>
+                                    ';
                         } else {
                             wp_redirect(get_site_url() . "/mspaylink/" . $order_id);
                             exit;
