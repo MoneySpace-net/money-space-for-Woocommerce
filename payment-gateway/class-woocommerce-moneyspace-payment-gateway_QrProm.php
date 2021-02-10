@@ -60,7 +60,7 @@ class MS_Payment_Gateway_QR extends WC_Payment_Gateway
                 'class' => 'wc-enhanced-select',
                 'default' => 1200,
                 'desc_tip' => true,
-                'options' => [1200 => "20 นาที",1500 => "25 นาที" ,1800 => "30 นาที"]
+                'options' => [900 => "15 นาที",1200 => "20 นาที",1500 => "25 นาที",1800 => "30 นาที"]
             ),
             'description' => array(
                 'title' => __(MS_FORM_FIELD_DESCRIPTION, $this->domain),

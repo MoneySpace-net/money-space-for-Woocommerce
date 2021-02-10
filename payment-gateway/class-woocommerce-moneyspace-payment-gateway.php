@@ -481,7 +481,31 @@ function avia_thank_you()
     return $added_text;
 }
 
-add_filter('woocommerce_payment_complete_reduce_order_stock', '__return_false');
+add_filter( 'woocommerce_payment_complete_reduce_order_stock', 'filter_woocommerce_payment_complete_reduce_order_stock', 10, 2 ); 
+
+function filter_woocommerce_payment_complete_reduce_order_stock( $order_order_get_data_store_get_stock_reduced_order_id, $order_id ) { 
+
+    $order = new WC_Order( $order_id );
+
+
+    if ($order->get_payment_method() == MS_ID || $order->get_payment_method() == MS_ID_QRPROM || $order->get_payment_method() == MS_ID_INSTALLMENT){
+
+        $order_order_get_data_store_get_stock_reduced_order_id = false;
+
+    }else if ($order->get_payment_method() != MS_ID || $order->get_payment_method() != MS_ID_QRPROM || $order->get_payment_method() != MS_ID_INSTALLMENT){
+       
+        $order_order_get_data_store_get_stock_reduced_order_id = true;
+ 
+    }else if ( $order->has_status( 'on-hold' ) && $order->get_payment_method() == 'bacs' ) {
+
+        $order_order_get_data_store_get_stock_reduced_order_id = true;
+
+    }
+
+    return $order_order_get_data_store_get_stock_reduced_order_id; 
+
+}; 
+
 add_action('woocommerce_order_details_before_order_table', 'custom_order_details_after_order_table', 10, 1);
 
 function custom_order_details_after_order_table($order)
