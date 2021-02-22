@@ -379,7 +379,7 @@ class MS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway
                                     'email' => $body_post["email"],
                                     'phone' => $body_post["phone"],
                                     'amount' => round($body_post["amount"], 2),
-                                    'description' => $body_post["description"],
+                                    'description' => preg_replace( "/<br>|\n/", "", $body_post["description"] ),
                                     'address' => $body_post["address"],
                                     'message' => $body_post["message"],
                                     'feeType' => "include",
