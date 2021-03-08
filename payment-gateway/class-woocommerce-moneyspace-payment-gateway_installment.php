@@ -95,7 +95,7 @@ class MS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway
                 'class' => 'wc-enhanced-select',
                 'default' => 'include',
                 'desc_tip' => true,
-                'options' => ["include" => "ร้านค้ารับผิดชอบดอกเบี้ยรายเดือน"]
+                'options' => ["include" => "ร้านค้ารับผิดชอบดอกเบี้ยรายเดือน","exclude" => "ผู้ซื้อรับผิดชอบดอกเบี้ยรายเดือน"]
             ),
             'message2store_setting' => array(
                 'title' => __(MESSAGE2STORE_HEADER, $this->domain),
@@ -290,6 +290,8 @@ class MS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway
         $ms_secret_id = $payment_gateway->settings['secret_id'];
         $ms_secret_key = $payment_gateway->settings['secret_key'];
 
+        $fee_setting = $gateways['moneyspace_installment']->settings['fee_setting'];
+
         $ms_template_payment = $payment_gateway->settings['ms_template_payment'];
 
         $ms_time = date("YmdHis");
@@ -301,6 +303,11 @@ class MS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway
                 if (get_woocommerce_currency() == "THB") {
                     if ($order_amount >= 3000.01) {
                         if (isset($_POST["selectbank"])) {
+
+                            
+                            
+
+
                             $MS_PAYMENT_TYPE = get_post_meta($order_id, 'MS_PAYMENT_TYPE', true);
 
                             $items_order = new WC_Order($order_id);
@@ -371,6 +378,8 @@ class MS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway
 
                                 $body_post = array("firstname" => $order_firstname, "lastname" => $order_lastname, "email" => $order_email, "phone" => $order_phone, "address" => $order_address, "amount" => $order_amount, "description" => $items_msg, "message" => $MS_special_instructions_to_merchant, "feeType" => "include", "customer_order_id" => $order_id . "MS" . $ms_time);
 
+                                if($fee_setting == "include"){
+
                                 $ms_body = array(
                                     'secret_id' => $ms_secret_id,
                                     'secret_key' => $ms_secret_key,
@@ -427,7 +436,91 @@ class MS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway
                                         wc_add_notice(__($data_status[0]->status, $this->domain), 'error');
                                     }
                                 }
+
+                                }else if($fee_setting == "exclude"){
+
+                                    $body_post = array("firstname" => $order_firstname, "lastname" => $order_lastname, "email" => $order_email, "phone" => $order_phone, "address" => $order_address, "amount" => $order_amount, "currency" => "THB", "description" => $items_msg, "message" => $MS_special_instructions_to_merchant, "feeType" => "exclude", "timeHash" => $ms_time, "customer_order_id" => $order_id . "MS" . $ms_time , "gatewayType" => "card", "successUrl" => get_site_url() . "/process/payment/" . $order_id, "failUrl" => get_site_url() . "/process/payment/" . $order_id, "cancelUrl" => get_site_url() . "/process/payment/" . $order_id );
+
+                                    
+                                    $hash_data = $body_post["firstname"] . $body_post["lastname"] . $body_post["email"] . $body_post["phone"] . $body_post["amount"] . $body_post["currency"] . preg_replace( "/<br>|\n/", "", $body_post["description"] ) . $body_post["address"] . $body_post["message"] . $body_post["feeType"] . $body_post["timeHash"] . $body_post["customer_order_id"] . $body_post["gatewayType"] . $body_post["successUrl"] . $body_post["failUrl"] . $body_post["cancelUrl"];
+
+
+                                    $hash_body = hash_hmac('sha256', $hash_data, $ms_secret_key);
+
+     
+
+                                    $ms_body = array(
+                                        "secret_id" => $ms_secret_id,
+                                        "secret_key" => $ms_secret_key,
+                                        "firstname" => $body_post["firstname"],
+                                        "lastname" => $body_post["lastname"],
+                                        "email" => $body_post["email"],
+                                        "phone" => $body_post["phone"],
+                                        "amount" => $body_post["amount"],
+                                        "description" => preg_replace( "/<br>|\n/", "", $body_post["description"] ),
+                                        "address" => $body_post["address"],
+                                        "feeType" => "exclude",
+                                        "message" => $body_post["message"],
+                                        "order_id" => $body_post["customer_order_id"],
+                                        "success_Url" => $body_post["successUrl"],
+                                        "fail_Url" => $body_post["failUrl"],
+                                        "cancel_Url" => $body_post["cancelUrl"],
+                                        "agreement" => "1",  
+                                        "bankType" => "BAY", $_POST["selectbank"],
+                                        "startTerm" => "3", 
+                                        "endTerm" => $max_months_setting,
+                                    );
+    
+                                    $response = wp_remote_post("https://a.moneyspace.net/payment/Createinstallment/", array(
+                                            'method' => 'POST',
+                                            'timeout' => 120,
+                                            'body' => $ms_body
+                                        )
+                                    );
+
+                                    if (is_wp_error($response)) {
+
+                                        wc_add_notice(__(MS_NOTICE_ERROR_SETUP, $this->domain), 'error');
+            
+                                    } else {
+
+
+
+                                        $array_response = json_decode($response["body"]); // JSON to Array
+
+
+                                        if ($array_response[0]->status != "success") {
+
+                                            wc_add_notice(__(MS_NOTICE_ERROR_SETUP, $this->domain), 'error');
+            
+                                        } else {
+
+                                            $tranId = $array_response[0]->transaction_ID;
+
+                                            update_post_meta($order_id, 'MS_fee_installment', "exclude");
+                                            update_post_meta($order_id, 'MS_orderid_installment', $body_post["customer_order_id"]);
+                                            update_post_meta($order_id, 'MS_transaction_orderid', $body_post["customer_order_id"]);
+                                            update_post_meta($order_id, 'MS_transaction', $tranId);
+
+
+                                            return array(
+                                                'result' => 'success',
+                                                'redirect' => $array_response[0]->link_payment
+                                            );
+
+
+                                        }
+
+
+                                    }
+
+                                }
+
+
                             }
+
+                            
+
                         } else {
                             wc_add_notice(__("กรุณาเลือกการผ่อนชำระ" . $_POST["selectbank"], $this->domain), 'error');
                         }
