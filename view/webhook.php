@@ -49,7 +49,7 @@ if (isset($_POST["transectionID"])) {
     $hash = $_POST["hash"];
     $process_payment_hash = hash_hmac('sha256', $process_transactionID.$amount.$status.$getorderid, $ms_secret_key);
 
-    if ($hash == $process_payment_hash){
+    if ($hash == $process_payment_hash && $status == "paysuccess"){
 
 
         if($MS_PAYMENT_TYPE == "Card"){
