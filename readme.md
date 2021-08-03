@@ -421,6 +421,8 @@
 
 # Changelog
 
+- 2021-08-04 : fix bug some Wordpress version can't working
+
 - 2021-07-02 : fix bug credit card and installment with option buyer pay fees
 
 - 2021-06-28 : verify credit card payment form
