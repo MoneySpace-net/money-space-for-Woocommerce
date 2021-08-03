@@ -1,0 +1,58 @@
+.modalsScroll {
+  overflow: auto;
+  position: fixed;
+  z-index: -1;
+  left: 0;
+  top: 0;
+  height: 100%;
+  width: 100%;
+  display: none
+}
+
+.modalsScroll.open{
+  z-index: 55;
+  display: block
+}
+
+.modals {
+  height: 100vh;
+  width: 100%;
+}
+
+.modals.table {
+  display: table
+}
+
+.blockMod {
+  position: relative;
+  z-index: 6;
+  display: none;
+  margin: 0 auto;
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center;
+}
+
+.modals .in {
+  margin: 0 auto;
+}
+
+ /* .modals .closeModal {
+   display: table;
+   position: absolute;
+   width: 33px;
+   height: 33px;
+   -webkit-border-radius: 50%;
+   -moz-border-radius: 50%;
+   border-radius: 50%;
+   background-color: #f4f4f4;
+   z-index: 15;
+   color: #999999;
+   right: 20px;
+   top: 15px;
+   cursor: pointer;
+   font-size: 24px;
+   font-family: 'icomoon';
+   line-height: 33px;
+   text-align: center;
+} */

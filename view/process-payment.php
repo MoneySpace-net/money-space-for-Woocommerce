@@ -34,7 +34,6 @@ if ($order && $pid) {
     $MS_transaction_orderid = get_post_meta($order->id, 'MS_transaction_orderid', true);
     $MS_PAYMENT_TYPE = get_post_meta($order->id, 'MS_PAYMENT_TYPE', true);
     $order_amount = $order->get_total();
-
     $check_orderid = wp_remote_post(MS_API_URL_CHECK, array(
         'method' => 'POST',
         'timeout' => 120,
@@ -49,6 +48,9 @@ if ($order && $pid) {
         $oid = "order id";
         $json_status = json_decode($check_orderid["body"]);
         $ms_status = $json_status[0]->$oid;
+
+        cancel_payment($order->id, $payment_gateway);
+
         if ($ms_status->status == "Pay Success") {
 
             if($MS_PAYMENT_TYPE == "Card"){
@@ -70,20 +72,14 @@ if ($order && $pid) {
                 }
 
 
-            }else if($MS_PAYMENT_TYPE == "Installment"){
+            } else if($MS_PAYMENT_TYPE == "Installment"){
 
                 if(empty($ms_order_select_installment)){
                     $order->update_status("wc-processing");
                 }else{
                     $order->update_status($ms_order_select_installment);
                 }
-
-
             }
-
-
-            
-
 
             if ($ms_stock_setting != "Disable") {
                 $order->reduce_order_stock();
@@ -92,13 +88,11 @@ if ($order && $pid) {
             update_post_meta($order->id, 'MS_PAYMENT_PAID', $ms_status->amount);
             update_post_meta($order->id, 'MS_PAYMENT_STATUS', $ms_status->status);
             wp_redirect(wc_get_order($order->id)->get_checkout_order_received_url());
-        } else if ($ms_status->status == "Fail") {
-            $order->update_status("wc-failed");
-            wp_redirect(wc_get_order($order->id)->get_checkout_order_received_url());
         } else if ($ms_status->status == "Cancel") {
             $order->update_status("wc-cancelled");
             wp_redirect(wc_get_order($order->id)->get_checkout_order_received_url());
         } else {
+            # Fail case
             $order->update_status("wc-failed");
             wp_redirect(wc_get_order($order->id)->get_checkout_order_received_url());
         }
@@ -109,4 +103,28 @@ if ($order && $pid) {
     WC()->cart->empty_cart();
 } else {
     wp_redirect(wc_get_order($order->id)->get_checkout_order_received_url());
+}
+
+function cancel_payment($order_id, $payment_gateway)
+{
+    $MS_transaction = get_post_meta($order_id, 'MS_transaction', true);
+
+    $ms_secret_id = $payment_gateway->settings['secret_id'];
+    $ms_secret_key = $payment_gateway->settings['secret_key'];
+    // trigger kill transaction id
+    $call_cancel = wp_remote_post(MS_CANCEL_TRANSACTION, array(
+        'method' => 'POST',
+        'timeout' => 120,
+        'body' => array(
+            'secret_id' => $ms_secret_id,
+            'secret_key' => $ms_secret_key,
+            'transaction_ID' => $MS_transaction,
+        )
+    ));
+    $json_status = json_decode($call_cancel["body"]);
+    if($json_status[0]->status == "success")
+    {
+        // TODO
+        
+    }
 }

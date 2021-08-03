@@ -1,6 +1,6 @@
 <?php
 
-class MS_Paylink
+class MNS_Paylink
 {
 
     public static function init()
@@ -16,6 +16,7 @@ class MS_Paylink
                 'pid' => 1,
             ),
             'page_callback' => function () {
+                # code ..
             },
             'page_arguments' => array('pid'),
             'access_callback' => TRUE,

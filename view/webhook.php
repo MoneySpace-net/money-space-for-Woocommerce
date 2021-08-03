@@ -4,12 +4,12 @@ global $wpdb;
 
 global $woocommerce;
 
-echo "Webhook !!!!!!!!!!";
+// echo "Webhook !!!!!!!!!!";
 
 
 if (isset($_POST["transectionID"])) {
 
-    $getorderid = $_POST["orderid"];
+    $getorderid = sanitize_text_field($_POST["orderid"]);
     preg_match_all('!\d+!', $getorderid, $arroid);
     $order = wc_get_order($arroid[0][0]);
 
@@ -43,10 +43,10 @@ if (isset($_POST["transectionID"])) {
 
 
 
-    $process_transactionID = $_POST["transectionID"]; 
-    $amount = $_POST["amount"];
-    $status = $_POST["status"];
-    $hash = $_POST["hash"];
+    $process_transactionID = sanitize_text_field($_POST["transectionID"]); 
+    $amount = sanitize_text_field($_POST["amount"]);
+    $status = sanitize_text_field($_POST["status"]);
+    $hash = sanitize_text_field($_POST["hash"]);
     $process_payment_hash = hash_hmac('sha256', $process_transactionID.$amount.$status.$getorderid, $ms_secret_key);
 
     if ($hash == $process_payment_hash && $status == "paysuccess"){

@@ -1,6 +1,6 @@
 <?php
 
-class MS_Webhook
+class MNS_Webhook
 {
 
     public static function init()
@@ -16,6 +16,7 @@ class MS_Webhook
                 'pid' => 1,
             ),
             'page_callback' => function () {
+                # code ..
             },
             'page_arguments' => array('pid'),
             'access_callback' => TRUE,

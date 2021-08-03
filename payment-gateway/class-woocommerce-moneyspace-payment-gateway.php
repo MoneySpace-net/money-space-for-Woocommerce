@@ -10,7 +10,7 @@ class MS_Payment_Gateway extends WC_Payment_Gateway
         $this->title = __($this->get_option('title'), $this->domain);
         $this->icon = apply_filters('woocommerce_custom_gateway_icon', MS_LOGO, '');
         $this->method_title = __(MS_METHOD_TITLE, $this->domain);
-        $this->method_description = __(MS_DESCRIPTION, $this->domain);
+        $this->method_description = __(MNS_DESCRIPTION, $this->domain);
         $this->has_fields = true;
 
         $this->init_form_fields();
@@ -22,19 +22,159 @@ class MS_Payment_Gateway extends WC_Payment_Gateway
         add_action('woocommerce_receipt_' . $this->id, array($this, 'paymentgateway_form'), 10, 1);
         add_action('woocommerce_update_options_payment_gateways_' . $this->id, array($this, 'process_admin_options'));
         add_action('woocommerce_thankyou_custom', array($this, 'thankyou_page'));
+       
+    }
+
+    public function create_payment_transaction($order_id, $ms_body, $ms_template_payment, $gateways) {
+
+        $response = wp_remote_post(MS_API_URL_CREATE, array(
+            'method' => 'POST',
+            'timeout' => 120,
+            'body' => $ms_body
+        ));
+        
+        if (is_wp_error($response)) {
+            wc_add_notice(__("Error : " . MNS_NOTICE_ERROR_SETUP, $this->domain), 'error');
+            return;
+        }
+
+        $data_status = json_decode($response["body"]);
+        if (empty($data_status) || $data_status[0]->status != "success") {
+            wc_add_notice(__("Error ms102 : " . MNS_NOTICE_CHECK_TRANSACTION, $this->domain), 'error');
+            return;
+        }
+
+        if ($data_status[0]->status == "success" && strlen($data_status[0]->mskey) > 9999) {
+            wc_add_notice(__("Error ms100 : " . MNS_NOTICE_CHECK_TRANSACTION . $data_status[0]->status, $this->domain), 'error');
+            return;
+        }
+
+        $tranId = $data_status[0]->transaction_ID;
+        $mskey = $data_status[0]->mskey;
+
+        update_post_meta($order_id, 'MS_transaction_orderid', $ms_body['order_id']);
+        update_post_meta($order_id, 'MS_transaction', $tranId);
+        update_post_meta($order_id, 'MS_PAYMENT_KEY', $mskey);
+
+        if ($ms_template_payment == "1") {
+            wp_redirect(get_site_url() . "/mspaylink/" . $order_id);
+        }
+        
+        if ($ms_template_payment == "2") {
+            
+            echo '<div align="center">
+            <div id="moneyspace-payment" 
+                    template="2"
+                    lang="eng"
+                    ms-title="' . $gateways['moneyspace']->settings['title'] . '" 
+                    ms-key="' . $mskey . '" 
+                    description="false">
+            </div>
+            </div>';
+            wp_enqueue_script( 'cc_mspayment', MS_PAYMENT_FORM_JS, array(), false, true);
+            echo "<style> input[type=text]{
+                box-sizing: content-box !important;
+                background-color: transparent !important;
+            }
+
+            .MuiOutlinedInput-notchedOutline {
+                background: transparent !important;
+            }
+
+            .MuiInputLabel-outlined.MuiInputLabel-shrink {
+                left: -0.6em !important;
+            }
+
+            .MuiInput-underline:before, .MuiInput-underline:after {
+                border-bottom: 0px !important;
+            }
+
+            .MuiSelect-select:focus {
+                background-color: transparent !important;
+            }
+
+            .MuiGrid-root.MuiGrid-container.MuiGrid-justify-xs-center > div > img {
+                width: 10em !important;
+                height: auto !important;
+            }
+
+            .MuiGrid-root.MuiGrid-container.MuiGrid-justify-xs-center {
+                padding-bottom: 10px !important;
+            }
+
+            .MuiContainer-maxWidthXs {
+                max-width: 100%;
+            }
+            </style>";    
+            
+            // add_action('after_woocommerce_pay', array($this, 'custom_order_pay'), 10, 1);
+        } else {
+            wp_redirect(get_site_url() . "/mspaylink/" . $order_id);
+        }
+    }
+
+    public function create_payment_transaction_v2($order_id, $ms_secret_key, $ms_body, $ms_template_payment, $gateways) {
+        
+        $response = wp_remote_post(MS_API_URL_V2_CREATE_PAYMENT, array(
+            'method' => 'POST',
+            'timeout' => 120,
+            'body' => $ms_body
+        ));
+        if (is_wp_error($response)) {
+            wc_add_notice(__(MNS_NOTICE_ERROR_SETUP, $this->domain), 'error');
+            return;
+        }
+
+        $json_tranId_status = json_decode($response["body"]);
+        if ($json_tranId_status[0]->status == "NotFound") {
+            wc_add_notice(__(MNS_NOTICE_ERROR_SETUP, $this->domain), 'error');
+            return;
+        } 
+        $urlpayment = "Transaction ID";
+        $json_tranId = json_decode($response["body"]);
+        $tranId = $json_tranId[0]->$urlpayment;
+        $ms_time = $ms_body['timeHash'];
+        $ms_secret_id = $ms_body['secreteID'];
+        $hash_link = hash_hmac('sha256', $tranId . $ms_time, $ms_secret_key);
+        $link = "https://www.moneyspace.net/merchantapi/makepayment/linkpaymentcard?transactionID=" . $tranId . "&timehash=" . $ms_time . "&secreteID=" . $ms_secret_id . "&hash=" . $hash_link;
+        update_post_meta($order_id, 'MS_transaction', $tranId);
+        update_post_meta($order_id, 'MS_transaction_orderid', $ms_body["order_id"]);
+        update_post_meta($order_id, 'MS_LINK', $link);
+        WC()->cart->empty_cart();
+        wp_redirect($link);
+    }
+
+    public function call_payment_getpay($order_id, $mskey) {
+        $ms_body["mskey"] = $mskey;
+        $response = wp_remote_post(MS_API_URL_GETPAY, array(
+            'method' => 'POST',
+            'timeout' => 120,
+            'body' => $ms_body
+        ));
+
+        if (is_wp_error($response)) {
+            wc_add_notice(__("Error : " . MNS_NOTICE_ERROR_SETUP, $this->domain), 'error');
+            return;
+        }
+
+        $data_status = json_decode($response["body"]);
+        $mspay = json_encode($data_status->data);
+        update_post_meta($order_id, 'MS_PAYMENT_PAY', $mspay);
+        return $mspay;
     }
 
     public function init_form_fields()
     {
+
         $this->form_fields = array(
             'header_setting' => array(
-                'title' => __('<h1><b> ' . MS_FORM_FIELD_HEADER_SETTING . ' </b></h1>', $this->domain),
+                'title' => __(set_title_html(MNS_FORM_FIELD_HEADER_SETTING), $this->domain),
                 'type' => 'title'
             ),
             'enabled' => array(
-                'title' => __(MS_FORM_FIELD_ENABLE, $this->domain),
+                'title' => __(MNS_FORM_FIELD_ENABLE, $this->domain),
                 'type' => 'checkbox',
-                'label' => __(MS_FORM_FIELD_ENABLE_LABEL, $this->domain),
+                'label' => __(MNS_FORM_FIELD_ENABLE_LABEL, $this->domain),
                 'default' => 'no'
             ),
             'title' => array(
@@ -45,26 +185,26 @@ class MS_Payment_Gateway extends WC_Payment_Gateway
                 'desc_tip' => true,
             ),
             'description' => array(
-                'title' => __(MS_FORM_FIELD_DESCRIPTION, $this->domain),
+                'title' => __(MNS_FORM_FIELD_DESCRIPTION, $this->domain),
                 'type' => 'textarea',
                 'default' => __("", $this->domain),
                 'desc_tip' => true,
             ),
             'desc_domain_webhook1' => array(
-                'title' => __('<h1><b>' . HEAD_DOMAIN_WEBHOOK . '</b></h1>', $this->domain),
+                'title' => __(set_title_html(MNS_HEAD_DOMAIN_WEBHOOK), $this->domain),
                 'type' => 'title',
-                'description' => DOMAIN_WEBHOOK
+                'description' => MNS_DOMAIN_WEBHOOK
             ),
             'ms_domain' => array(
-                'title' => __(YOUR_DOMAIN . " : <code>" . get_site_url() . "</code>", $this->domain),
+                'title' => __(MNS_YOUR_DOMAIN . " : <code>" . get_site_url() . "</code>", $this->domain),
                 'type' => 'title'
             ),
             'ms_webhook' => array(
-                'title' => __(YOUR_WEBHOOK . " : <code>" . get_site_url() . "/ms/webhook" . "</code>", $this->domain),
+                'title' => __(MNS_YOUR_WEBHOOK . " : <code>" . get_site_url() . "/ms/webhook" . "</code>", $this->domain),
                 'type' => 'title'
             ),
             'header_setting_ms' => array(
-                'title' => __('<h1><b>' . MS_FORM_FIELD_HEADER_SETTING_MS . '</b></h1>', $this->domain),
+                'title' => __(set_title_html(MNS_FORM_FIELD_HEADER_SETTING_MS), $this->domain),
                 'type' => 'title'
             ),
             'secret_id' => array(
@@ -80,15 +220,15 @@ class MS_Payment_Gateway extends WC_Payment_Gateway
                 'desc_tip' => true,
             ),
             'fee_setting' => array(
-                'title' => __(FEE_HEADER, $this->domain),
+                'title' => __(MNS_FEE_HEADER, $this->domain),
                 'type' => 'select',
                 'class' => 'wc-enhanced-select',
                 'default' => 'include',
                 'desc_tip' => true,
-                'options' => ["include" => FEE_INCLUDE,"exclude" => FEE_EXCLUDE]
+                'options' => ["include" => MNS_FEE_INCLUDE,"exclude" => MNS_FEE_EXCLUDE]
             ),
             'message2store_setting' => array(
-                'title' => __(MESSAGE2STORE_HEADER, $this->domain),
+                'title' => __(MNS_MESSAGE2STORE_HEADER, $this->domain),
                 'type' => 'select',
                 'class' => 'wc-enhanced-select',
                 'default' => false,
@@ -96,7 +236,7 @@ class MS_Payment_Gateway extends WC_Payment_Gateway
                 'options' => [true => "Enable", false => "Disable"]
             ),
             'order_status_if_success' => array(
-                'title' => __(MS_FORM_FIELD_SET_ORDER_STATUS, $this->domain),
+                'title' => __(MNS_FORM_FIELD_SET_ORDER_STATUS, $this->domain),
                 'type' => 'select',
                 'class' => 'wc-enhanced-select',
                 'default' => 'wc-processing',
@@ -104,12 +244,12 @@ class MS_Payment_Gateway extends WC_Payment_Gateway
                 'options' => wc_get_order_statuses()
             ),
             'ms_stock_setting' => array(
-                'title' => __(STOCKSETTING_HEAD, $this->domain),
+                'title' => __(MNS_STOCKSETTING_HEAD, $this->domain),
                 'type' => 'select',
                 'class' => 'wc-enhanced-select',
                 'default' => 'Disable',
                 'desc_tip' => true,
-                'options' => ["Disable" => STOCKSETTING_DISABLE, "Enable" => STOCKSETTING_ENABLE]
+                'options' => ["Disable" => MNS_STOCKSETTING_DISABLE, "Enable" => MNS_STOCKSETTING_ENABLE]
             ),
             'ms_template_payment' => array(
                 'title' => __("เลือกรูปแบบ UI", $this->domain),
@@ -121,53 +261,53 @@ class MS_Payment_Gateway extends WC_Payment_Gateway
                 'options' => ["1" => "รูปแบบที่ 1", "2" => "รูปแบบที่ 2"]
             ),
             'header_setting_QRPROM' => array(
-                'title' => __('<h1><b>' . MS_FORM_FIELD_HEADER_SETTING_MS . " ( " . TYPE_PAYMENT_QR . " )" . '</b></h1>', $this->domain),
+                'title' => __(set_title_html(MNS_FORM_FIELD_HEADER_SETTING_MS . " ( " . MNS_TYPE_PAYMENT_QR . " )"), $this->domain),
                 'type' => 'title'
             ),
             'header_setting_QRPROM_Link' => array(
-                'title' => __('<a href="admin.php?page=wc-settings&tab=checkout&section=moneyspace_qrprom">' . SETTING_LINK . '</a>', $this->domain),
+                'title' => __('<a href="admin.php?page=wc-settings&tab=checkout&section=moneyspace_qrprom">' . MNS_SETTING_LINK . '</a>', $this->domain),
                 'type' => 'title'
             ),
             'header_setting_INSTALLMENT' => array(
-                'title' => __('<h1><b>' . MS_FORM_FIELD_HEADER_SETTING_MS . " ( ผ่อนชำระรายเดือน )" . '</b></h1>', $this->domain),
+                'title' => __(set_title_html(MNS_FORM_FIELD_HEADER_SETTING_MS . " ( ผ่อนชำระรายเดือน )"), $this->domain),
                 'type' => 'title'
             ),
             'header_setting_installment_Link' => array(
-                'title' => __('<a href="admin.php?page=wc-settings&tab=checkout&section=moneyspace_installment">' . SETTING_LINK . '</a>', $this->domain),
+                'title' => __('<a href="admin.php?page=wc-settings&tab=checkout&section=moneyspace_installment">' . MNS_SETTING_LINK . '</a>', $this->domain),
                 'type' => 'title'
             ),
             'header_setting_ui' => array(
-                'title' => __('<h1><b>' . MS_FORM_FIELD_HEADER_SETTING_UI . ' ( Moneyspace ) </b></h1>', $this->domain),
+                'title' => __(set_title_html(MNS_FORM_FIELD_HEADER_SETTING_UI . ' ( Moneyspace )'), $this->domain),
                 'type' => 'title'
             ),
             'ms_firstname' => array(
-                'title' => __('' . MS_FORM_FIELD_MS_FIRSTNAME, $this->domain),
+                'title' => __('' . MNS_FORM_FIELD_MS_FIRSTNAME, $this->domain),
                 'type' => 'checkbox',
-                'label' => __(MS_FORM_FIELD_MS_LABEL, $this->domain),
+                'label' => __(MNS_FORM_FIELD_MS_LABEL, $this->domain),
                 'default' => 'yes'
             ),
             'ms_lastname' => array(
-                'title' => __('' . MS_FORM_FIELD_MS_LASTNAME, $this->domain),
+                'title' => __('' . MNS_FORM_FIELD_MS_LASTNAME, $this->domain),
                 'type' => 'checkbox',
-                'label' => __(MS_FORM_FIELD_MS_LABEL, $this->domain),
+                'label' => __(MNS_FORM_FIELD_MS_LABEL, $this->domain),
                 'default' => 'yes'
             ),
             'ms_email' => array(
-                'title' => __('' . MS_FORM_FIELD_MS_EMAIL, $this->domain),
+                'title' => __('' . MNS_FORM_FIELD_MS_EMAIL, $this->domain),
                 'type' => 'checkbox',
-                'label' => __(MS_FORM_FIELD_MS_LABEL, $this->domain),
+                'label' => __(MNS_FORM_FIELD_MS_LABEL, $this->domain),
                 'default' => 'yes'
             ),
             'ms_phone' => array(
-                'title' => __('' . MS_FORM_FIELD_MS_PHONE, $this->domain),
+                'title' => __('' . MNS_FORM_FIELD_MS_PHONE, $this->domain),
                 'type' => 'checkbox',
-                'label' => __(MS_FORM_FIELD_MS_LABEL, $this->domain),
+                'label' => __(MNS_FORM_FIELD_MS_LABEL, $this->domain),
                 'default' => 'yes'
             ),
             'ms_address' => array(
-                'title' => __('' . MS_FORM_FIELD_MS_ADDRESS, $this->domain),
+                'title' => __('' . MNS_FORM_FIELD_MS_ADDRESS, $this->domain),
                 'type' => 'checkbox',
-                'label' => __(MS_FORM_FIELD_MS_LABEL, $this->domain),
+                'label' => __(MNS_FORM_FIELD_MS_LABEL, $this->domain),
                 'default' => 'yes'
             )
         );
@@ -175,7 +315,9 @@ class MS_Payment_Gateway extends WC_Payment_Gateway
 
     public function thankyou_page()
     {
-        if ($this->instructions) echo wpautop(wptexturize($this->instructions));
+        if ($this->instructions) {
+            echo wpautop(wptexturize($this->instructions));
+        }
     }
 
     public function payment_fields()
@@ -187,22 +329,28 @@ class MS_Payment_Gateway extends WC_Payment_Gateway
         $payment_gateway = $payment_gateways->payment_gateways()[$payment_gateway_id];
         $gateways = WC()->payment_gateways->get_available_payment_gateways();
         $ms_message2store = $gateways['moneyspace']->settings['message2store_setting'];
+        $ms_template_payment = $gateways['moneyspace']->settings['ms_template_payment'];
+        $ms_fees = $gateways['moneyspace']->settings['fee_setting'];
 
         if ($description = $this->get_description()) {
             echo wpautop(wptexturize($description));
         }
-
+        if ($ms_template_payment == "1" && $ms_fees == "include") {
+            wp_enqueue_style( "moneyspace-style", MS_PAYMENT_FORM_CSS, array(), "1.0.0", "");
+            require_once MNS_ROOT . '/templates/credit-cards/mns-cc-tpl-1.php';
+        }
         ?>
         <?php if ($ms_message2store != 0) { ?>
-        <div id="custom_input">
-            <p class="form-row form-row-wide">
-                <label for="message_card" class=""><?php _e("", $this->domain); ?></label>
-                <input type="text" class="" name="message_card" id="message_card" placeholder="<?= MESSAGE2STORE ?>">
-            </p>
+        <div id="custom_input" class="container">
+            <div class="form-group">
+                <label for="message_card"><?php _e(MNS_MESSAGE, $this->domain); ?></label>
+                <input type="text" class="form-control" id="message_card" name="message_card" placeholder="<?php echo MNS_MESSAGE2STORE; ?>">
+            </div>
         </div>
     <?php } ?>
         <?php
     }
+    
 
     /**
      * Process the payment and return the result.
@@ -213,19 +361,36 @@ class MS_Payment_Gateway extends WC_Payment_Gateway
     public function process_payment($order_id)
     {
         $MS_special_instructions_to_merchant = get_post_meta($order_id, 'MS_special_instructions_to_merchant', true);
-
+        $message_card = sanitize_text_field($_POST["message_card"]);
         if (strlen($MS_special_instructions_to_merchant) <= 150) {
             if (get_woocommerce_currency() == "THB") {
-                update_post_meta($order_id, 'MS_special_instructions_to_merchant', $_POST["message_card"]);
+                update_post_meta($order_id, 'MS_special_instructions_to_merchant', $message_card);
                 update_post_meta($order_id, 'MS_PAYMENT_TYPE', "Card");
                 delete_post_meta($order_id, 'MS_transaction');
+
+                //CC Info
+                $cardNumber = sanitize_text_field($_POST["cardNumber"]);
+                $cardHolder = sanitize_text_field($_POST["cardHolder"]);
+                $cardExpDate = sanitize_text_field($_POST["cardExpDate"]);
+                $cardExpDateYear = sanitize_text_field($_POST["cardExpDateYear"]);
+                $cardCVV = sanitize_text_field($_POST["cardCVV"]);
+                update_post_meta($order_id, 'MS_CARD_NUMBER', $cardNumber);
+                update_post_meta($order_id, 'MS_CARD_HOLDER', $cardHolder);
+                update_post_meta($order_id, 'MS_CARD_EXP_DATE', $cardExpDate);
+                update_post_meta($order_id, 'MS_CARD_EXP_YEAR', $cardExpDateYear);
+                update_post_meta($order_id, 'MS_CARD_CVV', $cardCVV);
+
+                $mspay = sanitize_text_field($_POST["mspay"]);
+                update_post_meta($order_id, 'MS_PAYMENT_PAY', $mspay);
                 $order = wc_get_order($order_id);
                 return $this->_process_external_payment($order);
             } else {
-                wc_add_notice(__(MS_NOTICE_CURRENCY, $this->domain), 'error');
+                wc_add_notice(__(MNS_NOTICE_CURRENCY, $this->domain), 'error');
+                return;
             }
         } else {
             wc_add_notice(__("Error : Enter special instructions to merchant again", $this->domain), 'error');
+            return;
         }
     } // End Process
 
@@ -243,223 +408,61 @@ class MS_Payment_Gateway extends WC_Payment_Gateway
         $ms_fee = $payment_gateway->settings['fee_setting'];
         $MS_PAYMENT_TYPE = get_post_meta($order->id, 'MS_PAYMENT_TYPE', true);
         $ms_template_payment = $gateways['moneyspace']->settings['ms_template_payment'];
+        $ms_message2store = $gateways['moneyspace']->settings['message2store_setting'];
 
         $MS_special_instructions_to_merchant = get_post_meta($order_id, 'MS_special_instructions_to_merchant', true);
         $ms_time = date("YmdHis");
 
         $items_order = new WC_Order($order_id);
         $items = $order->get_items();
-        $items_msg = "";
-        $i = 1;
-
-        foreach ($items as $item) {
-            $product = wc_get_product($item['product_id']);
-            if (count($items) > 1) {
-                $items_msg .= $i . ". " . $product->get_name() . "  " . $product->get_price() . "฿" . " ( " . $item['quantity'] . " qty ) ";
-                $i++;
-            } else {
-                $items_msg .= $product->get_name() . "  " . $product->get_price() . "฿" . " ( " . $item['quantity'] . " qty ) ";
-            }
-        }
-
-        if ($ms_order_select == "wc-failed" || $ms_order_select == "wc-cancelled" || $ms_order_select == "wc-refunded") {
-            echo "Error : " . MS_NOTICE_ERROR_CONTINUE;
-        } else {
-
-
-            if($ms_fee == "include"){
-                
-            
-
-
-            $order_firstname = "";
-            $order_lastname = "";
-            $order_email = "";
-            $order_phone = "";
-            $order_address = "";
-
-            if ($gateways['moneyspace']->settings['ms_firstname'] == "yes") {
-                $order_firstname = $order->get_billing_first_name();
-            }
-
-            if ($gateways['moneyspace']->settings['ms_lastname'] == "yes") {
-                $order_lastname = $order->get_billing_last_name();
-            }
-
-            if ($gateways['moneyspace']->settings['ms_email'] == "yes") {
-                $order_email = $order->get_billing_email();
-            }
-
-            if ($gateways['moneyspace']->settings['ms_phone'] == "yes") {
-                $order_phone = $order->get_billing_phone();
-            }
-
-            if ($gateways['moneyspace']->settings['ms_address'] == "yes") {
-                $order_address = $order->get_billing_address_1() . " " . $order->get_billing_address_2() . " " . $order->get_billing_city() . " " . $order->get_billing_postcode();
-            }
-
-            $body_post = array("firstname" => $order_firstname, "lastname" => $order_lastname, "email" => $order_email, "phone" => $order_phone, "address" => $order_address, "amount" => $order_amount, "description" => $items_msg, "message" => $MS_special_instructions_to_merchant, "feeType" => "include", "customer_order_id" => $order_id . "MS" . $ms_time);
-
-            $ms_body = array(
-                "secret_id" => $ms_secret_id,
-                "secret_key" => $ms_secret_key,
-                'firstname' => $body_post["firstname"],
-                'lastname' => $body_post["lastname"],
-                'email' => $body_post["email"],
-                'phone' => $body_post["phone"],
-                'amount' => round($body_post["amount"], 2),
-                'description' => preg_replace( "/<br>|\n/", "", $body_post["description"] ),
-                'address' => $body_post["address"],
-                'message' => $body_post["message"],
-                'feeType' => "include",
-                'order_id' => $body_post["customer_order_id"],
-                "payment_type" => "card",
-                'success_Url' => get_site_url() . "/process/payment/" . $order_id,
-                'fail_Url' => get_site_url() . "/process/payment/" . $order_id,
-                'cancel_Url' => get_site_url() . "/process/payment/" . $order_id,
-                "agreement" => 1
-            );
-
-            $response = wp_remote_post(MS_API_URL_CREATE, array(
-                    'method' => 'POST',
-                    'timeout' => 120,
-                    'body' => $ms_body
-                )
-            );
-
-            if (is_wp_error($response)) {
-                echo "Error : " . MS_NOTICE_ERROR_SETUP;
-            } else {
-                $data_status = json_decode($response["body"]);
-                if ($data_status[0]->status == "success") {
-                    if (strlen($data_status[0]->mskey) > 9999) {
-                        wc_add_notice(__("Error ms100 : " . MS_NOTICE_CHECK_TRANSACTION . $data_status[0]->status, $this->domain), 'error');
-                    } else {
-                        $tranId = $data_status[0]->transaction_ID;
-                        $mskey = $data_status[0]->mskey;
-
-                        update_post_meta($order_id, 'MS_transaction_orderid', $body_post["customer_order_id"]);
-                        update_post_meta($order_id, 'MS_transaction', $tranId);
-                        update_post_meta($order_id, 'MS_PAYMENT_KEY', $mskey);
-
-                        if ($ms_template_payment == "1") {
-                            wp_redirect(get_site_url() . "/mspaylink/" . $order_id);
-                            exit;
-                        } else if ($ms_template_payment == "2") {
-                            echo '<div align="center">
-                            <div id="moneyspace-payment" 
-                                    template="2"
-                                    lang="eng"
-                                    ms-title="' . $gateways['moneyspace']->settings['title'] . '" 
-                                    ms-key="' . $mskey . '" 
-                                    description="false">
-                            </div>
-                        </div>
-                        <script type="text/javascript" src="' . MS_PAYMENT_JS . '"></script>';
-                        } else {
-                            wp_redirect(get_site_url() . "/mspaylink/" . $order_id);
-                            exit;
-                        }
-                    }
-                } else {
-                    wc_add_notice(__("Error ms102 : " . MS_NOTICE_CHECK_TRANSACTION, $this->domain), 'error');
-                }
-            }
-
-        }else if($ms_fee == "exclude"){
-
-                        $url = "https://www.moneyspace.net/merchantapi/v2/createpayment/obj";
-
-                        $body_post = array("firstname" => "", "lastname" => "", "email" => "", "phone" => "", "address" => "", "amount" => $order_amount, "currency" => "THB", "description" => $items_msg, "message" => "", "feeType" => "exclude", "timeHash" => $ms_time, "customer_order_id" => $order_id . "MS" . $ms_time, "gatewayType" => "card", "successUrl" => get_site_url() . "/process/payment/" . $order_id, "failUrl" => get_site_url() . "/process/payment/" . $order_id, "cancelUrl" => get_site_url() . "/process/payment/" . $order_id
-                        );
-
-
-                        if ($ms_message2store == "Enable") {
-                            $body_post["message"] = $MS_special_instructions_to_merchant;
-                        }
-
-
-                        if ($gateways['moneyspace']->settings['ms_firstname'] == "yes") {
-                            $body_post["firstname"] = $order->get_billing_first_name();
-                        }
-
-                        if ($gateways['moneyspace']->settings['ms_lastname'] == "yes") {
-                            $body_post["lastname"] = $order->get_billing_last_name();
-                        }
-
-                        if ($gateways['moneyspace']->settings['ms_email'] == "yes") {
-                            $body_post["email"] = $order->get_billing_email();
-                        }
-
-                        if ($gateways['moneyspace']->settings['ms_phone'] == "yes") {
-                            $body_post["phone"] = $order->get_billing_phone();
-                        }
-
-                        if ($gateways['moneyspace']->settings['ms_address'] == "yes") {
-                            $body_post["address"] = $order->get_billing_address_1() . " " . $order->get_billing_address_2() . " " . $order->get_billing_city() . " " . $order->get_billing_postcode();
-                        }
-
-
-                        $hash_data = $body_post["firstname"] . $body_post["lastname"] . $body_post["email"] . $body_post["phone"] . $body_post["amount"] . $body_post["currency"] . preg_replace( "/<br>|\n/", "", $body_post["description"] ) . $body_post["address"] . $body_post["message"] . $body_post["feeType"] . $body_post["timeHash"] . $body_post["customer_order_id"] . $body_post["gatewayType"] . $body_post["successUrl"] . $body_post["failUrl"] . $body_post["cancelUrl"];
-
-
-                        $hash_body = hash_hmac('sha256', $hash_data, $ms_secret_key);
-
-                        $ms_body = array('secreteID' => $ms_secret_id, 'firstname' => $body_post["firstname"], 'lastname' => $body_post["lastname"], 'email' => $body_post["email"], 'phone' => $body_post["phone"], 'amount' => $body_post["amount"], 'currency' => $body_post["currency"], 'description' => preg_replace( "/<br>|\n/", "", $body_post["description"] ), 'address' => $body_post["address"], 'message' => $body_post["message"], 'feeType' => $body_post["feeType"], 'customer_order_id' => $body_post["customer_order_id"], 'gatewayType' => $body_post["gatewayType"], 'timeHash' => $body_post["timeHash"], 'hash' => $hash_body, 'successUrl' => $body_post["successUrl"], 'failUrl' => $body_post["failUrl"], 'cancelUrl' => $body_post["cancelUrl"]
-                        );
-
-                        $response = wp_remote_post($url, array(
-                                'method' => 'POST',
-                                'timeout' => 120,
-                                'body' => $ms_body
-                            )
-                        );
-
-                        if (is_wp_error($response)) {
-
-                            wc_add_notice(__(MS_NOTICE_ERROR_SETUP, $this->domain), 'error');
-
-                        } else {
-
-                            $json_tranId_status = json_decode($response["body"]);
-
-
-                            if ($json_tranId_status[0]->status == "NotFound") {
-
-                                wc_add_notice(__(MS_NOTICE_ERROR_SETUP, $this->domain), 'error');
-
-                            } else {
-
-                                $urlpayment = "Transaction ID";
-                                $json_tranId = json_decode($response["body"]);
-                                $tranId = $json_tranId[0]->$urlpayment;
-
-                                $hash_link = hash_hmac('sha256', $tranId . $ms_time, $ms_secret_key);
-
-                                $link = "https://www.moneyspace.net/merchantapi/makepayment/linkpaymentcard?transactionID=" . $tranId . "&timehash=" . $ms_time . "&secreteID=" . $ms_secret_id . "&hash=" . $hash_link;
-
-                                update_post_meta($order_id, 'MS_transaction', $tranId);
-                                update_post_meta($order_id, 'MS_transaction_orderid', $body_post["customer_order_id"]);
-                                update_post_meta($order_id, 'MS_LINK', $link);
-
-
-                                WC()->cart->empty_cart();
-
-                                wp_redirect($link);
-
-                            }
-
-                        } // check POST
-                        
-
-        }
-
-
-        }
-
-
-
+        $items_msg = set_item_message($items);
+        $return_url = get_site_url() . "/process/payment/" . $order_id;
         
+        $error_list = array("wc-failed", "wc-cancelled", "wc-refunded");
+        if (in_array($ms_order_select, $error_list)) {
+            echo "Error : " . MNS_NOTICE_ERROR_CONTINUE;
+        }
+
+        // if (!is_user_logged_in()) {
+        //     wc_add_notice(__("Please login !", $this->domain), 'error');
+        //     return;
+        // }
+
+        if (strlen($message_ins) > 150) {
+            wc_add_notice(__("Message to the store (150 characters maximum)", $this->domain), 'error');
+            return;
+        }
+
+        $body_post = set_body($order_id, $order, $gateways, $order_amount, $items_msg, $MS_special_instructions_to_merchant, $ms_fee, $ms_time);
+            
+        if ($ms_fee == "include") {
+            $ms_body = set_req_message($ms_secret_id, $ms_secret_key, $body_post, "card", $return_url);
+            return $this->create_payment_transaction($order_id, $ms_body, $ms_template_payment, $gateways);
+        }
+
+        if ($ms_fee == "exclude") {
+            $body_post["message"] = $ms_message2store == "Enable" ? $MS_special_instructions_to_merchant : "";
+            $body_post["successUrl"] = $return_url;
+            $body_post["failUrl"] = $return_url;
+            $body_post["cancelUrl"] = $return_url;
+            $hash_data = $body_post["firstname"] . $body_post["lastname"] . $body_post["email"] . $body_post["phone"] . $body_post["amount"] . $body_post["currency"] . preg_replace( "/<br>|\n/", "", $body_post["description"] ) . $body_post["address"] . $body_post["message"] . $body_post["feeType"] . $body_post["timeHash"] . $body_post["customer_order_id"] . $body_post["gatewayType"] . $body_post["successUrl"] . $body_post["failUrl"] . $body_post["cancelUrl"];
+            $hash_body = hash_hmac('sha256', $hash_data, $ms_secret_key);
+            $ms_body = array('secreteID' => $ms_secret_id, 'firstname' => $body_post["firstname"], 'lastname' => $body_post["lastname"], 'email' => $body_post["email"], 'phone' => $body_post["phone"], 'amount' => $body_post["amount"], 'currency' => $body_post["currency"], 'description' => preg_replace( "/<br>|\n/", "", $body_post["description"] ), 'address' => $body_post["address"], 'message' => $body_post["message"], 'feeType' => $body_post["feeType"], 'customer_order_id' => $body_post["customer_order_id"], 'gatewayType' => $body_post["gatewayType"], 'timeHash' => $body_post["timeHash"], 'hash' => $hash_body, 'successUrl' => $body_post["successUrl"], 'failUrl' => $body_post["failUrl"], 'cancelUrl' => $body_post["cancelUrl"]);
+            // $ms_body = set_req_message($ms_secret_id, $ms_secret_key, $body_post, "", $return_url, $hash_body);
+            return $this->create_payment_transaction_v2($order_id, $ms_secret_key, $ms_body, $ms_template_payment, $gateways);
+        }
+    }
+
+    public function custom_order_pay($order_id)
+    {
+        // TODO: Show payment form in here
+        $order = new WC_Order($order_id);
+        if (strtolower($order->get_status()) != "cancelled")
+        {
+            wp_enqueue_style( "bootstrap-style", MNS_ROOT_URL ."includes/libs/bootstrap-4.0.0-dist/css/bootstrap.css", array(), "4.0.0", "");
+            require_once MNS_ROOT . '/templates/credit-cards/mns-cc-tpl-1.php';
+            
+        }
     }
 
     protected function _process_external_payment($order)
@@ -510,9 +513,18 @@ add_action('woocommerce_order_details_before_order_table', 'custom_order_details
 
 function custom_order_details_after_order_table($order)
 {
+    //TODO
 }
 
 add_action('woocommerce_order_details_after_order_table', 'ms_order_detail_display', 10, 1);
+
+function set_h6_html($msg) {
+    return '<h6 style="margin:0"><strong>' . $msg . '</strong></h6>';
+}
+
+function set_p_html($msg) {
+    return "<p style='color:#a7a6a6;margin:0'>" . $msg . " )</p>";
+}
 
 function ms_order_detail_display($order)
 {
@@ -529,19 +541,19 @@ function ms_order_detail_display($order)
 
     $order_amount = $order->get_total();
     $ms_time = date("YmdHis");
-
+    $new_line = "<br>";
     if ($MS_PAYMENT_STATUS == "Pay Success") {
         if ($MS_PAYMENT_TYPE == "Qrnone" || $MS_PAYMENT_TYPE == "Card") {
-            echo '<h6 style="margin:0"><strong>' . MS_THANK_PAYMENT_ORDER_1 . '</strong></h6>';
-            echo '<h6 style="margin:0"><strong>' . MS_THANK_PAYMENT_ORDER_2 . '</strong></h6><br>';
-            echo "<p style='color:#a7a6a6;margin:0'>" . wc_price($MS_PAYMENT_PAID) . " ( Transaction ID : " . $MS_transaction . " )</p>";
+            echo set_h6_html(MNS_THANK_PAYMENT_ORDER_1);
+            echo set_h6_html(MNS_THANK_PAYMENT_ORDER_2).$new_line;
+            echo set_p_html(wc_price($MS_PAYMENT_PAID) . " ( Transaction ID : " . $MS_transaction . " )");
         } else if ($MS_PAYMENT_TYPE == "Installment") {
             // $MS_INSTALLMENT_BANK = get_post_meta($order->id, 'MS_INSTALLMENT_BANK', true);
             // $MS_INSTALLMENT_MONTHS = get_post_meta($order->id, 'MS_INSTALLMENT_MONTHS', true);
             // $MS_fee_installment = get_post_meta($order->id, 'MS_fee_installment', true);
 
-            // echo '<h6 style="margin:0"><strong>' . MS_THANK_PAYMENT_ORDER_1 . '</strong></h6>';
-            // echo '<h6 style="margin:0"><strong>' . MS_THANK_PAYMENT_ORDER_2 . '</strong></h6><br>';
+            // echo '<h6 style="margin:0"><strong>' . MNS_THANK_PAYMENT_ORDER_1 . '</strong></h6>';
+            // echo '<h6 style="margin:0"><strong>' . MNS_THANK_PAYMENT_ORDER_2 . '</strong></h6><br>';
 
             // if($MS_fee_installment == "include"){
             //     $ex_ktc_bay = $json_status[0]->$amount_payment;
@@ -561,9 +573,10 @@ function ms_order_detail_display($order)
             //     echo "<p style='color:#a7a6a6;margin:0'>" . wc_price($ex_fcy) . " ( Transaction ID: " . $MS_transaction . " )</p>";
             // }
 
-            echo '<h6 style="margin:0"><strong>' . MS_THANK_PAYMENT_ORDER_1 . '</strong></h6>';
-            echo '<h6 style="margin:0"><strong>' . MS_THANK_PAYMENT_ORDER_2 . '</strong></h6><br>';
-            echo "<p style='color:#a7a6a6;margin:0'>" . wc_price($MS_PAYMENT_PAID) . " ( Transaction ID : " . $MS_transaction . " [" . $MS_transaction_orderid . "] )</p>";
+            echo set_h6_html(MNS_THANK_PAYMENT_ORDER_1);
+            echo set_h6_html(MNS_THANK_PAYMENT_ORDER_2). $new_line;
+            echo set_p_html(wc_price($MS_PAYMENT_PAID) . " ( Transaction ID : " . $MS_transaction . " [" . $MS_transaction_orderid . "])" );
+            // echo "<p style='color:#a7a6a6;margin:0'>" . wc_price($MS_PAYMENT_PAID) . " ( Transaction ID : " . $MS_transaction . " [" . $MS_transaction_orderid . "] )</p>";
         }
     }
 }

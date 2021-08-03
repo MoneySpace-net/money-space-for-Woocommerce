@@ -1,0 +1,29 @@
+== Changelog ==
+= 1.0.0 - 2021-03-11 =
+
+* 2021-07-02 : fix bug credit card and installment with option buyer pay fees
+* 2021-06-28 : verify credit card payment form
+* 2021-06-23 : add shortcut credit card on place order page
+* 2021-05-12 : Fixed QR auto kill transaction id on server and add Time countdown on qr pay page.
+* 2021-03-11 : Fixed bugs the order status update system.
+* 2021-03-09 : Added the buyer system, responsible for the fee in the installment payment system.
+* 2021-02-23 : Fixed payment bugs and product details.
+* 2021-02-10 : Fixed stock reduction bugs and updated QR code expiration time settings.
+* 2021-01-18 : Added a setting to be able to select the expiration time of the QR Code.
+* 2021-01-15 : Added buyer fee system and plugin update system.
+* 2020-12-28 : Updated security system UI type 1.
+* 2020-12-19 : Updated settings to set order status when payment is complete ( QR Code and installment )
+* 2020-11-18 : Updated redirect to the order received page upon successful payment.
+* 2020-11-15 : Updated redirect to the order detail page upon successful payment and bugs fix.
+* 2020-09-07 : Updated setting (Enter the buyer information in the transaction id)
+* 2020-07-06 : Updated payment methods to light box and fixed bugs.
+* 2020-04-09 : Updated QR promptpay (Redirect when payment completed)
+* 2020-03-04 : Updated QR promptpay and added installment payments
+* 2019-12-24 : Fixed bugs
+* 2019-11-30 : Added stock setting
+* 2019-09-13 : Added special instructions to merchant
+* 2019-09-02 : Updated settings
+* 2019-08-20 : Updated QR promptpay
+* 2019-04-22 : Fixed payment errors
+* 2019-02-11 : Added your domain and webhook
+* 2019-01-26 : Added

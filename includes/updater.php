@@ -68,36 +68,34 @@ class Moneyspace_Updater {
 	}
 
 	public function initialize() {
-		add_filter( 'pre_set_site_transient_update_plugins', array( $this, 'modify_transient' ), 10, 1 );
+		// add_filter( 'pre_set_site_transient_update_plugins', array( $this, 'modify_transient' ), 10, 1 );
 		add_filter( 'plugins_api', array( $this, 'plugin_popup' ), 10, 3);
 		add_filter( 'upgrader_post_install', array( $this, 'after_install' ), 10, 3 );
 	}
 
 	public function modify_transient( $transient ) {
 
-		if( property_exists( $transient, 'checked') ) { // Check if transient has a checked property
+		if( property_exists( $transient, 'checked') // Check if transient has a checked property
+		&& $checked = $transient->checked // Did Wordpress check for updates?
+		) { 
+			$this->get_repository_info(); // Get the repo info
 
-			if( $checked = $transient->checked ) { // Did Wordpress check for updates?
+			$out_of_date = version_compare( $this->github_response['tag_name'], $checked[ $this->basename ], 'gt' ); // Check if we're out of date
 
-				$this->get_repository_info(); // Get the repo info
+			if( $out_of_date ) {
 
-				$out_of_date = version_compare( $this->github_response['tag_name'], $checked[ $this->basename ], 'gt' ); // Check if we're out of date
+				$new_files = $this->github_response['zipball_url']; // Get the ZIP
 
-				if( $out_of_date ) {
+				$slug = current( explode('/', $this->basename ) ); // Create valid slug
 
-					$new_files = $this->github_response['zipball_url']; // Get the ZIP
+				$this->plugin = array( // setup our plugin info
+					'url' => $this->plugin["PluginURI"],
+					'slug' => $slug,
+					'package' => $new_files,
+					'new_version' => $this->github_response['tag_name']
+				);
 
-					$slug = current( explode('/', $this->basename ) ); // Create valid slug
-
-					$plugin = array( // setup our plugin info
-						'url' => $this->plugin["PluginURI"],
-						'slug' => $slug,
-						'package' => $new_files,
-						'new_version' => $this->github_response['tag_name']
-					);
-
-					$transient->response[$this->basename] = (object) $plugin; // Return it in response
-				}
+				$transient->response[$this->basename] = (object) $this->plugin; // Return it in response
 			}
 		}
 
@@ -106,35 +104,30 @@ class Moneyspace_Updater {
 
 	public function plugin_popup( $result, $action, $args ) {
 
-		if( ! empty( $args->slug ) ) { // If there is a slug
-			
-			if( $args->slug == current( explode( '/' , $this->basename ) ) ) { // And it's our slug
-
-				$this->get_repository_info(); // Get our repo info
-
-				// Set it to an array
-				$plugin = array(
-					'name'				=> $this->plugin["Name"],
-					'slug'				=> $this->basename,
-					'requires'					=> '5.5.1',
-					'downloaded'				=> '99999',
-					'added'							=> '2021-01-12',
-					'version'			=> $this->github_response['tag_name'],
-					'author'			=> $this->plugin["AuthorName"],
-					'author_profile'	=> $this->plugin["AuthorURI"],
-					'last_updated'		=> $this->github_response['published_at'],
-					'homepage'			=> $this->plugin["PluginURI"],
-					'short_description' => $this->plugin["Description"],
-					'sections'			=> array(
-						'Description'	=> $this->plugin["Description"],
-						'Updates'		=> $this->github_response['body'],
-					),
-					'download_link'		=> $this->github_response['zipball_url']
-				);
-
-				return (object) $plugin; // Return the data
-			}
-
+		if( ! empty( $args->slug ) // If there is a slug
+		&& $args->slug == current(explode( '/' , $this->basename )) // And it's our slug
+		) {
+			$this->get_repository_info(); // Get our repo info
+			// Set it to an array
+			$this->plugin = array(
+				'name'				=> $this->plugin["Name"],
+				'slug'				=> $this->basename,
+				'requires'			=> '5.5.1',
+				'downloaded'		=> '99999',
+				'added'				=> '2021-01-12',
+				'version'			=> $this->github_response['tag_name'],
+				'author'			=> $this->plugin["AuthorName"],
+				'author_profile'	=> $this->plugin["AuthorURI"],
+				'last_updated'		=> $this->github_response['published_at'],
+				'homepage'			=> $this->plugin["PluginURI"],
+				'short_description' => $this->plugin["Description"],
+				'sections'			=> array(
+					'Description'	=> $this->plugin["Description"],
+					'Updates'		=> $this->github_response['body'],
+				),
+				'download_link'		=> $this->github_response['zipball_url']
+			);
+			return (object) $this->plugin; // Return the data
 		}
 		return $result; // Otherwise return default
 	}

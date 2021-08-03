@@ -1,6 +1,6 @@
 <?php
 
-class MS_Processpayment
+class MNS_Processpayment
 {
 
     public static function init()
@@ -16,6 +16,7 @@ class MS_Processpayment
                 'pid' => 1,
             ),
             'page_callback' => function () {
+                # code ..
             },
             'page_arguments' => array('pid'),
             'access_callback' => TRUE,

@@ -16,6 +16,7 @@ class MS_Cancel
                 'pid' => 1,
             ),
             'page_callback' => function () {
+                # code ..
             },
             'page_arguments' => array('pid'),
             'access_callback' => TRUE,
