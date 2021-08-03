@@ -2,8 +2,8 @@
 Contributors: moneyspace
 Tags: credit card, moneyspace, payment request, thaibank, woocommerce, automattic, bay, ktc, fcy, installment
 Requires at least: 4.9
-Tested up to: 2.6.2
-Stable tag: 2.6.2
+Tested up to: 2.6.5
+Stable tag: 2.6.5
 Requires PHP: 5.6
 Requires WordPress: 4.9
 License: GPLv3
