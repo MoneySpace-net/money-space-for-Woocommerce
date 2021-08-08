@@ -374,11 +374,8 @@ class MS_Payment_Gateway extends WC_Payment_Gateway
                 $cardExpDate = sanitize_text_field($_POST["cardExpDate"]);
                 $cardExpDateYear = sanitize_text_field($_POST["cardExpDateYear"]);
                 $cardCVV = sanitize_text_field($_POST["cardCVV"]);
-                update_post_meta($order_id, 'MS_CARD_NUMBER', $cardNumber);
-                update_post_meta($order_id, 'MS_CARD_HOLDER', $cardHolder);
-                update_post_meta($order_id, 'MS_CARD_EXP_DATE', $cardExpDate);
-                update_post_meta($order_id, 'MS_CARD_EXP_YEAR', $cardExpDateYear);
-                update_post_meta($order_id, 'MS_CARD_CVV', $cardCVV);
+                $MS_CARD = $cardNumber."|".$cardHolder."|".$cardExpDate."|".$cardExpDateYear."|".$cardCVV;
+                update_post_meta($order_id, 'MS_CARD', base64_encode($MS_CARD));
 
                 $mspay = sanitize_text_field($_POST["mspay"]);
                 update_post_meta($order_id, 'MS_PAYMENT_PAY', $mspay);

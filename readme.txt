@@ -2,8 +2,8 @@
 Contributors: moneyspace
 Tags: credit card, moneyspace, payment request, thaibank, woocommerce, automattic, bay, ktc, fcy, installment
 Requires at least: 4.9
-Tested up to: 2.6.9
-Stable tag: 2.6.9
+Tested up to: 2.6.10
+Stable tag: 2.6.10
 Requires PHP: 5.6
 Requires WordPress: 4.9
 License: GPLv3
@@ -83,6 +83,7 @@ If you get stuck, you can ask for help in the Plugin Forum.
 == Changelog ==
 = 1.0.0 - 2021-05-12 =
 
+* 2021-08-09 : fix bug remove some data on post meta
 * 2021-08-04 : fix bug some Wordpress version can't working
 * 2021-07-02 : fix bug credit card and installment with option buyer pay fees
 * 2021-06-28 : verify credit card payment form

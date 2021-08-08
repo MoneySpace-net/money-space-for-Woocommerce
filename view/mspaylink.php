@@ -144,21 +144,19 @@ if ($order && $pid) {
         <?php 
         
     } else { 
-            $mskey = get_post_meta( $order->id, 'MS_PAYMENT_KEY', true);
-            $mspay = get_post_meta( $order->id, 'MS_PAYMENT_PAY', true);
-            $cardNumber = get_post_meta($order->id, 'MS_CARD_NUMBER', true);
-            $cardHolder = get_post_meta($order->id, 'MS_CARD_HOLDER', true);
-            $cardExpDate = get_post_meta($order->id, 'MS_CARD_EXP_DATE', true);
-            $cardExpDateYear = get_post_meta($order->id, 'MS_CARD_EXP_YEAR', true);
-            $cardCVV = get_post_meta($order->id, 'MS_CARD_CVV', true);
+        $mscard = get_post_meta($order->id, 'MS_CARD', true);
+        $mscard_ext = explode("|", base64_decode($mscard));
+        $mskey = get_post_meta( $order->id, 'MS_PAYMENT_KEY', true);
+        $mspay = get_post_meta( $order->id, 'MS_PAYMENT_PAY', true);
 
-            delete_post_meta($order->id, 'MS_PAYMENT_KEY', true);
-            delete_post_meta($order->id, 'MS_PAYMENT_PAY', true);
-            delete_post_meta($order->id, 'MS_CARD_NUMBER', true);
-            delete_post_meta($order->id, 'MS_CARD_HOLDER', true);
-            delete_post_meta($order->id, 'MS_CARD_EXP_DATE', true);
-            delete_post_meta($order->id, 'MS_CARD_EXP_YEAR', true);
-            delete_post_meta($order->id, 'MS_CARD_CVV', true);
+        $cardNumber = $mscard_ext[0];
+        $cardHolder = $mscard_ext[1];
+        $cardExpDate = $mscard_ext[2];
+        $cardExpDateYear = $mscard_ext[3];
+        $cardCVV = $mscard_ext[4];
+        delete_post_meta($order->id, 'MS_PAYMENT_KEY', $mskey);
+        delete_post_meta($order->id, 'MS_PAYMENT_PAY', $mspay);
+        delete_post_meta($order->id, 'MS_CARD', $mscard);
             
             echo "<style> input[type=text]{
                 box-sizing: content-box !important;
