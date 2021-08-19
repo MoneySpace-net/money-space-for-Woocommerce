@@ -198,7 +198,8 @@
 
 ![enter image description here](https://moneyspace.net/images/bitbucket_wp/card_payment2.png)
 
-  
+
+![enter image description here](docs/manual/03_pay_card.jpg)
 
 ****
 
@@ -281,6 +282,7 @@
 
 ![enter image description here](https://worldwallet.net/img_bitbucket/wp_woo/woo_payment.png)
 
+![enter image description here](docs/manual/03_pay_installment.jpg)
 ****
 
 ## Configure Pay by Card 3D secured
@@ -397,6 +399,7 @@
 
 ![enter image description here](https://moneyspace.net/images/bitbucket_wp/card_payment2.png)
 
+![enter image description here](docs/manual/03_pay_card.jpg)
 ****
 
 # Payment with PromptPay QR Code
@@ -417,6 +420,7 @@
 
 ![enter image description here](https://moneyspace.net/images/bitbucket_wp/0_payment.png)
 
+![enter image description here](docs/manual/03_pay_installment.jpg)
 ****
 
 # Changelog
