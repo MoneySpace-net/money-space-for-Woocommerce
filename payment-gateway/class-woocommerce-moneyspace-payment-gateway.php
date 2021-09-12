@@ -72,7 +72,8 @@ class MNS_Payment_Gateway extends WC_Payment_Gateway
             </div>
             </div>');
             wp_enqueue_script( 'cc_mspayment', MNS_PAYMENT_FORM_JS, array(), false, true);
-            esc_html_e("<style> input[type=text]{
+            $customStyle = ("
+            input[type=text]{
                 box-sizing: content-box !important;
                 background-color: transparent !important;
             }
@@ -104,9 +105,11 @@ class MNS_Payment_Gateway extends WC_Payment_Gateway
 
             .MuiContainer-maxWidthXs {
                 max-width: 100%;
-            }
-            </style>");    
+            }");    
             
+            wp_register_style( 'custom-css-handle', false );
+            wp_enqueue_style( 'custom-css-handle' );
+            wp_add_inline_style( 'custom-css-handle', $customStyle );
             // add_action('after_woocommerce_pay', array($this, 'custom_order_pay'), 10, 1);
         } else {
             wp_redirect(get_site_url() . "/mspaylink/" . $order_id);

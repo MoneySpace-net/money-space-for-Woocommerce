@@ -89,7 +89,7 @@ class MNS_Payment_Gateway_QR extends WC_Payment_Gateway
                 <h3> QR Code จะหมดอายุวันที่ : '.date('d/m/Y H:i', $MS_MNS_QR_TIME + $limit_time).'</h3>
                 <h3 id="time"></h3>
             </div>');
-            esc_html_e("<style>
+            $customStyle = ("
             .MuiContainer-maxWidthXs {
                 max-width: 60%;
             }
@@ -105,8 +105,12 @@ class MNS_Payment_Gateway_QR extends WC_Payment_Gateway
             .MuiGrid-root.MuiGrid-item.MuiGrid-grid-xs-12 > div > p {
                 margin-left: 10%;
                 margin-right: 10%;
-            }
-            </style>");
+            }");
+
+            wp_register_style( 'custom-css-handle', false );
+            wp_enqueue_style( 'custom-css-handle' );
+            wp_add_inline_style( 'custom-css-handle', $customStyle );
+
             wp_enqueue_script('qr_mspayment', MNS_PAYMENT_JS, array(), false, true);
             wc_enqueue_js('function startTimer(duration, display) {
                 var timer = duration, minutes, seconds;

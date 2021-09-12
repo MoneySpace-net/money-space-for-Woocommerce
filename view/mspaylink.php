@@ -158,7 +158,8 @@ if ($order && $pid) {
         delete_post_meta($order->id, 'MS_PAYMENT_PAY', $mspay);
         delete_post_meta($order->id, 'MS_CARD', $mscard);
             
-        esc_html_e("<style> input[type=text]{
+        $customStyle = ("
+            input[type=text]{
                 box-sizing: content-box !important;
                 background-color: transparent !important;
             }
@@ -186,8 +187,11 @@ if ($order && $pid) {
         
             .MuiGrid-root.MuiGrid-container.MuiGrid-justify-xs-center {
                 padding-bottom: 10px !important;
-            }
-            </style>");
+            }");
+
+            wp_register_style( 'custom-css-handle', false );
+            wp_enqueue_style( 'custom-css-handle' );
+            wp_add_inline_style( 'custom-css-handle', $customStyle );
         
             wc_enqueue_js( "
                 bindMSPay();
