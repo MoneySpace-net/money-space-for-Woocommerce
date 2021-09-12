@@ -74,27 +74,27 @@ if (in_array('woocommerce/woocommerce.php', $active_plugins)) {
         function MS_Router_load()
         {
             // load the base class
-            require_once plugin_dir_path(__FILE__) . 'includes/MS_Router_Utility.class.php';
+            require_once plugin_dir_path(__FILE__) . 'includes/MNS_Router_Utility.class.php';
 
-            if (MS_Router_Utility::prerequisites_met(phpversion(), get_bloginfo('version'))) {
+            if (MNS_Router_Utility::prerequisites_met(phpversion(), get_bloginfo('version'))) {
                 // we can continue. Load all supporting files and hook into wordpress
-                require_once plugin_dir_path(__FILE__) . 'includes/MS_Router.class.php';
-                require_once plugin_dir_path(__FILE__) . 'includes/MS_Route.class.php';
-                require_once plugin_dir_path(__FILE__) . 'includes/MS_Router_Page.class.php';
-                add_action('init', array('MS_Router_Utility', 'init'), -100, 0);
-                add_action(MS_Router_Utility::PLUGIN_INIT_HOOK, array('MS_Router_Page', 'init'), 0, 0);
-                add_action(MS_Router_Utility::PLUGIN_INIT_HOOK, array('MS_Router', 'init'), 1, 0);
+                require_once plugin_dir_path(__FILE__) . 'includes/MNS_Router.class.php';
+                require_once plugin_dir_path(__FILE__) . 'includes/MNS_Route.class.php';
+                require_once plugin_dir_path(__FILE__) . 'includes/MNS_Router_Page.class.php';
+                add_action('init', array('MNS_Router_Utility', 'init'), -100, 0);
+                add_action(MNS_Router_Utility::PLUGIN_INIT_HOOK, array('MNS_Router_Page', 'init'), 0, 0);
+                add_action(MNS_Router_Utility::PLUGIN_INIT_HOOK, array('MNS_Router', 'init'), 1, 0);
 
                 require_once plugin_dir_path(__FILE__) . 'router/processpayment.php';
                 require_once plugin_dir_path(__FILE__) . 'router/webhook.php';
                 require_once plugin_dir_path(__FILE__) . 'router/mspaylink.php';
                 require_once plugin_dir_path(__FILE__) . 'router/payform.php';
                 require_once plugin_dir_path(__FILE__) . 'router/cancel.php';
-                add_action(MS_Router_Utility::PLUGIN_INIT_HOOK, array('MNS_Processpayment', 'init'), 1, 0);
-                add_action(MS_Router_Utility::PLUGIN_INIT_HOOK, array('MNS_Webhook', 'init'), 1, 0);
-                add_action(MS_Router_Utility::PLUGIN_INIT_HOOK, array('MNS_Paylink', 'init'), 1, 0);
-                add_action(MS_Router_Utility::PLUGIN_INIT_HOOK, array('MS_Payform', 'init'), 1, 0);
-                add_action(MS_Router_Utility::PLUGIN_INIT_HOOK, array('MS_Cancel', 'init'), 1, 0);
+                add_action(MNS_Router_Utility::PLUGIN_INIT_HOOK, array('MNS_Processpayment', 'init'), 1, 0);
+                add_action(MNS_Router_Utility::PLUGIN_INIT_HOOK, array('MNS_Webhook', 'init'), 1, 0);
+                add_action(MNS_Router_Utility::PLUGIN_INIT_HOOK, array('MNS_Paylink', 'init'), 1, 0);
+                add_action(MNS_Router_Utility::PLUGIN_INIT_HOOK, array('MNS_Payform', 'init'), 1, 0);
+                add_action(MNS_Router_Utility::PLUGIN_INIT_HOOK, array('MNS_Cancel', 'init'), 1, 0);
 
                 require_once plugin_dir_path(__FILE__) . 'includes/helper.php';
             }

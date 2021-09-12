@@ -1,12 +1,12 @@
 <?php
 
-class MS_Router extends MS_Router_Utility
+class MNS_Router extends MNS_Router_Utility
 {
     const ROUTE_CACHE_OPTION = 'MS_Router_route_hash';
     private $routes = array();
 
     /**
-     * @var MS_Router The one instance of this singleton class
+     * @var MNS_Router The one instance of this singleton class
      */
     private static $instance;
 
@@ -30,7 +30,7 @@ class MS_Router extends MS_Router_Utility
      *
      * @param string $id
      * @param array $properties
-     * @return null|MS_Route
+     * @return null|MNS_Route
      */
     public function add_route($id, array $properties)
     {
@@ -44,7 +44,7 @@ class MS_Router extends MS_Router_Utility
      * Get a previously registered route
      *
      * @param string $id
-     * @return null|MS_Route
+     * @return null|MNS_Route
      */
     public function get_route($id)
     {
@@ -157,11 +157,11 @@ class MS_Router extends MS_Router_Utility
      *
      * @return void
      * @uses do_action() Calls 'ms_Router_alter_routes'
-     * @uses do_action() Calls 'ms_router_generate_routes'
+     * @uses do_action() Calls 'mns_router_generate_routes'
      */
     public function generate_routes()
     {
-        do_action('ms_router_generate_routes', $this);
+        do_action('mns_router_generate_routes', $this);
         do_action('ms_Router_alter_routes', $this);
         $rules = $this->rewrite_rules();
         if ($this->hash($rules) != get_option(self::ROUTE_CACHE_OPTION)) {
@@ -220,7 +220,7 @@ class MS_Router extends MS_Router_Utility
     {
         // we'll only get a 'MS_Router_page' query var when visiting
         // the page for a WP Router post, and there's only one of those
-        if (!empty($query->query_vars[MS_Router_Page::POST_TYPE])) {
+        if (!empty($query->query_vars[MNS_Router_Page::POST_TYPE])) {
             wp_redirect(home_url(), 303);
             exit();
         }
@@ -238,25 +238,25 @@ class MS_Router extends MS_Router_Utility
             return NULL;
         }
         $id = $query->query_vars[self::QUERY_VAR];
-        if (!isset($this->routes[$id]) || !$this->routes[$id] instanceof MS_Route) {
+        if (!isset($this->routes[$id]) || !$this->routes[$id] instanceof MNS_Route) {
             return NULL;
         }
         return $id;
     }
 
     /**
-     * Create a new MS_Route with the given id and properties
+     * Create a new MNS_Route with the given id and properties
      *
      * protected so it can be mocked in testing
      *
      * @param string $id
      * @param array $properties
-     * @return null|MS_Route
+     * @return null|MNS_Route
      */
     protected function create_route($id, array $properties)
     {
         try {
-            $route = new MS_Route($id, $properties);
+            $route = new MNS_Route($id, $properties);
         } catch (Exception $e) {
             // invalid route $properties
             return NULL;

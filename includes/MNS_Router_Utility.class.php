@@ -1,10 +1,10 @@
 <?php
 
 
-class MS_Router_Utility
+class MNS_Router_Utility
 {
 
-    const QUERY_VAR = 'MS_Route';
+    const QUERY_VAR = 'MNS_Route';
     const PLUGIN_NAME = 'MS Router';
     const DEBUG = FALSE;
     const MIN_PHP_VERSION = '5.2';

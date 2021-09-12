@@ -1,10 +1,10 @@
 <?php
 
-class MS_Router_Page extends MS_Router_Utility
+class MNS_Router_Page extends MNS_Router_Utility
 {
     const POST_TYPE = 'MS_Router_page';
 
-    protected static $rewrite_slug = 'MS_Router';
+    protected static $rewrite_slug = 'MNS_Router';
     protected static $post_id = 0; // The ID of the post this plugin uses
 
     protected $contents = '';
@@ -200,7 +200,7 @@ class MS_Router_Page extends MS_Router_Utility
      */
     public function override_redirect($redirect_url, $requested_url)
     {
-        if ($redirect_url && get_query_var('MS_Route')) {
+        if ($redirect_url && get_query_var('MNS_Route')) {
             return FALSE;
         }
         if ($redirect_url && get_permalink(self::get_post_id()) == $redirect_url) {

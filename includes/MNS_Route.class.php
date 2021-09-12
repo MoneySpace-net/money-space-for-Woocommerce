@@ -1,6 +1,6 @@
 <?php
 
-class MS_Route extends MS_Router_Utility
+class MNS_Route extends MNS_Router_Utility
 {
     protected $id = '';
     protected $path = '';
@@ -116,7 +116,7 @@ class MS_Route extends MS_Router_Utility
 
         $title = $this->get_title($query);
 
-        $page = new MS_Router_Page($page_contents, $title, $template);
+        $page = new MNS_Router_Page($page_contents, $title, $template);
     }
 
     /**
@@ -256,9 +256,9 @@ class MS_Route extends MS_Router_Utility
      */
     protected function error_403()
     {
-        $message = apply_filters('MS_Router_access_denied_message', __('You are not authorized to access this page', 'ms-router'));
-        $title = apply_filters('MS_Router_access_denied_title', __('Access Denied', 'ms-router'));
-        $args = apply_filters('MS_Router_access_denied_args', array('response' => 403));
+        $message = apply_filters('MNS_Router_access_denied_message', __('You are not authorized to access this page', 'ms-router'));
+        $title = apply_filters('MNS_Router_access_denied_title', __('Access Denied', 'ms-router'));
+        $args = apply_filters('MNS_Router_access_denied_args', array('response' => 403));
         wp_die($message, $title, $args);
         exit();
     }
