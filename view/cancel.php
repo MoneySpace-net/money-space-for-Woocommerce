@@ -32,7 +32,7 @@ if ($order && $pid) {
     if ($MNS_PAYMENT_TYPE == "Qrnone") {
 
         $MNS_transaction = get_post_meta($order->id, 'MNS_transaction', true);
-        $MS_MNS_QR_TIME = get_post_meta($order->id, 'MS_MNS_QR_TIME', true);
+        $MNS_QR_TIME = get_post_meta($order->id, 'MNS_QR_TIME', true);
         $auto_cancel = $payment_gateway_qr->settings['auto_cancel'];
 
         if(empty($auto_cancel)){
@@ -41,7 +41,7 @@ if ($order && $pid) {
             $limit_time = $auto_cancel;
         }
 
-        if ((time() - $MS_MNS_QR_TIME) > $limit_time){
+        if ((time() - $MNS_QR_TIME) > $limit_time){
 
             $call_cancel = wp_remote_post(MNS_CANCEL_TRANSACTION, array(
                 'method' => 'POST',

@@ -424,21 +424,21 @@ class MNS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
                 
             
                             delete_post_meta($order_id, 'MNS_transaction');
-                            delete_post_meta($order_id, 'MS_QR_URL');
+                            delete_post_meta($order_id, 'MNS_QR_URL');
                             update_post_meta($order_id, 'MNS_PAYMENT_TYPE', "Installment");
-                            update_post_meta($order_id, 'MS_INSTALLMENT_BANK', sanitize_text_field($_POST["selectbank"]));
+                            update_post_meta($order_id, 'MNS_INSTALLMENT_BANK', sanitize_text_field($_POST["selectbank"]));
 
                             $Endterm = "";
 
                             if (sanitize_text_field($_POST["selectbank"]) == "KTC"){
                                 $Endterm = sanitize_text_field($_POST["KTC_permonths"]);
-                                update_post_meta($order_id, 'MS_INSTALLMENT_MONTHS', sanitize_text_field($_POST["KTC_permonths"]));
+                                update_post_meta($order_id, 'MNS_INSTALLMENT_MONTHS', sanitize_text_field($_POST["KTC_permonths"]));
                             }else if (sanitize_text_field($_POST["selectbank"]) == "BAY"){
                                 $Endterm = sanitize_text_field($_POST["BAY_permonths"]);
-                                update_post_meta($order_id, 'MS_INSTALLMENT_MONTHS', sanitize_text_field($_POST["BAY_permonths"]));
+                                update_post_meta($order_id, 'MNS_INSTALLMENT_MONTHS', sanitize_text_field($_POST["BAY_permonths"]));
                             }else if (sanitize_text_field($_POST["selectbank"]) == "FCY"){
                                 $Endterm = sanitize_text_field($_POST["FCY_permonths"]);
-                                update_post_meta($order_id, 'MS_INSTALLMENT_MONTHS', sanitize_text_field($_POST["FCY_permonths"]));
+                                update_post_meta($order_id, 'MNS_INSTALLMENT_MONTHS', sanitize_text_field($_POST["FCY_permonths"]));
                             }
 
 
@@ -473,7 +473,7 @@ class MNS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
                             if ($ms_order_select == "wc-failed" || $ms_order_select == "wc-cancelled" || $ms_order_select == "wc-refunded") {
 
 
-                                wc_add_notice(__(MS_NOTICE_ERROR_CONTINUE, $this->domain), 'error');
+                                wc_add_notice(__(MNS_NOTICE_ERROR_CONTINUE, $this->domain), 'error');
             
             
                             } else {
@@ -542,9 +542,9 @@ class MNS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
 
                                         update_post_meta($order_id, 'MNS_transaction', $tranId);
 
-                                        update_post_meta($order_id, 'MS_fee_installment', $payment_data['feeType']);
+                                        update_post_meta($order_id, 'MNS_fee_installment', $payment_data['feeType']);
 
-                                        update_post_meta($order_id, 'MS_orderid_installment', $payment_data['customer_order_id']);
+                                        update_post_meta($order_id, 'MNS_orderid_installment', $payment_data['customer_order_id']);
 
                                         $order = wc_get_order($order_id);
                                         
@@ -559,7 +559,7 @@ class MNS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
                         wc_add_notice(__("จำนวนยอดเงินต้อง 3,000.01 บาทขึ้นไปถึงจะทำการผ่อนชำระได้", $this->domain), 'error');
                     }
                 }else{
-                    wc_add_notice(__(MS_NOTICE_CURRENCY, $this->domain), 'error');
+                    wc_add_notice(__(MNS_NOTICE_CURRENCY, $this->domain), 'error');
                 }
             }else{
                 wc_add_notice(__("Message to the store (150 characters maximum)", $this->domain), 'error');
@@ -590,31 +590,31 @@ class MNS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
 
 
         $MNS_transaction = get_post_meta($order_id, 'MNS_transaction', true);
-        $MS_orderid_installment = get_post_meta($order_id, 'MS_orderid_installment', true);
-        $MS_INSTALLMENT_BANK = get_post_meta($order_id, 'MS_INSTALLMENT_BANK', true);
-        $MS_INSTALLMENT_MONTHS = get_post_meta($order_id, 'MS_INSTALLMENT_MONTHS', true);
-        $MS_fee_installment = get_post_meta($order_id, 'MS_fee_installment', true);
+        $MNS_orderid_installment = get_post_meta($order_id, 'MNS_orderid_installment', true);
+        $MNS_INSTALLMENT_BANK = get_post_meta($order_id, 'MNS_INSTALLMENT_BANK', true);
+        $MNS_INSTALLMENT_MONTHS = get_post_meta($order_id, 'MNS_INSTALLMENT_MONTHS', true);
+        $MNS_fee_installment = get_post_meta($order_id, 'MNS_fee_installment', true);
 
         $order = wc_get_order($order_id);
         $order_amount = $order->get_total();
 
 
-        if ($MS_fee_installment == "include"){
+        if ($MNS_fee_installment == "include"){
             $KTC = [ 3, 4, 5, 6, 7, 8, 9, 10];
             $BAY = [ 3, 4, 6, 9, 10];
             $FCY = [ 3, 4, 6, 9, 10];
-        }else if ($MS_fee_installment == "exclude"){
+        }else if ($MNS_fee_installment == "exclude"){
             $KTC = [ 3, 4, 5, 6, 7, 8, 9, 10];
             $BAY = [ 3, 4, 6, 9, 10];
             $FCY = [ 3, 4, 6, 9, 10, 12, 18, 24, 36];
         }
 
-        if($MS_fee_installment == "include"){
+        if($MNS_fee_installment == "include"){
             $ex_ktc_bay = $order_amount;
             $ex_fcy = $order_amount;
-        }else if($MS_fee_installment == "exclude"){
-            $ex_ktc_bay = $order_amount / 100 * 0.8 * $MS_INSTALLMENT_MONTHS + $order_amount;
-            $ex_fcy = $order_amount / 100 * 1 * $MS_INSTALLMENT_MONTHS + $order_amount;
+        }else if($MNS_fee_installment == "exclude"){
+            $ex_ktc_bay = $order_amount / 100 * 0.8 * $MNS_INSTALLMENT_MONTHS + $order_amount;
+            $ex_fcy = $order_amount / 100 * 1 * $MNS_INSTALLMENT_MONTHS + $order_amount;
         }
 
         ?>
@@ -622,33 +622,33 @@ class MNS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
 
         <h3 style="text-decoration: underline;">ยืนยันการชำระเงิน</h3>
 
-        <p><h5>จำนวนเดือน : <?php esc_html_e($MS_INSTALLMENT_MONTHS."  เดือน"); ?></h5></p>
+        <p><h5>จำนวนเดือน : <?php esc_html_e($MNS_INSTALLMENT_MONTHS."  เดือน"); ?></h5></p>
 
-        <?php if($MS_INSTALLMENT_BANK == "KTC" || $MS_INSTALLMENT_BANK == "BAY"){ ?>
+        <?php if($MNS_INSTALLMENT_BANK == "KTC" || $MNS_INSTALLMENT_BANK == "BAY"){ ?>
 
-        <p><h5>จำนวนเงินชำระต่อเดือน : <?php esc_html_e(round($ex_ktc_bay / $MS_INSTALLMENT_MONTHS,2).get_woocommerce_currency()." / เดือน"); ?></h5></p>
+        <p><h5>จำนวนเงินชำระต่อเดือน : <?php esc_html_e(round($ex_ktc_bay / $MNS_INSTALLMENT_MONTHS,2).get_woocommerce_currency()." / เดือน"); ?></h5></p>
 
-        <?php }if($MS_INSTALLMENT_BANK == "FCY"){ ?>
+        <?php }if($MNS_INSTALLMENT_BANK == "FCY"){ ?>
 
-        <p><h5>จำนวนเงินชำระต่อเดือน : <?php esc_html_e(round($ex_fcy / $MS_INSTALLMENT_MONTHS,2).get_woocommerce_currency()." / เดือน"); ?></h5></p>
+        <p><h5>จำนวนเงินชำระต่อเดือน : <?php esc_html_e(round($ex_fcy / $MNS_INSTALLMENT_MONTHS,2).get_woocommerce_currency()." / เดือน"); ?></h5></p>
 
         <?php } ?>
 
 
         <?php 
-        if($MS_INSTALLMENT_BANK == "KTC"){
+        if($MNS_INSTALLMENT_BANK == "KTC"){
             $actionUrl = "https://www.moneyspace.net/ktccredit/payment/directpay";
-            $paymonth = round($ex_ktc_bay / $MS_INSTALLMENT_MONTHS,2);
+            $paymonth = round($ex_ktc_bay / $MNS_INSTALLMENT_MONTHS,2);
         }
 
-        if($MS_INSTALLMENT_BANK == "BAY"){
+        if($MNS_INSTALLMENT_BANK == "BAY"){
             $actionUrl = "https://www.moneyspace.net/baycredit/pay";
-            $paymonth = round($ex_ktc_bay / $MS_INSTALLMENT_MONTHS,2);
+            $paymonth = round($ex_ktc_bay / $MNS_INSTALLMENT_MONTHS,2);
         }
 
-        if($MS_INSTALLMENT_BANK == "FCY"){
+        if($MNS_INSTALLMENT_BANK == "FCY"){
             $actionUrl = "https://www.moneyspace.net/baycredit/pay";
-            $paymonth = round($ex_fcy / $MS_INSTALLMENT_MONTHS,2);
+            $paymonth = round($ex_fcy / $MNS_INSTALLMENT_MONTHS,2);
         }
         ?>
         
@@ -659,10 +659,10 @@ class MNS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
                             <input type="hidden" name="transactionID" value="<?php esc_html_e($MNS_transaction); ?>"/>
                             <input type="hidden" id="pay_type" name="pay_type" value=""/>
                             <input type="hidden" id="locale" name="locale" value=""/>
-                             <input type="hidden" id="term" name="term" value="<?php esc_html_e($MS_INSTALLMENT_MONTHS); ?>"/>
+                             <input type="hidden" id="term" name="term" value="<?php esc_html_e($MNS_INSTALLMENT_MONTHS); ?>"/>
                             <input type="hidden" id="payForMonth" name="paymonth" value="<?php esc_html_e($paymonth); ?>"/>
                             <input type="hidden" id="interest" name="interest" value="0.0"/>
-                            <input type="hidden" id="bankType" name="bankType" value="<?php esc_html_e($MS_INSTALLMENT_BANK); ?>"/>
+                            <input type="hidden" id="bankType" name="bankType" value="<?php esc_html_e($MNS_INSTALLMENT_BANK); ?>"/>
                         </div>
                      </div>
                  <button class="button" type="submit">ชำระเงิน</button>

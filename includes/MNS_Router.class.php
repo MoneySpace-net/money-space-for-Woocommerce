@@ -2,7 +2,7 @@
 
 class MNS_Router extends MNS_Router_Utility
 {
-    const ROUTE_CACHE_OPTION = 'MS_Router_route_hash';
+    const ROUTE_CACHE_OPTION = 'MNS_Router_route_hash';
     private $routes = array();
 
     /**
@@ -218,7 +218,7 @@ class MNS_Router extends MNS_Router_Utility
      */
     protected function redirect_placeholder($query)
     {
-        // we'll only get a 'MS_Router_page' query var when visiting
+        // we'll only get a 'MNS_Router_page' query var when visiting
         // the page for a WP Router post, and there's only one of those
         if (!empty($query->query_vars[MNS_Router_Page::POST_TYPE])) {
             wp_redirect(home_url(), 303);

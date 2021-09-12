@@ -85,8 +85,8 @@ if ($order && $pid) {
                 $order->reduce_order_stock();
             }
 
-            update_post_meta($order->id, 'MS_PAYMENT_PAID', $ms_status->amount);
-            update_post_meta($order->id, 'MS_PAYMENT_STATUS', $ms_status->status);
+            update_post_meta($order->id, 'MNS_PAYMENT_PAID', $ms_status->amount);
+            update_post_meta($order->id, 'MNS_PAYMENT_STATUS', $ms_status->status);
             wp_redirect(wc_get_order($order->id)->get_checkout_order_received_url());
         } else if ($ms_status->status == "Cancel") {
             $order->update_status("wc-cancelled");

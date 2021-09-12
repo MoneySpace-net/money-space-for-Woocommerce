@@ -2,7 +2,7 @@
 
 class MNS_Router_Page extends MNS_Router_Utility
 {
-    const POST_TYPE = 'MS_Router_page';
+    const POST_TYPE = 'MNS_Router_page';
 
     protected static $rewrite_slug = 'MNS_Router';
     protected static $post_id = 0; // The ID of the post this plugin uses
@@ -227,7 +227,7 @@ class MNS_Router_Page extends MNS_Router_Utility
                 $this->meta = array(
                     '_yoast_wpseo_title' => array($this->get_title('', $post_id)),
                 );
-                $this->meta = apply_filters('MS_Router_placeholder_postmeta', $this->meta);
+                $this->meta = apply_filters('MNS_Router_placeholder_postmeta', $this->meta);
             }
             if ($meta_key) {
                 if (empty($this->meta[$meta_key])) {

@@ -54,7 +54,7 @@ class MNS_Payment_Gateway extends WC_Payment_Gateway
 
         update_post_meta($order_id, 'MNS_transaction_orderid', $ms_body['order_id']);
         update_post_meta($order_id, 'MNS_transaction', $tranId);
-        update_post_meta($order_id, 'MS_PAYMENT_KEY', $mskey);
+        update_post_meta($order_id, 'MNS_PAYMENT_KEY', $mskey);
 
         if ($ms_template_payment == "1") {
             wp_redirect(get_site_url() . "/mspaylink/" . $order_id);
@@ -142,7 +142,7 @@ class MNS_Payment_Gateway extends WC_Payment_Gateway
         $link = "https://www.moneyspace.net/merchantapi/makepayment/linkpaymentcard?transactionID=" . $tranId . "&timehash=" . $ms_time . "&secreteID=" . $ms_secret_id . "&hash=" . $hash_link;
         update_post_meta($order_id, 'MNS_transaction', $tranId);
         update_post_meta($order_id, 'MNS_transaction_orderid', $ms_body["order_id"]);
-        update_post_meta($order_id, 'MS_LINK', $link);
+        update_post_meta($order_id, 'MNS_LINK', $link);
         WC()->cart->empty_cart();
         wp_redirect($link);
     }
@@ -162,7 +162,7 @@ class MNS_Payment_Gateway extends WC_Payment_Gateway
 
         $data_status = json_decode($response["body"]);
         $mspay = json_encode($data_status->data);
-        update_post_meta($order_id, 'MS_PAYMENT_PAY', $mspay);
+        update_post_meta($order_id, 'MNS_PAYMENT_PAY', $mspay);
         return $mspay;
     }
 
@@ -377,11 +377,11 @@ class MNS_Payment_Gateway extends WC_Payment_Gateway
                 $cardExpDate = sanitize_text_field($_POST["cardExpDate"]);
                 $cardExpDateYear = sanitize_text_field($_POST["cardExpDateYear"]);
                 $cardCVV = sanitize_text_field($_POST["cardCVV"]);
-                $MS_CARD = $cardNumber."|".$cardHolder."|".$cardExpDate."|".$cardExpDateYear."|".$cardCVV;
-                update_post_meta($order_id, 'MS_CARD', base64_encode($MS_CARD));
+                $MNS_CARD = $cardNumber."|".$cardHolder."|".$cardExpDate."|".$cardExpDateYear."|".$cardCVV;
+                update_post_meta($order_id, 'MNS_CARD', base64_encode($MNS_CARD));
 
                 $mspay = sanitize_text_field($_POST["mspay"]);
-                update_post_meta($order_id, 'MS_PAYMENT_PAY', $mspay);
+                update_post_meta($order_id, 'MNS_PAYMENT_PAY', $mspay);
                 $order = wc_get_order($order_id);
                 return $this->_process_external_payment($order);
             } else {
@@ -536,21 +536,21 @@ function ms_order_detail_display($order)
     $MNS_PAYMENT_TYPE = get_post_meta($order->id, 'MNS_PAYMENT_TYPE', true);
     $MNS_transaction = get_post_meta($order->id, 'MNS_transaction', true);
     $MNS_transaction_orderid = get_post_meta($order->id, 'MNS_transaction_orderid', true);
-    $MS_PAYMENT_PAID = get_post_meta($order->id, 'MS_PAYMENT_PAID', true);
-    $MS_PAYMENT_STATUS = get_post_meta($order->id, 'MS_PAYMENT_STATUS', true);
+    $MNS_PAYMENT_PAID = get_post_meta($order->id, 'MNS_PAYMENT_PAID', true);
+    $MNS_PAYMENT_STATUS = get_post_meta($order->id, 'MNS_PAYMENT_STATUS', true);
 
     $order_amount = $order->get_total();
     $ms_time = date("YmdHis");
     $new_line = "<br>";
-    if ($MS_PAYMENT_STATUS == "Pay Success") {
+    if ($MNS_PAYMENT_STATUS == "Pay Success") {
         if ($MNS_PAYMENT_TYPE == "Qrnone" || $MNS_PAYMENT_TYPE == "Card") {
             esc_html_e(set_h6_html(MNS_THANK_PAYMENT_ORDER_1));
             esc_html_e(set_h6_html(MNS_THANK_PAYMENT_ORDER_2).$new_line);
-            esc_html_e(set_p_html(wc_price($MS_PAYMENT_PAID) . " ( Transaction ID : " . $MNS_transaction . " )"));
+            esc_html_e(set_p_html(wc_price($MNS_PAYMENT_PAID) . " ( Transaction ID : " . $MNS_transaction . " )"));
         } else if ($MNS_PAYMENT_TYPE == "Installment") {
             esc_html_e(set_h6_html(MNS_THANK_PAYMENT_ORDER_1));
             esc_html_e(set_h6_html(MNS_THANK_PAYMENT_ORDER_2). $new_line);
-            esc_html_e(set_p_html(wc_price($MS_PAYMENT_PAID) . " ( Transaction ID : " . $MNS_transaction . " [" . $MNS_transaction_orderid . "])" ));
+            esc_html_e(set_p_html(wc_price($MNS_PAYMENT_PAID) . " ( Transaction ID : " . $MNS_transaction . " [" . $MNS_transaction_orderid . "])" ));
         }
     }
 }

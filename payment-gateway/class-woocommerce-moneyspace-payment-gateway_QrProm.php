@@ -63,13 +63,13 @@ class MNS_Payment_Gateway_QR extends WC_Payment_Gateway
 
         update_post_meta($order_id, 'MNS_transaction_orderid', $ms_body["order_id"]);
         update_post_meta($order_id, 'MNS_transaction', $tranId);
-        update_post_meta($order_id, 'MS_PAYMENT_KEY', $mskey);
-        update_post_meta($order_id, 'MS_MNS_QR_TIME', time());
+        update_post_meta($order_id, 'MNS_PAYMENT_KEY', $mskey);
+        update_post_meta($order_id, 'MNS_QR_TIME', time());
 
         if ($ms_template_payment == "2") {
 
             date_default_timezone_set(MNS_TIME_ZONE);
-            $MS_MNS_QR_TIME = get_post_meta($order_id, 'MS_MNS_QR_TIME', true);
+            $MNS_QR_TIME = get_post_meta($order_id, 'MNS_QR_TIME', true);
             $auto_cancel = $payment_gateway_qr->settings['auto_cancel'];
 
             if(empty($auto_cancel)){
@@ -86,7 +86,7 @@ class MNS_Payment_Gateway_QR extends WC_Payment_Gateway
                         description="false">
                 </div>
                 <br>
-                <h3> QR Code จะหมดอายุวันที่ : '.date('d/m/Y H:i', $MS_MNS_QR_TIME + $limit_time).'</h3>
+                <h3> QR Code จะหมดอายุวันที่ : '.date('d/m/Y H:i', $MNS_QR_TIME + $limit_time).'</h3>
                 <h3 id="time"></h3>
             </div>');
             $customStyle = ("

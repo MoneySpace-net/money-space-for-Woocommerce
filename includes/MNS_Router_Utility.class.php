@@ -10,7 +10,7 @@ class MNS_Router_Utility
     const MIN_PHP_VERSION = '5.2';
     const MIN_WP_VERSION = '3.0';
     const DB_VERSION = 1;
-    const PLUGIN_INIT_HOOK = 'MS_Router_init';
+    const PLUGIN_INIT_HOOK = 'MNS_Router_init';
 
     /**
      * @static

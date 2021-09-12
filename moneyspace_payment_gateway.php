@@ -70,8 +70,8 @@ if (in_array('woocommerce/woocommerce.php', $active_plugins)) {
         return array_merge($links, $mylinks);
     }
 
-    if (!function_exists('MS_Router_load')) {
-        function MS_Router_load()
+    if (!function_exists('MNS_Router_load')) {
+        function MNS_Router_load()
         {
             // load the base class
             require_once plugin_dir_path(__FILE__) . 'includes/MNS_Router_Utility.class.php';
@@ -100,7 +100,7 @@ if (in_array('woocommerce/woocommerce.php', $active_plugins)) {
             }
         }
         // Fire it up!
-        MS_Router_load();
+        MNS_Router_load();
     }
 
     if( ! class_exists( 'Moneyspace_Updater' ) ){

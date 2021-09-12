@@ -34,10 +34,10 @@ if ($order && $pid) {
     $MNS_transaction = get_post_meta($order->id, 'MNS_transaction', true);
     $order_amount = $order->get_total();
     $MNS_PAYMENT_TYPE = get_post_meta($order->id, 'MNS_PAYMENT_TYPE', true);
-    $MS_PAYMENT_KEY = get_post_meta($order->id, 'MS_PAYMENT_KEY', true);
+    $MNS_PAYMENT_KEY = get_post_meta($order->id, 'MNS_PAYMENT_KEY', true);
 
-    if ((strlen($MS_PAYMENT_KEY) > 9999 && isset($MS_PAYMENT_KEY) && $MS_PAYMENT_KEY != "")
-    || (!isset($MS_PAYMENT_KEY) && $MS_PAYMENT_KEY == "")) {
+    if ((strlen($MNS_PAYMENT_KEY) > 9999 && isset($MNS_PAYMENT_KEY) && $MNS_PAYMENT_KEY != "")
+    || (!isset($MNS_PAYMENT_KEY) && $MNS_PAYMENT_KEY == "")) {
         wp_redirect(wc_get_account_endpoint_url('orders'));
     }
 
@@ -46,7 +46,7 @@ if ($order && $pid) {
     } else if ($MNS_PAYMENT_TYPE == "Qrnone") {
 
         $ms_title = $gateways['moneyspace_qrprom']->settings['title'];
-        $MS_MNS_QR_TIME = get_post_meta($order->id, 'MS_MNS_QR_TIME', true);
+        $MNS_QR_TIME = get_post_meta($order->id, 'MNS_QR_TIME', true);
         $auto_cancel = $payment_gateway_qr->settings['auto_cancel'];
 
         if(empty($auto_cancel)){
@@ -56,7 +56,7 @@ if ($order && $pid) {
         }
         
 
-        if ((time() - $MS_MNS_QR_TIME) > $limit_time){
+        if ((time() - $MNS_QR_TIME) > $limit_time){
             wp_redirect($redirect_url);
         }
 
@@ -100,11 +100,11 @@ if ($order && $pid) {
         <?php if ($MNS_PAYMENT_TYPE == "Qrnone") { 
             
             ?>
-            <div id="moneyspace-payment" lang="eng" ms-title="<?php esc_html_e($ms_title); ?> " ms-key="<?php esc_html_e($MS_PAYMENT_KEY); ?>"></div>
+            <div id="moneyspace-payment" lang="eng" ms-title="<?php esc_html_e($ms_title); ?> " ms-key="<?php esc_html_e($MNS_PAYMENT_KEY); ?>"></div>
             <br>
 
             <h3>
-                QR Code จะหมดอายุวันที่ : <?php esc_html_e(date('d/m/Y H:i', $MS_MNS_QR_TIME + $limit_time)); ?>
+                QR Code จะหมดอายุวันที่ : <?php esc_html_e(date('d/m/Y H:i', $MNS_QR_TIME + $limit_time)); ?>
             </h3>
             <h3 id="time"></h3>
             <script>
@@ -144,19 +144,19 @@ if ($order && $pid) {
         <?php 
         
     } else { 
-        $mscard = get_post_meta($order->id, 'MS_CARD', true);
+        $mscard = get_post_meta($order->id, 'MNS_CARD', true);
         $mscard_ext = explode("|", base64_decode($mscard));
-        $mskey = get_post_meta( $order->id, 'MS_PAYMENT_KEY', true);
-        $mspay = get_post_meta( $order->id, 'MS_PAYMENT_PAY', true);
+        $mskey = get_post_meta( $order->id, 'MNS_PAYMENT_KEY', true);
+        $mspay = get_post_meta( $order->id, 'MNS_PAYMENT_PAY', true);
 
         $cardNumber = $mscard_ext[0];
         $cardHolder = $mscard_ext[1];
         $cardExpDate = $mscard_ext[2];
         $cardExpDateYear = $mscard_ext[3];
         $cardCVV = $mscard_ext[4];
-        delete_post_meta($order->id, 'MS_PAYMENT_KEY', $mskey);
-        delete_post_meta($order->id, 'MS_PAYMENT_PAY', $mspay);
-        delete_post_meta($order->id, 'MS_CARD', $mscard);
+        delete_post_meta($order->id, 'MNS_PAYMENT_KEY', $mskey);
+        delete_post_meta($order->id, 'MNS_PAYMENT_PAY', $mspay);
+        delete_post_meta($order->id, 'MNS_CARD', $mscard);
             
         $customStyle = ("
             input[type=text]{
@@ -227,7 +227,7 @@ else if ($ms_template_payment == "2"){
              template="2"
              lang="eng"
              ms-title="<?php esc_html_e($ms_title); ?>"
-             ms-key="<?php esc_html_e($MS_PAYMENT_KEY); ?>"
+             ms-key="<?php esc_html_e($MNS_PAYMENT_KEY); ?>"
              description="false">
         </div>
     </div>
@@ -235,13 +235,13 @@ else if ($ms_template_payment == "2"){
 <?php 
 } else { ?>
     <div align="left">
-        <div id="moneyspace-payment" lang="eng" ms-title="<?php esc_html_e($ms_title); ?>" ms-key="<?php esc_html_e($MS_PAYMENT_KEY); ?>"></div>
+        <div id="moneyspace-payment" lang="eng" ms-title="<?php esc_html_e($ms_title); ?>" ms-key="<?php esc_html_e($MNS_PAYMENT_KEY); ?>"></div>
         <br>
         <?php if ($MNS_PAYMENT_TYPE == "Qrnone") { ?>
 
 
             <h3>
-                QR Code จะหมดอายุวันที่ : <?php esc_html_e(date('d/m/Y H:i', $MS_MNS_QR_TIME + $limit_time)); ?>
+                QR Code จะหมดอายุวันที่ : <?php esc_html_e(date('d/m/Y H:i', $MNS_QR_TIME + $limit_time)); ?>
             </h3>
 
             <script>
