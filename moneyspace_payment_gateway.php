@@ -8,27 +8,27 @@
  * Author URI:        https://moneyspace.net
  */
 
-define('MS_ID', 'moneyspace');
-define('MS_ID_QRPROM', 'moneyspace_qrprom');
-define('MS_ID_INSTALLMENT', 'moneyspace_installment');
-define('MS_TITLE', 'Money Space');
-define('MS_API_URL_PREFIX', 'https://a.moneyspace.net'); //'http://127.0.0.1:8000');
-define('MS_STATIC_URL_PREFIX', 'https://a.moneyspace.net/static'); //'http://127.0.0.1:8000/static');
-define('MS_API_URL_CREATE', MS_API_URL_PREFIX . '/CreateTransactionID');
-define('MS_API_URL_CHECK', MS_API_URL_PREFIX . '/CheckOrderID');
-define('MS_API_URL_GETPAY', MS_API_URL_PREFIX . '/Getpay');
-define('MS_API_URL_PAY', MS_API_URL_PREFIX . '/Pay');
-define('MS_API_URL_V2_CREATE_PAYMENT', 'https://www.moneyspace.net/merchantapi/v2/createpayment/obj');
-define('MS_API_URL_CREATE_INSTALLMENT', 'https://a.moneyspace.net/payment/Createinstallment/');
-define('MS_LOGO', MS_STATIC_URL_PREFIX . '/img/type/Master_VISA_JCB_UNION_180.png');
-define('MS_LOGO_QR', MS_STATIC_URL_PREFIX. '/img/type/QRCode_160.png');
-define('MS_LOGO_INSTALLMENT', MS_STATIC_URL_PREFIX . '/img/type/Installment_220.png');
-define('MS_PAYMENT_JS', plugins_url( "includes/moneyspace_payment.js", __FILE__ )); // MS_STATIC_URL_PREFIX . '/moneyspace_payment.js'); //
-define('MS_PAYMENT_FORM_JS', plugins_url( "includes/moneyspace_payment_form.js", __FILE__ ) );
-define('MS_PAYMENT_FORM_CSS', plugins_url( "includes/css/moneyspace.css", __FILE__ ) );
-define('MS_METHOD_TITLE', 'Money Space for WooCommerce');
+define('MNS_ID', 'moneyspace');
+define('MNS_ID_QRPROM', 'moneyspace_qrprom');
+define('MNS_ID_INSTALLMENT', 'moneyspace_installment');
+define('MNS_TITLE', 'Money Space');
+define('MNS_API_URL_PREFIX', 'https://a.moneyspace.net'); //'http://127.0.0.1:8000');
+define('MNS_STATIC_URL_PREFIX', 'https://a.moneyspace.net/static'); //'http://127.0.0.1:8000/static');
+define('MNS_API_URL_CREATE', MNS_API_URL_PREFIX . '/CreateTransactionID');
+define('MNS_API_URL_CHECK', MNS_API_URL_PREFIX . '/CheckOrderID');
+define('MNS_API_URL_GETPAY', MNS_API_URL_PREFIX . '/Getpay');
+define('MNS_API_URL_PAY', MNS_API_URL_PREFIX . '/Pay');
+define('MNS_API_URL_V2_CREATE_PAYMENT', 'https://www.moneyspace.net/merchantapi/v2/createpayment/obj');
+define('MNS_API_URL_CREATE_INSTALLMENT', 'https://a.moneyspace.net/payment/Createinstallment/');
+define('MNS_LOGO', MNS_STATIC_URL_PREFIX . '/img/type/Master_VISA_JCB_UNION_180.png');
+define('MNS_LOGO_QR', MNS_STATIC_URL_PREFIX. '/img/type/QRCode_160.png');
+define('MNS_LOGO_INSTALLMENT', MNS_STATIC_URL_PREFIX . '/img/type/Installment_220.png');
+define('MNS_PAYMENT_JS', plugins_url( "includes/moneyspace_payment.js", __FILE__ )); // MNS_STATIC_URL_PREFIX . '/moneyspace_payment.js'); //
+define('MNS_PAYMENT_FORM_JS', plugins_url( "includes/moneyspace_payment_form.js", __FILE__ ) );
+define('MNS_PAYMENT_FORM_CSS', plugins_url( "includes/css/moneyspace.css", __FILE__ ) );
+define('MNS_METHOD_TITLE', 'Money Space for WooCommerce');
 define('MNS_TIME_ZONE', "Asia/Bangkok");
-define('MS_CANCEL_TRANSACTION', 'https://a.moneyspace.net/merchantapi/cancelpayment');
+define('MNS_CANCEL_TRANSACTION', 'https://a.moneyspace.net/merchantapi/cancelpayment');
 define("MNS_ROOT", __DIR__."/");
 define("MNS_ROOT_URL", plugin_dir_url(__FILE__));
 

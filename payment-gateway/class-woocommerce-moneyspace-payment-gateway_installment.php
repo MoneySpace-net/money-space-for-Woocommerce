@@ -12,9 +12,9 @@ class MS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
     public function __construct() {
         $this->domain = 'ms_payment_installment';
         global $woocommerce;
-        $this->id             = MS_ID_INSTALLMENT;
+        $this->id             = MNS_ID_INSTALLMENT;
         $this->title = __($this->get_option( 'title' ), $this->domain);
-        $this->icon = apply_filters('woocommerce_custom_gateway_icon', MS_LOGO_INSTALLMENT, '');
+        $this->icon = apply_filters('woocommerce_custom_gateway_icon', MNS_LOGO_INSTALLMENT, '');
         $this->method_title = __("Money Space for WooCommerce ( ผ่อนชำระรายเดือน )", $this->domain);
         $this->method_description = __("
 
@@ -144,12 +144,12 @@ class MS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
     public function thankyou_page()
     {
         if ($this->instructions)
-            echo wpautop(wptexturize($this->instructions));
+        esc_html_e(wpautop(wptexturize($this->instructions)));
     }
 
     public function payment_fields()
     {
-        $payment_gateway_id = MS_ID_INSTALLMENT;
+        $payment_gateway_id = MNS_ID_INSTALLMENT;
         $payment_gateways = WC_Payment_Gateways::instance();
         $payment_gateway = $payment_gateways->payment_gateways()[$payment_gateway_id];
         $gateways = WC()->payment_gateways->get_available_payment_gateways();
@@ -183,7 +183,7 @@ class MS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
         }
 
         if ($description = $this->get_description()) {
-            echo wpautop(wptexturize($description));
+            esc_html_e(wpautop(wptexturize($description)));
         }
 
         ?>
@@ -255,38 +255,38 @@ class MS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
         <br>
 
         <table id="banks" border = "1">
-         <tr id="tr_banks">
+        <tr id="tr_banks">
             <td id="td_banks">บัตรเคทีซี (KTC)</td>
             <td id="td_banks">บัตรกรุงศรีฯ วีซ่า , บัตรเซ็นทรัล , บัตรเทสโก้โลตัส</td>
             <td id="td_banks">บัตรกรุงศรีเฟิร์สช้อยส์ , บัตรโฮมโปร , บัตรเมกาโฮม</td>
-         </tr>
+        </tr>
          
-         <tr>
-         <?php if($ms_fee == "include"){ ?>
+        <tr>
+        <?php if($ms_fee == "include"){ ?>
             <td id="td_banks">
             <label>
                 <input type="radio" name="selectbank" id="selectbank" value="KTC" onclick="KTC();">
-                <img src="https://worldwallet.net/images/installment/KTC0.png">
+                <img src="<?php esc_html_e(MNS_ROOT_URL . 'includes/images/installment/KTC08.png'); ?>">
             </label>
             </td>
         <?php } if($ms_fee == "exclude"){ ?>   
             <td id="td_banks">
             <label>
                 <input type="radio" name="selectbank" id="selectbank" value="KTC" onclick="KTC();">
-                <img src="https://worldwallet.net/images/installment/KTC08.png">
+                <img src="<?php esc_html_e(MNS_ROOT_URL .  'includes/images/installment/KTC08.png'); ?>">
             </label>
             </td>
         <?php } ?>
             <td id="td_banks">
             <label>
                 <input type="radio" name="selectbank" id="selectbank" value="BAY" onclick="BAY();">
-                <img src="https://worldwallet.net/images/installment/BAY33050.png">
+                <img src="<?php esc_html_e(MNS_ROOT_URL . 'includes/images/installment/BAY33050.png'); ?>">
             </label>
             </td>
             <td id="td_banks">
             <label>
                 <input type="radio" name="selectbank" id="selectbank" value="FCY" onclick="FCY();">
-                <img src="https://worldwallet.net/images/installment/FCY.png">
+                <img src="<?php esc_html_e(MNS_ROOT_URL . 'includes/images/installment/FCY.png'); ?>">
             </label>
             </td>
          </tr>
@@ -303,7 +303,7 @@ class MS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
             <select name="KTC_permonths" id="permonths">
                 <?php foreach($KTC as $months){ ?>
                     <?php if(round($amount_total / $months,2) >= 300 && $months <= $ktc_max_months_setting){ ?>
-                    <option value="<?=$months?>">ผ่อน <?=$months?> เดือน ดอกเบี้ย 0 % ( <?= number_format($amount_total / $months,2)?> บาท / เดือน )</option>
+                    <option value="<?php esc_html_e($months); ?>">ผ่อน <?php esc_html_e($months); ?> เดือน ดอกเบี้ย 0 % ( <?php esc_html_e(number_format($amount_total / $months,2)); ?> บาท / เดือน )</option>
                     <?php } ?>
                 <?php } ?>
             </select>
@@ -314,7 +314,7 @@ class MS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
             <select name="BAY_permonths" id="permonths">
                 <?php foreach($BAY as $months){ ?>
                     <?php if(round($amount_total / $months,2) >= 500 && $months <= $bay_max_months_setting){ ?>
-                    <option value="<?=$months?>">ผ่อน <?=$months?> เดือน ดอกเบี้ย 0 % ( <?= number_format($amount_total / $months,2)?> บาท / เดือน )</option>
+                    <option value="<?php esc_html_e($months); ?>">ผ่อน <?php esc_html_e($months); ?> เดือน ดอกเบี้ย 0 % ( <?php esc_html_e(number_format($amount_total / $months,2)); ?> บาท / เดือน )</option>
                     <?php } ?>
                 <?php } ?>
             </select>
@@ -325,7 +325,7 @@ class MS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
             <select name="FCY_permonths" id="permonths">
                 <?php foreach($FCY as $months){ ?>
                     <?php if(round($amount_total / $months,2) >= 300 && $months <= $fcy_max_months_setting){ ?>
-                    <option value="<?=$months?>">ผ่อน <?=$months?> เดือน ดอกเบี้ย 0 % ( <?= number_format($amount_total / $months,2)?> บาท / เดือน )</option>
+                    <option value="<?php esc_html_e($months); ?>">ผ่อน <?php esc_html_e($months); ?> เดือน ดอกเบี้ย 0 % ( <?php esc_html_e(number_format($amount_total / $months,2)); ?> บาท / เดือน )</option>
                     <?php } ?>
                 <?php } ?>
             </select>
@@ -338,7 +338,7 @@ class MS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
             <select name="KTC_permonths" id="permonths">
                 <?php foreach($KTC as $months){ ?>
                     <?php if(round($amount_total / $months,2) >= 300 && $months <= $ktc_max_months_setting){ $ex_ktc_bay = $amount_total / 100 * 0.8 * $months + $amount_total; ?>
-                    <option value="<?=$months?>">ผ่อน <?=$months?> เดือน ดอกเบี้ย 0.8 % ( <?= number_format($ex_ktc_bay / $months,2)?> บาท / เดือน )</option>
+                    <option value="<?php esc_html_e($months); ?>">ผ่อน <?php esc_html_e($months); ?> เดือน ดอกเบี้ย 0.8 % ( <?php esc_html_e(number_format($ex_ktc_bay / $months,2)); ?> บาท / เดือน )</option>
                     <?php } ?>
                 <?php } ?>
             </select>
@@ -349,7 +349,7 @@ class MS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
             <select name="BAY_permonths" id="permonths">
                 <?php foreach($BAY as $months){ ?>
                     <?php if(round($amount_total / $months,2) >= 500 && $months <= $bay_max_months_setting){ $ex_ktc_bay = $amount_total / 100 * 0.8 * $months + $amount_total;?>
-                    <option value="<?=$months?>">ผ่อน <?=$months?> เดือน ดอกเบี้ย 0.8 % ( <?= number_format($ex_ktc_bay / $months,2)?> บาท / เดือน )</option>
+                    <option value="<?php esc_html_e($months); ?>">ผ่อน <?php esc_html_e($months); ?> เดือน ดอกเบี้ย 0.8 % ( <?php esc_html_e(number_format($ex_ktc_bay / $months,2)); ?> บาท / เดือน )</option>
                     <?php } ?>
                 <?php } ?>
             </select>
@@ -360,7 +360,7 @@ class MS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
             <select name="FCY_permonths" id="permonths">
                 <?php foreach($FCY as $months){ ?>
                     <?php if(round($amount_total / $months,2) >= 300 && $months <= $fcy_max_months_setting){ $ex_fcy = $amount_total / 100 * 1 * $months + $amount_total; ?>
-                    <option value="<?=$months?>">ผ่อน <?=$months?> เดือน ดอกเบี้ย 1 % ( <?= number_format($ex_fcy / $months,2)?> บาท / เดือน )</option>
+                    <option value="<?php esc_html_e($months); ?>">ผ่อน <?php esc_html_e($months); ?> เดือน ดอกเบี้ย 1 % ( <?php esc_html_e(number_format($ex_fcy / $months,2)); ?> บาท / เดือน )</option>
                     <?php } ?>
                 <?php } ?>
             </select>
@@ -375,7 +375,7 @@ class MS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
         <div id="custom_input">
             <p class="form-row form-row-wide">
                 <label for="message_card" class=""><?php _e("", $this->domain); ?></label>
-                <input type="text" class="" name="message_card" id="message_card" placeholder="<?=MESSAGE2STORE?>">
+                <input type="text" class="" name="message_card" id="message_card" placeholder="<?php esc_html_e(MESSAGE2STORE); ?>">
             </p>
         </div>
 
@@ -384,7 +384,7 @@ class MS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
         <?php if ($ms_message2store != "Enable"){ ?>
 
 
-        <input type="text" class="" name="message_card" id="message_card" placeholder="<?=MESSAGE2STORE?>" value="" hidden>
+        <input type="text" class="" name="message_card" id="message_card" placeholder="<?php esc_html_e(MESSAGE2STORE); ?>" value="" hidden>
 
 
         <?php } ?>
@@ -407,39 +407,38 @@ class MS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
 
         $order = wc_get_order($order_id);
         $order_amount = $order->get_total();
-
-        update_post_meta($order_id, 'MS_special_instructions_to_merchant', $_POST["message_card"]);
+        update_post_meta($order_id, 'MNS_special_instructions_to_merchant', sanitize_text_field($_POST["message_card"]));
 
     if (is_user_logged_in()) {
-        if (strlen($_POST["message_card"]) <= 150) {
+        if (strlen(sanitize_text_field($_POST["message_card"])) <= 150) {
 
             if (get_woocommerce_currency() == "THB") {
 
 
                 if($order_amount >= 3000.01){
 
-                    if(isset($_POST["selectbank"]) && $_POST["selectbank"] != ""){
+                    if(sanitize_text_field($_POST["selectbank"]) != ""){
 
-                        $MS_PAYMENT_TYPE = get_post_meta($order_id, 'MS_PAYMENT_TYPE', true);
+                        $MNS_PAYMENT_TYPE = get_post_meta($order_id, 'MNS_PAYMENT_TYPE', true);
 
                 
             
-                            delete_post_meta($order_id, 'MS_transaction');
+                            delete_post_meta($order_id, 'MNS_transaction');
                             delete_post_meta($order_id, 'MS_QR_URL');
-                            update_post_meta($order_id, 'MS_PAYMENT_TYPE', "Installment");
-                            update_post_meta($order_id, 'MS_INSTALLMENT_BANK', $_POST["selectbank"]);
+                            update_post_meta($order_id, 'MNS_PAYMENT_TYPE', "Installment");
+                            update_post_meta($order_id, 'MS_INSTALLMENT_BANK', sanitize_text_field($_POST["selectbank"]));
 
                             $Endterm = "";
 
-                            if ($_POST["selectbank"] == "KTC"){
-                                $Endterm = $_POST["KTC_permonths"];
-                                update_post_meta($order_id, 'MS_INSTALLMENT_MONTHS', $_POST["KTC_permonths"]);
-                            }else if ($_POST["selectbank"] == "BAY"){
-                                $Endterm = $_POST["BAY_permonths"];
-                                update_post_meta($order_id, 'MS_INSTALLMENT_MONTHS', $_POST["BAY_permonths"]);
-                            }else if ($_POST["selectbank"] == "FCY"){
-                                $Endterm = $_POST["FCY_permonths"];
-                                update_post_meta($order_id, 'MS_INSTALLMENT_MONTHS', $_POST["FCY_permonths"]);
+                            if (sanitize_text_field($_POST["selectbank"]) == "KTC"){
+                                $Endterm = sanitize_text_field($_POST["KTC_permonths"]);
+                                update_post_meta($order_id, 'MS_INSTALLMENT_MONTHS', sanitize_text_field($_POST["KTC_permonths"]));
+                            }else if (sanitize_text_field($_POST["selectbank"]) == "BAY"){
+                                $Endterm = sanitize_text_field($_POST["BAY_permonths"]);
+                                update_post_meta($order_id, 'MS_INSTALLMENT_MONTHS', sanitize_text_field($_POST["BAY_permonths"]));
+                            }else if (sanitize_text_field($_POST["selectbank"]) == "FCY"){
+                                $Endterm = sanitize_text_field($_POST["FCY_permonths"]);
+                                update_post_meta($order_id, 'MS_INSTALLMENT_MONTHS', sanitize_text_field($_POST["FCY_permonths"]));
                             }
 
 
@@ -491,7 +490,7 @@ class MS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
                                 $payment_data['currency'] = 'THB';
                                 $payment_data['description'] = $items_msg;
                                 $payment_data['address'] = $order->get_billing_address_1() . " " . $order->get_billing_address_2() . " " . $order->get_billing_city() . " " . $order->get_billing_postcode();
-                                $payment_data['message'] = $_POST["message_card"];
+                                $payment_data['message'] = sanitize_text_field($_POST["message_card"]);
                                 $payment_data['feeType'] = $ms_fee;
                                 $payment_data['timeHash'] = $ms_time;
                                 $payment_data['customer_order_id'] = $ms_time;
@@ -500,7 +499,7 @@ class MS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
                                 $payment_data['failUrl'] = $this->get_return_url($order);
                                 $payment_data['cancelUrl'] = $this->get_return_url($order);
                                 $payment_data['agreement'] = $agreement_setting;
-                                $payment_data['bankType'] = $_POST["selectbank"];
+                                $payment_data['bankType'] = sanitize_text_field($_POST["selectbank"]);
                                 $payment_data['startTerm'] = '3';
                                 $payment_data['endTerm'] = $Endterm;
                                 $payment_data['bgColor'] = "#43a047";
@@ -541,7 +540,7 @@ class MS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
 
                                         $link = "https://www.moneyspace.net/merchantapi/makepayment/linkpaymentcard?transactionID=" . $tranId . "&timehash=" . $ms_time . "&secreteID=" . $ms_secret_id . "&hash=" . $hash_link;
 
-                                        update_post_meta($order_id, 'MS_transaction', $tranId);
+                                        update_post_meta($order_id, 'MNS_transaction', $tranId);
 
                                         update_post_meta($order_id, 'MS_fee_installment', $payment_data['feeType']);
 
@@ -554,7 +553,7 @@ class MS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
                                 }
                             }
                         }else{
-                            wc_add_notice(__("กรุณาเลือกการผ่อนชำระ".$_POST["selectbank"], $this->domain), 'error');
+                            wc_add_notice(__("กรุณาเลือกการผ่อนชำระ".sanitize_text_field($_POST["selectbank"]), $this->domain), 'error');
                         }
                     }else{
                         wc_add_notice(__("จำนวนยอดเงินต้อง 3,000.01 บาทขึ้นไปถึงจะทำการผ่อนชำระได้", $this->domain), 'error');
@@ -590,7 +589,7 @@ class MS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
 
 
 
-        $MS_transaction = get_post_meta($order_id, 'MS_transaction', true);
+        $MNS_transaction = get_post_meta($order_id, 'MNS_transaction', true);
         $MS_orderid_installment = get_post_meta($order_id, 'MS_orderid_installment', true);
         $MS_INSTALLMENT_BANK = get_post_meta($order_id, 'MS_INSTALLMENT_BANK', true);
         $MS_INSTALLMENT_MONTHS = get_post_meta($order_id, 'MS_INSTALLMENT_MONTHS', true);
@@ -623,15 +622,15 @@ class MS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
 
         <h3 style="text-decoration: underline;">ยืนยันการชำระเงิน</h3>
 
-        <p><h5>จำนวนเดือน : <?=$MS_INSTALLMENT_MONTHS."  เดือน"?></h5></p>
+        <p><h5>จำนวนเดือน : <?php esc_html_e($MS_INSTALLMENT_MONTHS."  เดือน"); ?></h5></p>
 
         <?php if($MS_INSTALLMENT_BANK == "KTC" || $MS_INSTALLMENT_BANK == "BAY"){ ?>
 
-        <p><h5>จำนวนเงินชำระต่อเดือน : <?=round($ex_ktc_bay / $MS_INSTALLMENT_MONTHS,2).get_woocommerce_currency()." / เดือน"?></h5></p>
+        <p><h5>จำนวนเงินชำระต่อเดือน : <?php esc_html_e(round($ex_ktc_bay / $MS_INSTALLMENT_MONTHS,2).get_woocommerce_currency()." / เดือน"); ?></h5></p>
 
         <?php }if($MS_INSTALLMENT_BANK == "FCY"){ ?>
 
-        <p><h5>จำนวนเงินชำระต่อเดือน : <?=round($ex_fcy / $MS_INSTALLMENT_MONTHS,2).get_woocommerce_currency()." / เดือน"?></h5></p>
+        <p><h5>จำนวนเงินชำระต่อเดือน : <?php esc_html_e(round($ex_fcy / $MS_INSTALLMENT_MONTHS,2).get_woocommerce_currency()." / เดือน"); ?></h5></p>
 
         <?php } ?>
 
@@ -654,16 +653,16 @@ class MS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
         ?>
         
         <div style="display: none;">
-            <form  id="mainform"  method="post" action="<?php echo $actionUrl; ?>">
+            <form  id="mainform"  method="post" action="<?php esc_html_e($actionUrl); ?>">
                     <div class="row">
                         <div class="col-12 col-sm-12 col-12 mt-3">
-                            <input type="hidden" name="transactionID" value="<?=$MS_transaction?>"/>
+                            <input type="hidden" name="transactionID" value="<?php esc_html_e($MNS_transaction); ?>"/>
                             <input type="hidden" id="pay_type" name="pay_type" value=""/>
                             <input type="hidden" id="locale" name="locale" value=""/>
-                             <input type="hidden" id="term" name="term" value="<?=$MS_INSTALLMENT_MONTHS?>"/>
-                            <input type="hidden" id="payForMonth" name="paymonth" value="<?php echo $paymonth; ?>"/>
+                             <input type="hidden" id="term" name="term" value="<?php esc_html_e($MS_INSTALLMENT_MONTHS); ?>"/>
+                            <input type="hidden" id="payForMonth" name="paymonth" value="<?php esc_html_e($paymonth); ?>"/>
                             <input type="hidden" id="interest" name="interest" value="0.0"/>
-                            <input type="hidden" id="bankType" name="bankType" value="<?=$MS_INSTALLMENT_BANK?>"/>
+                            <input type="hidden" id="bankType" name="bankType" value="<?php esc_html_e($MS_INSTALLMENT_BANK); ?>"/>
                         </div>
                      </div>
                  <button class="button" type="submit">ชำระเงิน</button>

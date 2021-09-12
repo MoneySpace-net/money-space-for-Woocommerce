@@ -190,13 +190,13 @@ class MS_Route extends MS_Router_Utility
         $args = $this->get_query_args($query, 'page');
         ob_start();
         $returned = call_user_func_array($callback, $args);
-        $echoed = ob_get_clean();
+        $ed = ob_get_clean();
 
         if ($returned === FALSE) {
             return FALSE;
         }
 
-        return $echoed . $returned;
+        return $ed . $returned;
     }
 
     protected function get_title(WP $query)

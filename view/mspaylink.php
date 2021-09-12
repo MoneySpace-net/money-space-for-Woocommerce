@@ -12,9 +12,9 @@ $redirect_url = get_site_url() . "/ms/cancel/" . $order->id;
 
 if ($order && $pid) {
 
-    $payment_gateway_id = MS_ID;
-    $payment_gateway_qr_id = MS_ID_QRPROM;
-    $payment_gateway_installment_id = MS_ID_INSTALLMENT;
+    $payment_gateway_id = MNS_ID;
+    $payment_gateway_qr_id = MNS_ID_QRPROM;
+    $payment_gateway_installment_id = MNS_ID_INSTALLMENT;
 
     
     $payment_gateways = WC_Payment_Gateways::instance();
@@ -30,10 +30,10 @@ if ($order && $pid) {
     $ms_template_payment = $gateways['moneyspace']->settings['ms_template_payment'];
 
     $ms_time = date("YmdHis");
-    $MS_transaction_orderid = get_post_meta($order->id, 'MS_transaction_orderid', true);
-    $MS_transaction = get_post_meta($order->id, 'MS_transaction', true);
+    $MNS_transaction_orderid = get_post_meta($order->id, 'MNS_transaction_orderid', true);
+    $MNS_transaction = get_post_meta($order->id, 'MNS_transaction', true);
     $order_amount = $order->get_total();
-    $MS_PAYMENT_TYPE = get_post_meta($order->id, 'MS_PAYMENT_TYPE', true);
+    $MNS_PAYMENT_TYPE = get_post_meta($order->id, 'MNS_PAYMENT_TYPE', true);
     $MS_PAYMENT_KEY = get_post_meta($order->id, 'MS_PAYMENT_KEY', true);
 
     if ((strlen($MS_PAYMENT_KEY) > 9999 && isset($MS_PAYMENT_KEY) && $MS_PAYMENT_KEY != "")
@@ -41,9 +41,9 @@ if ($order && $pid) {
         wp_redirect(wc_get_account_endpoint_url('orders'));
     }
 
-    if ($MS_PAYMENT_TYPE == "Card") {
+    if ($MNS_PAYMENT_TYPE == "Card") {
         $ms_title = $gateways['moneyspace']->settings['title'];
-    } else if ($MS_PAYMENT_TYPE == "Qrnone") {
+    } else if ($MNS_PAYMENT_TYPE == "Qrnone") {
 
         $ms_title = $gateways['moneyspace_qrprom']->settings['title'];
         $MS_MNS_QR_TIME = get_post_meta($order->id, 'MS_MNS_QR_TIME', true);
@@ -61,7 +61,7 @@ if ($order && $pid) {
         }
 
 
-    } else if ($MS_PAYMENT_TYPE == "Installment") {
+    } else if ($MNS_PAYMENT_TYPE == "Installment") {
         $ms_title = $gateways['moneyspace_installment']->settings['title'];
     }
 }
@@ -71,9 +71,9 @@ if ($order && $pid) {
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <title><?= $ms_title ?></title>
+    <title><?php esc_html_e($ms_title); ?></title>
     
-    <script id="moneyspace-util-js" src="<?php echo  MNS_ROOT_URL ."includes/libs/moneyspace/moneyspace_util.js"; ?>"></script>
+    <script id="moneyspace-util-js" src="<?php esc_html_e(MNS_ROOT_URL ."includes/libs/moneyspace/moneyspace_util.js"); ?>"></script>
 
     <style>
         .MuiPaper-root.MuiCard-root {
@@ -97,14 +97,14 @@ if ($order && $pid) {
     
 
         
-        <?php if ($MS_PAYMENT_TYPE == "Qrnone") { 
+        <?php if ($MNS_PAYMENT_TYPE == "Qrnone") { 
             
             ?>
-            <div id="moneyspace-payment" lang="eng" ms-title="<?= $ms_title ?> " ms-key="<?= $MS_PAYMENT_KEY ?>"></div>
+            <div id="moneyspace-payment" lang="eng" ms-title="<?php esc_html_e($ms_title); ?> " ms-key="<?php esc_html_e($MS_PAYMENT_KEY); ?>"></div>
             <br>
 
             <h3>
-                QR Code จะหมดอายุวันที่ : <?=date('d/m/Y H:i', $MS_MNS_QR_TIME + $limit_time);?>
+                QR Code จะหมดอายุวันที่ : <?php esc_html_e(date('d/m/Y H:i', $MS_MNS_QR_TIME + $limit_time)); ?>
             </h3>
             <h3 id="time"></h3>
             <script>
@@ -124,7 +124,7 @@ if ($order && $pid) {
                                             
                                             timer -= 1;
                                             if (timer === 0) {
-                                                window.location="<?=$redirect_url?>";
+                                                window.location="<?php esc_html_e($redirect_url); ?>";
                                             } else if (timer > 0) {
                                                 // Time calculations for days, hours, minutes and seconds
                                                 var days = Math.floor(distance / (1000 * 60 * 60 * 24));
@@ -136,7 +136,7 @@ if ($order && $pid) {
                                         }, 1000);
                                     }
                                     
-                                    var fiveMinutes = <?php echo $limit_time; ?>,
+                                    var fiveMinutes = <?php esc_html_e($limit_time); ?>,
                                         display = document.querySelector("#time");
                                     startTimer(fiveMinutes, display);
             </script>
@@ -158,7 +158,7 @@ if ($order && $pid) {
         delete_post_meta($order->id, 'MS_PAYMENT_PAY', $mspay);
         delete_post_meta($order->id, 'MS_CARD', $mscard);
             
-            echo "<style> input[type=text]{
+        esc_html_e("<style> input[type=text]{
                 box-sizing: content-box !important;
                 background-color: transparent !important;
             }
@@ -187,7 +187,7 @@ if ($order && $pid) {
             .MuiGrid-root.MuiGrid-container.MuiGrid-justify-xs-center {
                 padding-bottom: 10px !important;
             }
-            </style>";
+            </style>");
         
             wc_enqueue_js( "
                 bindMSPay();
@@ -201,8 +201,8 @@ if ($order && $pid) {
                 }
             ");
             ?>
-            <form action="<?php echo MS_API_URL_PAY; ?>" id="pay_form" method="post" target="_top">
-                <input type="hidden" id="mskey" name="mskey" value="<?php echo $mskey; ?>">
+            <form action="<?php esc_html_e(MNS_API_URL_PAY); ?>" id="pay_form" method="post" target="_top">
+                <input type="hidden" id="mskey" name="mskey" value="<?php esc_html_e($mskey); ?>">
                 <input type="hidden" id="mspay" name="mspay" >
                 <div class="btn-submit-payment" style="display: none;">
                     <button type="submit" onclick="submit()" id="submit-form"></button>
@@ -211,7 +211,7 @@ if ($order && $pid) {
 
         <?php } ?>
     </div>
-<?php wp_enqueue_script( 'payment_form_pay', MS_PAYMENT_FORM_JS, array(), false, true ); ?>
+<?php wp_enqueue_script( 'payment_form_pay', MNS_PAYMENT_FORM_JS, array(), false, true ); ?>
 <?php 
 }
 else if ($ms_template_payment == "2"){ 
@@ -222,22 +222,22 @@ else if ($ms_template_payment == "2"){
         <div id="moneyspace-payment"
              template="2"
              lang="eng"
-             ms-title="<?= $ms_title ?>"
-             ms-key="<?= $MS_PAYMENT_KEY ?>"
+             ms-title="<?php esc_html_e($ms_title); ?>"
+             ms-key="<?php esc_html_e($MS_PAYMENT_KEY); ?>"
              description="false">
         </div>
     </div>
-<?php wp_enqueue_script( 'payment_pay', MS_PAYMENT_JS, array(), false, true ); ?>
+<?php wp_enqueue_script( 'payment_pay', MNS_PAYMENT_JS, array(), false, true ); ?>
 <?php 
 } else { ?>
     <div align="left">
-        <div id="moneyspace-payment" lang="eng" ms-title="<?= $ms_title ?>" ms-key="<?= $MS_PAYMENT_KEY ?>"></div>
+        <div id="moneyspace-payment" lang="eng" ms-title="<?php esc_html_e($ms_title); ?>" ms-key="<?php esc_html_e($MS_PAYMENT_KEY); ?>"></div>
         <br>
-        <?php if ($MS_PAYMENT_TYPE == "Qrnone") { ?>
+        <?php if ($MNS_PAYMENT_TYPE == "Qrnone") { ?>
 
 
             <h3>
-                QR Code จะหมดอายุวันที่ : <?=date('d/m/Y H:i', $MS_MNS_QR_TIME + $limit_time);?>
+                QR Code จะหมดอายุวันที่ : <?php esc_html_e(date('d/m/Y H:i', $MS_MNS_QR_TIME + $limit_time)); ?>
             </h3>
 
             <script>
@@ -258,7 +258,7 @@ else if ($ms_template_payment == "2"){
                                             timer -= 1;
                                             if (timer == 0) {
                                                 timer = duration;
-                                                window.location="<?=$redirect_url?>";
+                                                window.location="<?php esc_html_e($redirect_url); ?>";
                                             } else if (timer > 0) { 
                                                 var days = Math.floor(distance / (1000 * 60 * 60 * 24));
                                                 var hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
@@ -270,7 +270,7 @@ else if ($ms_template_payment == "2"){
                                     }
                                     
                                     window.onload = function () {
-                                        var fiveMinutes = <?=$limit_time?>,
+                                        var fiveMinutes = <?php esc_html_e($limit_time); ?>,
                                             display = document.querySelector("#time");
                                         startTimer(fiveMinutes, display);
                                     };
@@ -278,7 +278,7 @@ else if ($ms_template_payment == "2"){
 
         <?php } ?>
     </div>
-<?php wp_enqueue_script( 'payment_form_pay', MS_PAYMENT_FORM_JS, array(), false, true ); ?>
+<?php wp_enqueue_script( 'payment_form_pay', MNS_PAYMENT_FORM_JS, array(), false, true ); ?>
 <?php 
 } ?>
 </body>

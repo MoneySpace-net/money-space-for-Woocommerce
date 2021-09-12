@@ -56,13 +56,14 @@ if (document.getElementById('order_review') !== null) {
     </div>
 </div>
 <?php 
-// wp_enqueue_script( "bootstrap-4", MNS_ROOT_URL ."includes/libs/bootstrap-4.0.0-dist/js/bootstrap.bundle.min.js", array(), "4.0.0", true);
+// wp_enqueue_script( "bootstrap-4", MNS_ROOT_URL ."includes/libs/bootstrap-4.6.0-dist/js/bootstrap.bundle.min.js", array(), "4.0.0", true);
 // wp_enqueue_script( "vue-2", MNS_ROOT_URL ."includes/libs/vue@2/dist/vue.js", array(), "2.0.0", true);
 // wp_enqueue_script( "moneyspace-util", MNS_ROOT_URL ."includes/libs/moneyspace/moneyspace_util.js", array(), "1.0.0", true);
 // wp_enqueue_script( "creditcard", MNS_ROOT_URL ."includes/js/creditcard.js", array(), "1.0.0", true);
+
 ?>
-<script id="bootstrap-4-js" src="<?php echo  MNS_ROOT_URL ."includes/libs/bootstrap-4.0.0-dist/js/bootstrap.bundle.min.js"; ?>"></script>
-<script id="vue-2-js" src="<?php echo  MNS_ROOT_URL ."includes/libs/vue@2/dist/vue.js"; ?>"></script>
-<script id="moneyspace-util-js" src="<?php echo  MNS_ROOT_URL ."includes/libs/moneyspace/moneyspace_util.js"; ?>"></script>
-<script id="creditcard-js" src="<?php echo  MNS_ROOT_URL ."includes/js/creditcard.js"; ?>"></script>
-<link id="mns-01-css" rel="stylesheet" href="<?php echo MNS_ROOT_URL ."includes/themes/mns-01/css/mns-01.css"; ?>">
+<script id="bootstrap-4-js" src="<?php esc_html_e(MNS_ROOT_URL ."includes/libs/bootstrap-4.6.0-dist/js/bootstrap.bundle.min.js"); ?>"></script>
+<script id="vue-2-js" src="<?php esc_html_e(MNS_ROOT_URL ."includes/libs/vue@2/dist/vue.js"); ?>"></script>
+<script id="moneyspace-util-js" src="<?php esc_html_e(MNS_ROOT_URL ."includes/libs/moneyspace/moneyspace_util.js"); ?>"></script>
+<script id="creditcard-js" src="<?php esc_html_e(MNS_ROOT_URL ."includes/js/creditcard.js"); ?>"></script>
+<link id="mns-01-css" rel="stylesheet" href="<?php esc_html_e(MNS_ROOT_URL ."includes/themes/mns-01/css/mns-01.css"); ?>">

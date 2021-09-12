@@ -1,8 +1,8 @@
 <?php
-wp_enqueue_script("bootstrap-4", MNS_ROOT_URL ."/includes/libs/bootstrap-4.0.0-dist/js/bootstrap.bundle.min.js", array(), "4.0.0", true);
+wp_enqueue_script("bootstrap-4", MNS_ROOT_URL ."/includes/libs/bootstrap-4.6.0-dist/js/bootstrap.bundle.min.js", array(), "4.0.0", true);
 wp_enqueue_script("vue-3", MNS_ROOT_URL ."/includes/libs/vue@3.0.11/dist/vue.global.js", array(), "3.0.11", true);
 
-wp_enqueue_style("bootstrap-4", MNS_ROOT_URL ."/includes/libs/bootstrap-4.0.0-dist/css/bootstrap.min.css", array(), "4.0.0", "" );
+wp_enqueue_style("bootstrap-4", MNS_ROOT_URL ."/includes/libs/bootstrap-4.6.0-dist/css/bootstrap.min.css", array(), "4.0.0", "" );
 wp_enqueue_style("mns-01", MNS_ROOT_URL ."/includes/themes/mns-01/css/mns-01.css", array(), "1.0.0", "" );
 
 ?>
@@ -10,9 +10,9 @@ wp_enqueue_style("mns-01", MNS_ROOT_URL ."/includes/themes/mns-01/css/mns-01.css
     <div class="card">
         <div class="card-header">
             <div class="card-group justify-content-between">
-                <h3><?php echo MNS_PAY_QR; ?></h3>
+                <h3><?php esc_html_e(MNS_PAY_QR); ?></h3>
                 <div class="d-flex">
-                    <img class="mns-title-logo" src="<?php echo MNS_ROOT_URL; ?>includes/themes/mns-01/images/logo.png" alt="logo">
+                    <img class="mns-title-logo" src="<?php esc_html_e(MNS_ROOT_URL); ?>includes/themes/mns-01/images/logo.png" alt="logo">
                     <div class="mns-title-data">
                         <div class="mns-title-subtitle">powered by </div>
                         <div class="mns-title-title">money space</div>
