@@ -26,14 +26,14 @@ class MNS_Payment_Gateway_QR extends WC_Payment_Gateway
         
     }
 
-    public function custom_order_pay() {
-        // TODO:
-        $order = new WC_Order($order_id);
-        if (strtolower($order->get_status()) != "cancelled")
-        {
-            require_once MNS_ROOT . '/templates/qr-code/mns-qr-tpl-1.php';
-        }
-    }
+    // public function custom_order_pay() {
+    //     // TODO:
+    //     $order = new WC_Order($order_id);
+    //     if (strtolower($order->get_status()) != "cancelled")
+    //     {
+    //         require_once MNS_ROOT . '/templates/qr-code/mns-qr-tpl-1.php';
+    //     }
+    // }
 
     public function create_payment_transaction($order_id, $ms_body, $ms_template_payment, $gateways, $payment_gateway_qr) {
         $response = wp_remote_post(MNS_API_URL_CREATE, array(
