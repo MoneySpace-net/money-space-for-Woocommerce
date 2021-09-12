@@ -3,7 +3,7 @@
  * WC wcCpg3 Gateway Class.
  * Built the wcCpg3 method.
  */
-class MS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
+class MNS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
     /**
      * Constructor for the gateway.
      *

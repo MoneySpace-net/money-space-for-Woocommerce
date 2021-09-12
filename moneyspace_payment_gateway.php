@@ -49,9 +49,9 @@ if (in_array('woocommerce/woocommerce.php', $active_plugins)) {
 
         function add_MS_Payemnt_Gateway($gateways)
         {
-            $gateways[] = 'MS_Payment_Gateway';
-            $gateways[] = 'MS_Payment_Gateway_QR';
-            $gateways[] = 'MS_Payment_Gateway_INSTALLMENT';
+            $gateways[] = 'MNS_Payment_Gateway';
+            $gateways[] = 'MNS_Payment_Gateway_QR';
+            $gateways[] = 'MNS_Payment_Gateway_INSTALLMENT';
             return $gateways;
         }
 

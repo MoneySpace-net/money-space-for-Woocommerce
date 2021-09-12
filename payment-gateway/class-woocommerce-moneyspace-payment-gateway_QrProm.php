@@ -1,6 +1,6 @@
 <?php
 
-class MS_Payment_Gateway_QR extends WC_Payment_Gateway
+class MNS_Payment_Gateway_QR extends WC_Payment_Gateway
 {
 
     public function __construct()
