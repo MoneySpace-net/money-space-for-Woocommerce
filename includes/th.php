@@ -46,6 +46,9 @@ define('MNS_FORM_FIELD_MS_PHONE', 'เบอร์โทรศัพท์');
 define('MNS_FORM_FIELD_MS_ADDRESS', 'ที่อยู่');
 define('MNS_FORM_FIELD_MS_CUSTOMER', 'ลูกค้า');
 define('MNS_FORM_FIELD_MS_LABEL', 'กรอก');
+define('MNS_FORM_FIELD_KTC_ENABLE', 'KTC เปิดใช้งาน / ปิดการใช้งาน');
+define('MNS_FORM_FIELD_BAY_ENABLE', 'BAY เปิดใช้งาน / ปิดการใช้งาน');
+define('MNS_FORM_FIELD_FCY_ENABLE', 'FCY เปิดใช้งาน / ปิดการใช้งาน');
 
 define('MNS_YOUR_DOMAIN', 'โดเมนของท่าน');
 define('MNS_YOUR_WEBHOOK', 'Webhook ของท่าน');

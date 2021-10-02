@@ -56,13 +56,23 @@ function render_creditcard() {
         </div>
     </div>
 </div>
+<script>
+    if (typeof createCreditCard === 'function') 
+        createCreditCard();
+</script>
 <?php 
 }
 render_creditcard();
-wp_enqueue_script( "bootstrap-4", MNS_ROOT_URL ."includes/libs/bootstrap-4.6.0-dist/js/bootstrap.bundle.min.js", array(), "4.0.0", true);
-wp_enqueue_script( "vue-2", MNS_ROOT_URL ."includes/libs/vue@2/dist/vue.js", array(), "2.0.0", true);
-wp_enqueue_script( "moneyspace-util", MNS_ROOT_URL ."includes/libs/moneyspace/moneyspace_util.js", array(), "1.0.0", true);
-wp_enqueue_script( "creditcard", MNS_ROOT_URL ."includes/js/creditcard.js", array("bootstrap-4", "vue-2", "moneyspace-util"), "1.0.0", true);
-wp_enqueue_style( "mns-01", MNS_ROOT_URL ."includes/themes/mns-01/css/mns-01.css", array(), "1.0.0", "all" );
-wp_dequeue_script( 'wc-checkout' );
+function add_script() {
+    wp_enqueue_script( "bootstrap-4", MNS_ROOT_URL ."includes/libs/bootstrap-4.6.0-dist/js/bootstrap.bundle.min.js", array(), "4.0.0", true);
+    wp_enqueue_script( "vue-2", MNS_ROOT_URL ."includes/libs/vue@2/dist/vue.min.js", array(), "2.0.0", true);
+    wp_enqueue_script( "moneyspace-util", MNS_ROOT_URL ."includes/libs/moneyspace/moneyspace_util.js", array(), "1.0.0", true);
+    wp_enqueue_script( "creditcard", MNS_ROOT_URL ."includes/js/creditcard.min.js", array("bootstrap-4", "vue-2", "moneyspace-util"), "1.0.0", true);
+    wp_enqueue_style( "mns-01", MNS_ROOT_URL ."includes/themes/mns-01/css/mns-01.css", array(), "1.0.0", "all" );
+}
+
+add_action('woocommerce_checkout_update_order_review', 'add_script');
+
+do_action( 'woocommerce_checkout_update_order_review' );
+// wp_dequeue_script( 'wc-checkout' );
 ?>

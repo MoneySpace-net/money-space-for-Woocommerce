@@ -136,6 +136,24 @@ class MNS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
                  "4" => "ข้าพเจ้ายอมรับว่าไม่สามารถขอคืนเงิน และเมื่อหากสินค้า / บริการ มีปัญหาจะรีบติดต่อกลับ ภายใน 30 วัน หรือ ปฏิบัติตามนโยบายการคืนเงินของร้านค้า",
                  "5" => "ข้าพเจ้ายอมรับว่าไม่สามารถขอคืนเงิน และเมื่อหากสินค้า / บริการ มีปัญหาจะรีบติดต่อกลับ ภายใน 60 วัน หรือ ปฏิบัติตามนโยบายการคืนเงินของร้านค้า"]
             ),
+            'ktc_enabled' => array(
+                'title' => __(MNS_FORM_FIELD_KTC_ENABLE, $this->domain),
+                'type' => 'checkbox',
+                'label' => __(MNS_FORM_FIELD_ENABLE_LABEL, $this->domain),
+                'default' => 'yes'
+            ),
+            'bay_enabled' => array(
+                'title' => __(MNS_FORM_FIELD_BAY_ENABLE, $this->domain),
+                'type' => 'checkbox',
+                'label' => __(MNS_FORM_FIELD_ENABLE_LABEL, $this->domain),
+                'default' => 'yes'
+            ),
+            'fcy_enabled' => array(
+                'title' => __(MNS_FORM_FIELD_FCY_ENABLE, $this->domain),
+                'type' => 'checkbox',
+                'label' => __(MNS_FORM_FIELD_ENABLE_LABEL, $this->domain),
+                'default' => 'yes'
+            ),
         );
 
 
@@ -158,6 +176,9 @@ class MNS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
         $ktc_max_months_setting = $gateways['moneyspace_installment']->settings['ktc_max_months_setting']; 
         $bay_max_months_setting = $gateways['moneyspace_installment']->settings['bay_max_months_setting']; 
         $fcy_max_months_setting = $gateways['moneyspace_installment']->settings['fcy_max_months_setting']; 
+        $ktc_enabled = $gateways['moneyspace_installment']->settings['ktc_enabled'] ?? "yes";
+        $bay_enabled = $gateways['moneyspace_installment']->settings['bay_enabled'] ?? "yes";
+        $fcy_enabled = $gateways['moneyspace_installment']->settings['fcy_enabled'] ?? "yes";
 
         
 
@@ -218,7 +239,6 @@ class MNS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
         </style>
         
         <script type="text/javascript">
-
             function KTC(){
                 document.getElementById('KTC').style.display ='block';
 
@@ -256,20 +276,26 @@ class MNS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
 
         <table id="banks" border = "1">
         <tr id="tr_banks">
+            <?php if ($ktc_enabled == "yes") { ?>
             <td id="td_banks">บัตรเคทีซี (KTC)</td>
+            <?php } ?>
+            <?php if ($bay_enabled == "yes") { ?>
             <td id="td_banks">บัตรกรุงศรีฯ วีซ่า , บัตรเซ็นทรัล , บัตรเทสโก้โลตัส</td>
+            <?php } ?>
+            <?php if ($fcy_enabled == "yes") { ?>
             <td id="td_banks">บัตรกรุงศรีเฟิร์สช้อยส์ , บัตรโฮมโปร , บัตรเมกาโฮม</td>
+            <?php } ?>
         </tr>
          
         <tr>
-        <?php if($ms_fee == "include"){ ?>
+        <?php if($ktc_enabled == "yes" && $ms_fee == "include"){ ?>
             <td id="td_banks">
             <label>
                 <input type="radio" name="selectbank" id="selectbank" value="KTC" onclick="KTC();">
                 <img src="<?php esc_html_e(MNS_ROOT_URL . 'includes/images/installment/KTC08.png'); ?>">
             </label>
             </td>
-        <?php } if($ms_fee == "exclude"){ ?>   
+        <?php } if($ktc_enabled == "yes" && $ms_fee == "exclude"){ ?>   
             <td id="td_banks">
             <label>
                 <input type="radio" name="selectbank" id="selectbank" value="KTC" onclick="KTC();">
@@ -277,18 +303,22 @@ class MNS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
             </label>
             </td>
         <?php } ?>
+        <?php if ($bay_enabled == "yes") { ?>
             <td id="td_banks">
             <label>
                 <input type="radio" name="selectbank" id="selectbank" value="BAY" onclick="BAY();">
                 <img src="<?php esc_html_e(MNS_ROOT_URL . 'includes/images/installment/BAY33050.png'); ?>">
             </label>
             </td>
+            <?php } ?>
+            <?php if ($fcy_enabled == "yes") { ?>
             <td id="td_banks">
             <label>
                 <input type="radio" name="selectbank" id="selectbank" value="FCY" onclick="FCY();">
                 <img src="<?php esc_html_e(MNS_ROOT_URL . 'includes/images/installment/FCY.png'); ?>">
             </label>
             </td>
+            <?php } ?>
          </tr>
       </table>
         

@@ -47,6 +47,9 @@ define('MNS_FORM_FIELD_MS_PHONE', 'Phone Number');
 define('MNS_FORM_FIELD_MS_ADDRESS', 'Address');
 define('MNS_FORM_FIELD_MS_CUSTOMER', 'Customer');
 define('MNS_FORM_FIELD_MS_LABEL', 'Select');
+define('MNS_FORM_FIELD_KTC_ENABLE', 'KTC Enable / Disable');
+define('MNS_FORM_FIELD_BAY_ENABLE', 'BAY Enable / Disable');
+define('MNS_FORM_FIELD_FCY_ENABLE', 'FCY Enable / Disable');
 
 define('MNS_YOUR_DOMAIN', 'Domain');
 define('MNS_YOUR_WEBHOOK', 'Webhook');
