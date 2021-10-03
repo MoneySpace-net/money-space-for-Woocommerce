@@ -459,7 +459,7 @@ class MNS_Payment_Gateway extends WC_Payment_Gateway
         $order = new WC_Order($order_id);
         if (strtolower($order->get_status()) != "cancelled")
         {
-            wp_enqueue_style( "bootstrap-style", MNS_ROOT_URL ."includes/libs/bootstrap-4.6.0-dist/css/bootstrap.css", array(), "4.0.0", "");
+            wp_enqueue_style( "bootstrap-style", MNS_ROOT_URL ."includes/libs/bootstrap-4.6.0-dist/css/bootstrap.css", array(), "4.6.0", "all");
             require_once MNS_ROOT . '/templates/credit-cards/mns-cc-tpl-1.php';
             
         }
