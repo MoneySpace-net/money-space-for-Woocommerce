@@ -83,6 +83,7 @@ If you get stuck, you can ask for help in the Plugin Forum.
 == Changelog ==
 = 1.0.0 - 2021-05-12 =
 
+* 2021-10-09 : fix bug installment channel
 * 2021-08-09 : fix bug remove some data on post meta
 * 2021-08-04 : fix bug some Wordpress version can't working
 * 2021-07-02 : fix bug credit card and installment with option buyer pay fees

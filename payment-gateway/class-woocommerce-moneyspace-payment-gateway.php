@@ -389,7 +389,8 @@ class MNS_Payment_Gateway extends WC_Payment_Gateway
                 return;
             }
         } else {
-            wc_add_notice(__("Error : Enter special instructions to merchant again", $this->domain), 'error');
+            wc_add_notice(__("Error : Message to the store (150 characters maximum)", $this->domain), 'error');
+            // wc_add_notice(__("Error : Enter special instructions to merchant again", $this->domain), 'error');
             return;
         }
     } // End Process

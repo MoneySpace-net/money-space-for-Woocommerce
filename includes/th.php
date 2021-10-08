@@ -81,3 +81,5 @@ define('MNS_QR_NEWCREATE', 'สร้าง QR Code ใหม่');
 
 define('MNS_PAY_INS', 'ผ่อนชำระรายเดือน');
 define('MNS_PAY_QR', 'จ่ายบิลด้วยคิวอาร์โค้ด');
+
+define('MNS_INS_MESSAGE_WARNING', 'จำนวนยอดเงินต้อง 3,000.01 บาทขึ้นไปถึงจะทำการผ่อนชำระได้');

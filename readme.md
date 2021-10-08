@@ -127,9 +127,13 @@
 
 - 10 เลือกเงื่อนไขของการยกเลิกสินค้า
 
-- 11 เลือกขนาดของตัวอักษรแจ้ง Error กรณีลูกค้าไม่เลือกประเภทบัตรที่ต้องการทำการผ่อนชำระ
+- 11 เปิดการใช้งานบัตร KTC
 
-- 12 บันทึกการตั้งค่า(Save Changes)
+- 12 เปิดการใช้งานบัตร BAY
+
+- 13 เปิดการใช้งานบัตร FCY
+
+- 14 บันทึกการตั้งค่า(Save Changes)
 
 
 
@@ -370,9 +374,13 @@
 
 - 10. Choose terms of cancellation of the item purchased
 
-- 11. Choose a size of the text to notify an error in case the customer does not select the card for installment
+- 11. Enable KTC Credit Card
 
-- 12. Save changes
+- 12. Enable BAY Credit Card
+
+- 13. Enable FCY Credit Card
+
+- 14. Save changes
 
 
 ****
@@ -424,6 +432,8 @@
 ****
 
 # Changelog
+
+- 2021-10-09 : fix bug installment channel
 
 - 2021-08-09 : fix bug remove some data on post meta
 
