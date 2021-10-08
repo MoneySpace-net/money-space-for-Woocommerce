@@ -4,19 +4,16 @@ global $wpdb;
 
 global $woocommerce;
 
-// echo "Webhook !!!!!!!!!!";
-
-
-if (isset($_POST["transectionID"])) {
+if (sanitize_text_field($_POST["transectionID"]) != "") {
 
     $getorderid = sanitize_text_field($_POST["orderid"]);
     preg_match_all('!\d+!', $getorderid, $arroid);
     $order = wc_get_order($arroid[0][0]);
 
 
-    $payment_gateway_id = MS_ID;
-    $payment_gateway_qr_id = MS_ID_QRPROM;
-    $payment_gateway_installment_id = MS_ID_INSTALLMENT;
+    $payment_gateway_id = MNS_ID;
+    $payment_gateway_qr_id = MNS_ID_QRPROM;
+    $payment_gateway_installment_id = MNS_ID_INSTALLMENT;
 
     $payment_gateways = WC_Payment_Gateways::instance();
     $payment_gateway = $payment_gateways->payment_gateways()[$payment_gateway_id];
@@ -31,8 +28,8 @@ if (isset($_POST["transectionID"])) {
     $ms_stock_setting = $payment_gateway->settings['ms_stock_setting'];
     $ms_time = date("YmdHis");
 
-    $MS_transaction_orderid = get_post_meta($order->id, 'MS_transaction_orderid', true);
-    $MS_PAYMENT_TYPE = get_post_meta($order->id, 'MS_PAYMENT_TYPE', true);
+    $MNS_transaction_orderid = get_post_meta($order->id, 'MNS_transaction_orderid', true);
+    $MNS_PAYMENT_TYPE = get_post_meta($order->id, 'MNS_PAYMENT_TYPE', true);
     $order_amount = $order->get_total();
 
 
@@ -52,7 +49,7 @@ if (isset($_POST["transectionID"])) {
     if ($hash == $process_payment_hash && $status == "paysuccess"){
 
 
-        if($MS_PAYMENT_TYPE == "Card"){
+        if($MNS_PAYMENT_TYPE == "Card"){
 
             if(empty($ms_order_select)){
                 $order->update_status("wc-processing");
@@ -62,7 +59,7 @@ if (isset($_POST["transectionID"])) {
 
 
 
-        }else if($MS_PAYMENT_TYPE == "Qrnone"){
+        }else if($MNS_PAYMENT_TYPE == "Qrnone"){
 
             if(empty($ms_order_select_qr)){
                 $order->update_status("wc-processing");
@@ -71,7 +68,7 @@ if (isset($_POST["transectionID"])) {
             }
 
 
-        }else if($MS_PAYMENT_TYPE == "Installment"){
+        }else if($MNS_PAYMENT_TYPE == "Installment"){
 
             if(empty($ms_order_select_installment)){
                 $order->update_status("wc-processing");

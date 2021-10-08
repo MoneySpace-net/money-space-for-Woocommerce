@@ -46,6 +46,9 @@ define('MNS_FORM_FIELD_MS_PHONE', 'เบอร์โทรศัพท์');
 define('MNS_FORM_FIELD_MS_ADDRESS', 'ที่อยู่');
 define('MNS_FORM_FIELD_MS_CUSTOMER', 'ลูกค้า');
 define('MNS_FORM_FIELD_MS_LABEL', 'กรอก');
+define('MNS_FORM_FIELD_KTC_ENABLE', 'KTC เปิดใช้งาน / ปิดการใช้งาน');
+define('MNS_FORM_FIELD_BAY_ENABLE', 'BAY เปิดใช้งาน / ปิดการใช้งาน');
+define('MNS_FORM_FIELD_FCY_ENABLE', 'FCY เปิดใช้งาน / ปิดการใช้งาน');
 
 define('MNS_YOUR_DOMAIN', 'โดเมนของท่าน');
 define('MNS_YOUR_WEBHOOK', 'Webhook ของท่าน');
@@ -78,3 +81,5 @@ define('MNS_QR_NEWCREATE', 'สร้าง QR Code ใหม่');
 
 define('MNS_PAY_INS', 'ผ่อนชำระรายเดือน');
 define('MNS_PAY_QR', 'จ่ายบิลด้วยคิวอาร์โค้ด');
+
+define('MNS_INS_MESSAGE_WARNING', 'จำนวนยอดเงินต้อง 3,000.01 บาทขึ้นไปถึงจะทำการผ่อนชำระได้');
