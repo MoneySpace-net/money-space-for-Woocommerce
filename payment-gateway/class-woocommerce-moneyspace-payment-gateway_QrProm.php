@@ -86,8 +86,8 @@ class MNS_Payment_Gateway_QR extends WC_Payment_Gateway
                         description="false">
                 </div>
                 <br>
-                <h3> QR Code จะหมดอายุวันที่ : '.date('d/m/Y H:i', $MNS_QR_TIME + $limit_time).'</h3>
-                <h3 id="time"></h3>
+                <h3 style="text-align: center;"> QR Code จะหมดอายุวันที่ : '.date('d/m/Y H:i', $MNS_QR_TIME + $limit_time).'</h3>
+                <h3 id="time" style="text-align: center;"></h3>
             </div>');
             $customStyle = ("
             .MuiContainer-maxWidthXs {
@@ -135,7 +135,7 @@ class MNS_Payment_Gateway_QR extends WC_Payment_Gateway
                         var hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
                         var minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
                         var seconds = Math.floor((distance % (1000 * 60)) / 1000);
-                        display.innerHTML = "QR Code จะหมดอายุในอีก "+minutes + " นาที " + seconds + " วินาที ";
+                        display.innerHTML = ("QR Code จะหมดอายุในอีก "+minutes + " นาที " + seconds + " วินาที ");
                     }
                 }, 1000);
             }
