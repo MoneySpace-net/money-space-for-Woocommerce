@@ -545,13 +545,13 @@ function ms_order_detail_display($order)
     $new_line = "<br>";
     if ($MNS_PAYMENT_STATUS == "Pay Success") {
         if ($MNS_PAYMENT_TYPE == "Qrnone" || $MNS_PAYMENT_TYPE == "Card") {
-            esc_html_e(set_h6_html(MNS_THANK_PAYMENT_ORDER_1));
-            esc_html_e(set_h6_html(MNS_THANK_PAYMENT_ORDER_2).$new_line);
-            esc_html_e(set_p_html(wc_price($MNS_PAYMENT_PAID) . " ( Transaction ID : " . $MNS_transaction . " )"));
+            esc_html(set_h6_html(MNS_THANK_PAYMENT_ORDER_1));
+            esc_html(set_h6_html(MNS_THANK_PAYMENT_ORDER_2).$new_line);
+            esc_html(set_p_html(wc_price($MNS_PAYMENT_PAID) . " ( Transaction ID : " . $MNS_transaction . " )"));
         } else if ($MNS_PAYMENT_TYPE == "Installment") {
-            esc_html_e(set_h6_html(MNS_THANK_PAYMENT_ORDER_1));
-            esc_html_e(set_h6_html(MNS_THANK_PAYMENT_ORDER_2). $new_line);
-            esc_html_e(set_p_html(wc_price($MNS_PAYMENT_PAID) . " ( Transaction ID : " . $MNS_transaction . " [" . $MNS_transaction_orderid . "])" ));
+            esc_html(set_h6_html(MNS_THANK_PAYMENT_ORDER_1));
+            esc_html(set_h6_html(MNS_THANK_PAYMENT_ORDER_2). $new_line);
+            esc_html(set_p_html(wc_price($MNS_PAYMENT_PAID) . " ( Transaction ID : " . $MNS_transaction . " [" . $MNS_transaction_orderid . "])" ));
         }
     }
 }

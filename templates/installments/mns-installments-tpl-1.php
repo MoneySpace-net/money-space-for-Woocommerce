@@ -4,7 +4,7 @@
 // wp_enqueue_style("mns-01", MNS_ROOT_URL ."/includes/themes/mns-01/css/mns-01.css", array(), "1.0.0", "" );
 
 ?>
-<div class="container" id="installment-form">
+<!-- <div class="container" id="installment-form">
     <div class="card">
         <div class="card-body">
             <div>
@@ -32,4 +32,4 @@
 <script id="bootstrap-4-js" src="<?php esc_html_e(MNS_ROOT_URL ."includes/libs/bootstrap-4.6.0-dist/js/bootstrap.bundle.min.js"); ?>"></script>
 <script id="vue-2-js" src="<?php esc_html_e(MNS_ROOT_URL ."includes/libs/vue@2/dist/vue.js"); ?>"></script>
 <script id="moneyspace-util-js" src="<?php esc_html_e(MNS_ROOT_URL ."includes/libs/moneyspace/moneyspace_util.js"); ?>"></script>
-<script id="installment-js" src="<?php esc_html_e(MNS_ROOT_URL ."includes/js/installment.js"); ?>"></script>
+<script id="installment-js" src="<?php esc_html_e(MNS_ROOT_URL ."includes/js/installment.js"); ?>"></script> -->

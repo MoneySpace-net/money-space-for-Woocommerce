@@ -7,6 +7,7 @@ if (document.getElementById('payment_method_moneyspace') !== null) {
 
 var appCreditCard;
 function createCreditCard() {
+
     appCreditCard = new Vue({
         el: '#credit-card-form',
         data: {
@@ -101,19 +102,18 @@ function createCreditCard() {
                 this.cardHolder = value.toUpperCase();
             }
         }
-    })
+    });
+
+    document.getElementsByName('payment_method').forEach(element => { 
+        element.addEventListener('change', function() {
+            if (this.checked && this.value == 'moneyspace') {
+                checkPaymentMethodCC = this.checked;
+            } else {
+                checkPaymentMethodCC = false;
+            }
+            appCreditCard.$forceUpdate();
+        });
+    });
+    
 }
 
-
-
-document.getElementsByName('payment_method').forEach(element => { 
-    element.addEventListener('change', function() {
-        if (this.checked && this.value == 'moneyspace') {
-            checkPaymentMethodCC = this.checked;
-        } else {
-            checkPaymentMethodCC = false;
-        }
-
-        appCreditCard.$forceUpdate();
-    });
-});

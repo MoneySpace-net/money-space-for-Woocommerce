@@ -103,42 +103,42 @@ if ($order && $pid) {
             <div id="moneyspace-payment" lang="eng" ms-title="<?php esc_html_e($ms_title); ?> " ms-key="<?php esc_html_e($MNS_PAYMENT_KEY); ?>"></div>
             <br>
 
-            <h3>
+            <h3 style="text-align: center;">
                 QR Code จะหมดอายุวันที่ : <?php esc_html_e(date('d/m/Y H:i', $MNS_QR_TIME + $limit_time)); ?>
             </h3>
-            <h3 id="time"></h3>
+            <h3 id="time" style="text-align: center;"></h3>
             <script>
-                                    function startTimer(duration, display) {
-                                        var timer = duration, minutes, seconds;
-                                        var countDownDate = new Date();
-                                        countDownDate.setMinutes(countDownDate.getMinutes()+ (duration/60) );
-                                        setInterval(function () {
-                                            var now = new Date().getTime();
-                                            var distance = countDownDate - now;
+                function startTimer(duration, display) {
+                    var timer = duration, minutes, seconds;
+                    var countDownDate = new Date();
+                    countDownDate.setMinutes(countDownDate.getMinutes()+ (duration/60) );
+                    setInterval(function () {
+                        var now = new Date().getTime();
+                        var distance = countDownDate - now;
 
-                                            minutes = parseInt(timer / 60, 10);
-                                            seconds = parseInt(timer % 60, 10);
-                                    
-                                            minutes = minutes < 10 ? "0" + minutes : minutes;
-                                            seconds = seconds < 10 ? "0" + seconds : seconds;
-                                            
-                                            timer -= 1;
-                                            if (timer === 0) {
-                                                window.location="<?php esc_html_e($redirect_url); ?>";
-                                            } else if (timer > 0) {
-                                                // Time calculations for days, hours, minutes and seconds
-                                                var days = Math.floor(distance / (1000 * 60 * 60 * 24));
-                                                var hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-                                                var minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-                                                var seconds = Math.floor((distance % (1000 * 60)) / 1000);
-                                                display.innerHTML = "QR Code จะหมดอายุในอีก "+minutes + " นาที " + seconds + " วินาที ";
-                                            }
-                                        }, 1000);
-                                    }
-                                    
-                                    var fiveMinutes = <?php esc_html_e($limit_time); ?>,
-                                        display = document.querySelector("#time");
-                                    startTimer(fiveMinutes, display);
+                        minutes = parseInt(timer / 60, 10);
+                        seconds = parseInt(timer % 60, 10);
+                
+                        minutes = minutes < 10 ? "0" + minutes : minutes;
+                        seconds = seconds < 10 ? "0" + seconds : seconds;
+                        
+                        timer -= 1;
+                        if (timer === 0) {
+                            window.location="<?php esc_html_e($redirect_url); ?>";
+                        } else if (timer > 0) {
+                            // Time calculations for days, hours, minutes and seconds
+                            var days = Math.floor(distance / (1000 * 60 * 60 * 24));
+                            var hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                            var minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                            var seconds = Math.floor((distance % (1000 * 60)) / 1000);
+                            display.innerHTML = ("QR Code จะหมดอายุในอีก "+minutes + " นาที " + seconds + " วินาที ");
+                        }
+                    }, 1000);
+                }
+                
+                var duration = <?php esc_html_e($limit_time); ?>,
+                    display = document.querySelector("#time");
+                startTimer(duration, display);
             </script>
 
         <?php 
@@ -240,44 +240,43 @@ else if ($ms_template_payment == "2"){
         <?php if ($MNS_PAYMENT_TYPE == "Qrnone") { ?>
 
 
-            <h3>
+            <h3 style="text-align: center;">
                 QR Code จะหมดอายุวันที่ : <?php esc_html_e(date('d/m/Y H:i', $MNS_QR_TIME + $limit_time)); ?>
             </h3>
-
+            <h3 id="time" style="text-align: center;"></h3>
             <script>
-                                    function startTimer(duration, display) {
-                                        var timer = duration, minutes, seconds;
-                                        var countDownDate = new Date();
-                                        countDownDate.setMinutes(countDownDate.getMinutes()+ (duration/60) );
-                                        setInterval(function () {
-                                            var now = new Date().getTime();
-                                            var distance = countDownDate - now;
+                function startTimer(duration, display) {
+                    var timer = duration, minutes, seconds;
+                    var countDownDate = new Date();
+                    countDownDate.setMinutes(countDownDate.getMinutes()+ (duration/60) );
+                    setInterval(function () {
+                        var now = new Date().getTime();
+                        var distance = countDownDate - now;
 
-                                            minutes = parseInt(timer / 60, 10);
-                                            seconds = parseInt(timer % 60, 10);
-                                    
-                                            minutes = minutes < 10 ? "0" + minutes : minutes;
-                                            seconds = seconds < 10 ? "0" + seconds : seconds;
+                        minutes = parseInt(timer / 60, 10);
+                        seconds = parseInt(timer % 60, 10);
+                
+                        minutes = minutes < 10 ? "0" + minutes : minutes;
+                        seconds = seconds < 10 ? "0" + seconds : seconds;
 
-                                            timer -= 1;
-                                            if (timer == 0) {
-                                                timer = duration;
-                                                window.location="<?php esc_html_e($redirect_url); ?>";
-                                            } else if (timer > 0) { 
-                                                var days = Math.floor(distance / (1000 * 60 * 60 * 24));
-                                                var hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-                                                var minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-                                                var seconds = Math.floor((distance % (1000 * 60)) / 1000);
-                                                display.innerHTML = "QR Code จะหมดอายุในอีก "+minutes + " นาที " + seconds + " วินาที ";
-                                            }
-                                        }, 1000);
-                                    }
-                                    
-                                    window.onload = function () {
-                                        var fiveMinutes = <?php esc_html_e($limit_time); ?>,
-                                            display = document.querySelector("#time");
-                                        startTimer(fiveMinutes, display);
-                                    };
+                        timer -= 1;
+                        if (timer == 0) {
+                            window.location="<?php esc_html_e($redirect_url); ?>";
+                        } else if (timer > 0) { 
+                            var days = Math.floor(distance / (1000 * 60 * 60 * 24));
+                            var hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                            var minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                            var seconds = Math.floor((distance % (1000 * 60)) / 1000);
+                            display.innerHTML = ("QR Code จะหมดอายุในอีก "+minutes + " นาที " + seconds + " วินาที ");
+                        }
+                    }, 1000);
+                }
+                
+                window.onload = function () {
+                    var duration = <?php esc_html_e($limit_time); ?>,
+                        display = document.querySelector("#time");
+                    startTimer(duration, display);
+                };
             </script>
 
         <?php } ?>
