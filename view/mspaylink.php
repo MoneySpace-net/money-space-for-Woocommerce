@@ -1,6 +1,6 @@
 <?php
 
-date_default_timezone_set(MNS_TIME_ZONE);
+// date_default_timezone_set(MNS_TIME_ZONE);
 
 
 global $wpdb;

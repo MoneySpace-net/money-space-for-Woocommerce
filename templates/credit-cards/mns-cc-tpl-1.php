@@ -70,9 +70,7 @@ function add_script() {
     wp_enqueue_script( "creditcard", MNS_ROOT_URL ."includes/js/creditcard.min.js", array("bootstrap-4", "vue-2", "moneyspace-util"), "1.0.0", true);
     wp_enqueue_style( "mns-01", MNS_ROOT_URL ."includes/themes/mns-01/css/mns-01.css", array(), "1.0.0", "all" );
 }
-
 add_action('woocommerce_checkout_update_order_review', 'add_script');
-
 do_action( 'woocommerce_checkout_update_order_review' );
-// wp_dequeue_script( 'wc-checkout' );
+
 ?>

@@ -27,7 +27,7 @@ define('MNS_PAYMENT_JS', plugins_url( "includes/moneyspace_payment.js", __FILE__
 define('MNS_PAYMENT_FORM_JS', plugins_url( "includes/moneyspace_payment_form.js", __FILE__ ) );
 define('MNS_PAYMENT_FORM_CSS', plugins_url( "includes/css/moneyspace.css", __FILE__ ) );
 define('MNS_METHOD_TITLE', 'Money Space for WooCommerce');
-define('MNS_TIME_ZONE', "Asia/Bangkok");
+// define('MNS_TIME_ZONE', "Asia/Bangkok");
 define('MNS_CANCEL_TRANSACTION', 'https://a.moneyspace.net/merchantapi/cancelpayment');
 define("MNS_ROOT", __DIR__."/");
 define("MNS_ROOT_URL", plugin_dir_url(__FILE__));
