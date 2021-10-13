@@ -223,6 +223,7 @@ class MNS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
             }
             #selectbank:checked + img {
             outline: 2px solid #f00;
+            outline: 2px solid #96588a;
             }
             .installment {
                  display: none;
@@ -249,6 +250,8 @@ class MNS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
                 if (document.getElementById('FCY'))
                     document.getElementById('FCY').style.display ='none';
                 // document.getElementById('btbpay').disabled = false;
+
+                bindOutline();
             }
 
             function BAY(){
@@ -258,6 +261,8 @@ class MNS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
                 if (document.getElementById('FCY'))
                     document.getElementById('FCY').style.display ='none';
                 // document.getElementById('btbpay').disabled = false;
+
+                bindOutline();
             }
 
             function FCY(){
@@ -267,6 +272,18 @@ class MNS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
                 if (document.getElementById('BAY'))
                     document.getElementById('BAY').style.display ='none';
                 // document.getElementById('btbpay').disabled = false;
+
+                bindOutline();
+            }
+
+            function bindOutline() {
+                document.getElementsByName("selectbank").forEach(ele => { 
+                    if (ele.checked == true) {
+                        ele.style.outline = "2px solid #96588a";
+                    } else {
+                        ele.style.outline = "";
+                    }
+                });
             }
 
         </script>
@@ -280,7 +297,7 @@ class MNS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
             <input class="form-check-input" type="radio" style="width: 0px" name="selectbank" id="selectbank-ktc" value="KTC" onclick="KTC();">
             <label class="form-check-label" for="selectbank-ktc">
             เคทีซี (KTC)
-            <img src="<?php esc_html_e(MNS_ROOT_URL . 'includes/images/installment/KTC08.png'); ?>">
+            <img src="<?php esc_html_e(MNS_ROOT_URL . 'includes/images/installment/ktc-logo.png'); ?>">
             </label>
         </div>
             <?php if ($ms_fee == "include") { ?>
@@ -353,7 +370,7 @@ class MNS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
             <input class="form-check-input" type="radio" style="width: 0px" name="selectbank" id="selectbank-fcy" value="FCY" onclick="FCY();">
             <label class="form-check-label" for="selectbank-fcy">
             กรุงศรีเฟิร์สช้อยส์ , โฮมโปร , เมกาโฮม
-            <img src="<?php esc_html_e(MNS_ROOT_URL . 'includes/images/installment/FCY.png'); ?>">
+            <img src="<?php esc_html_e(MNS_ROOT_URL . 'includes/images/installment/fcy-logo35.png'); ?>">
             </label>
         </div>
             <?php if ($ms_fee == "include") { ?>

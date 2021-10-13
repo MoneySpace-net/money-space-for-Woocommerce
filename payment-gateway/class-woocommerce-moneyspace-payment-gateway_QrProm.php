@@ -26,15 +26,6 @@ class MNS_Payment_Gateway_QR extends WC_Payment_Gateway
         
     }
 
-    // public function custom_order_pay() {
-    //     // TODO:
-    //     $order = new WC_Order($order_id);
-    //     if (strtolower($order->get_status()) != "cancelled")
-    //     {
-    //         require_once MNS_ROOT . '/templates/qr-code/mns-qr-tpl-1.php';
-    //     }
-    // }
-
     public function create_payment_transaction($order_id, $ms_body, $ms_template_payment, $gateways, $payment_gateway_qr) {
         $response = wp_remote_post(MNS_API_URL_CREATE, array(
             'method' => 'POST',
@@ -65,10 +56,9 @@ class MNS_Payment_Gateway_QR extends WC_Payment_Gateway
         update_post_meta($order_id, 'MNS_transaction', $tranId);
         update_post_meta($order_id, 'MNS_PAYMENT_KEY', $mskey);
         update_post_meta($order_id, 'MNS_QR_TIME', time());
-
         if ($ms_template_payment == "2") {
 
-            date_default_timezone_set(MNS_TIME_ZONE);
+            // date_default_timezone_set(MNS_TIME_ZONE);
             $MNS_QR_TIME = get_post_meta($order_id, 'MNS_QR_TIME', true);
             $auto_cancel = $payment_gateway_qr->settings['auto_cancel'];
 
