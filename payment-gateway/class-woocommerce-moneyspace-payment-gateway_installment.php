@@ -334,7 +334,7 @@ class MNS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
             <input class="form-check-input" type="radio" style="width: 0px" name="selectbank" id="selectbank-bay" value="BAY" onclick="BAY();">
             <label class="form-check-label" for="selectbank-bay">
             กรุงศรีฯ วีซ่า , เซ็นทรัล , เทสโก้โลตัส
-            <img src="<?php esc_html_e(MNS_ROOT_URL . 'includes/images/installment/BAY33050.png'); ?>" style="width: 36%;">
+            <img src="<?php esc_html_e(MNS_ROOT_URL . 'includes/images/installment/bay_central_lotus.png'); ?>">
             </label>
         </div>
                 <?php if ($ms_fee == "include") { ?>
@@ -370,7 +370,7 @@ class MNS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
             <input class="form-check-input" type="radio" style="width: 0px" name="selectbank" id="selectbank-fcy" value="FCY" onclick="FCY();">
             <label class="form-check-label" for="selectbank-fcy">
             กรุงศรีเฟิร์สช้อยส์ , โฮมโปร , เมกาโฮม
-            <img src="<?php esc_html_e(MNS_ROOT_URL . 'includes/images/installment/fcy-logo35.png'); ?>">
+            <img src="<?php esc_html_e(MNS_ROOT_URL . 'includes/images/installment/fcy-logo.png'); ?>">
             </label>
         </div>
             <?php if ($ms_fee == "include") { ?>
