@@ -62,7 +62,7 @@ class MNS_Payment_Gateway extends WC_Payment_Gateway
         
         if ($ms_template_payment == "2") {
             
-            esc_html_e('<div align="center">
+            _e('<div align="center">
             <div id="moneyspace-payment" 
                     template="2"
                     lang="eng"
@@ -319,7 +319,7 @@ class MNS_Payment_Gateway extends WC_Payment_Gateway
     public function thankyou_page()
     {
         if ($this->instructions) {
-            esc_html_e(wpautop(wptexturize($this->instructions)));
+            _e(wpautop(wptexturize($this->instructions)));
         }
     }
 
@@ -336,7 +336,7 @@ class MNS_Payment_Gateway extends WC_Payment_Gateway
         $ms_fees = $gateways['moneyspace']->settings['fee_setting'];
 
         if ($description = $this->get_description()) {
-            esc_html_e(wpautop(wptexturize($description)));
+            _e(wpautop(wptexturize($description)));
         }
         if ($ms_template_payment == "1" && $ms_fees == "include") {
             wp_enqueue_style( "moneyspace-style", MNS_PAYMENT_FORM_CSS, array(), "1.0.0", "");
@@ -347,7 +347,7 @@ class MNS_Payment_Gateway extends WC_Payment_Gateway
         <div id="custom_input" class="container">
             <div class="form-group">
                 <label for="message_card"><?php _e(MNS_MESSAGE, $this->domain); ?></label>
-                <input type="text" class="form-control" id="message_card" name="message_card" placeholder="<?php esc_html_e(MNS_MESSAGE2STORE); ?>">
+                <input type="text" class="form-control" id="message_card" name="message_card" placeholder="<?php _e(MNS_MESSAGE2STORE); ?>">
             </div>
         </div>
     <?php } ?>
@@ -421,7 +421,7 @@ class MNS_Payment_Gateway extends WC_Payment_Gateway
         
         $error_list = array("wc-failed", "wc-cancelled", "wc-refunded");
         if (in_array($ms_order_select, $error_list)) {
-            esc_html_e("Error : " . MNS_NOTICE_ERROR_CONTINUE);
+            _e("Error : " . MNS_NOTICE_ERROR_CONTINUE);
         }
 
         // if (!is_user_logged_in()) {
@@ -545,13 +545,13 @@ function ms_order_detail_display($order)
     $new_line = "<br>";
     if ($MNS_PAYMENT_STATUS == "Pay Success") {
         if ($MNS_PAYMENT_TYPE == "Qrnone" || $MNS_PAYMENT_TYPE == "Card") {
-            esc_html(set_h6_html(MNS_THANK_PAYMENT_ORDER_1));
-            esc_html(set_h6_html(MNS_THANK_PAYMENT_ORDER_2).$new_line);
-            esc_html(set_p_html(wc_price($MNS_PAYMENT_PAID) . " ( Transaction ID : " . $MNS_transaction . " )"));
+            _e(set_h6_html(MNS_THANK_PAYMENT_ORDER_1));
+            _e(set_h6_html(MNS_THANK_PAYMENT_ORDER_2).$new_line);
+            _e(set_p_html(wc_price($MNS_PAYMENT_PAID) . " ( Transaction ID : " . $MNS_transaction . " )"));
         } else if ($MNS_PAYMENT_TYPE == "Installment") {
-            esc_html(set_h6_html(MNS_THANK_PAYMENT_ORDER_1));
-            esc_html(set_h6_html(MNS_THANK_PAYMENT_ORDER_2). $new_line);
-            esc_html(set_p_html(wc_price($MNS_PAYMENT_PAID) . " ( Transaction ID : " . $MNS_transaction . " [" . $MNS_transaction_orderid . "])" ));
+            _e(set_h6_html(MNS_THANK_PAYMENT_ORDER_1));
+            _e(set_h6_html(MNS_THANK_PAYMENT_ORDER_2). $new_line);
+            _e(set_p_html(wc_price($MNS_PAYMENT_PAID) . " ( Transaction ID : " . $MNS_transaction . " [" . $MNS_transaction_orderid . "])" ));
         }
     }
 }
