@@ -433,6 +433,8 @@
 
 # Changelog
 
+- 2021-10-17 : fix bug render html text
+
 - 2021-10-09 : fix bug installment channel
 
 - 2021-08-09 : fix bug remove some data on post meta
