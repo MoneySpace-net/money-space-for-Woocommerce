@@ -1,16 +1,16 @@
 <?php
 
-class MS_Payment_Gateway_QR extends WC_Payment_Gateway
+class MNS_Payment_Gateway_QR extends WC_Payment_Gateway
 {
 
     public function __construct()
     {
         $this->domain = 'ms_payment_qrprom';
 
-        $this->id = MS_ID_QRPROM;
+        $this->id = MNS_ID_QRPROM;
         $this->title = __($this->get_option('title'), $this->domain);
-        $this->icon = apply_filters('woocommerce_custom_gateway_icon', MS_LOGO_QR, '');
-        $this->method_title = __(MS_METHOD_TITLE . "( " . MNS_TYPE_PAYMENT_QR . " )", $this->domain);
+        $this->icon = apply_filters('woocommerce_custom_gateway_icon', MNS_LOGO_QR, '');
+        $this->method_title = __(MNS_METHOD_TITLE . "( " . MNS_TYPE_PAYMENT_QR . " )", $this->domain);
         $this->method_description = __(MNS_DESCRIPTION_QR, $this->domain);
         $this->has_fields = true;
 
@@ -26,17 +26,8 @@ class MS_Payment_Gateway_QR extends WC_Payment_Gateway
         
     }
 
-    public function custom_order_pay() {
-        // TODO:
-        $order = new WC_Order($order_id);
-        if (strtolower($order->get_status()) != "cancelled")
-        {
-            require_once MNS_ROOT . '/templates/qr-code/mns-qr-tpl-1.php';
-        }
-    }
-
     public function create_payment_transaction($order_id, $ms_body, $ms_template_payment, $gateways, $payment_gateway_qr) {
-        $response = wp_remote_post(MS_API_URL_CREATE, array(
+        $response = wp_remote_post(MNS_API_URL_CREATE, array(
             'method' => 'POST',
             'timeout' => 120,
             'body' => $ms_body
@@ -61,15 +52,14 @@ class MS_Payment_Gateway_QR extends WC_Payment_Gateway
         $tranId = $data_status[0]->transaction_ID;
         $mskey = $data_status[0]->mskey;
 
-        update_post_meta($order_id, 'MS_transaction_orderid', $ms_body["order_id"]);
-        update_post_meta($order_id, 'MS_transaction', $tranId);
-        update_post_meta($order_id, 'MS_PAYMENT_KEY', $mskey);
-        update_post_meta($order_id, 'MS_MNS_QR_TIME', time());
-
+        update_post_meta($order_id, 'MNS_transaction_orderid', $ms_body["order_id"]);
+        update_post_meta($order_id, 'MNS_transaction', $tranId);
+        update_post_meta($order_id, 'MNS_PAYMENT_KEY', $mskey);
+        update_post_meta($order_id, 'MNS_QR_TIME', time());
         if ($ms_template_payment == "2") {
 
-            date_default_timezone_set(MNS_TIME_ZONE);
-            $MS_MNS_QR_TIME = get_post_meta($order_id, 'MS_MNS_QR_TIME', true);
+            // date_default_timezone_set(MNS_TIME_ZONE);
+            $MNS_QR_TIME = get_post_meta($order_id, 'MNS_QR_TIME', true);
             $auto_cancel = $payment_gateway_qr->settings['auto_cancel'];
 
             if(empty($auto_cancel)){
@@ -77,7 +67,7 @@ class MS_Payment_Gateway_QR extends WC_Payment_Gateway
             }else{
                 $limit_time = $auto_cancel;
             }
-            echo '<div align="center">
+            _e('<div align="center">
                 <div id="moneyspace-payment" 
                         template="2"
                         lang="eng"
@@ -86,10 +76,10 @@ class MS_Payment_Gateway_QR extends WC_Payment_Gateway
                         description="false">
                 </div>
                 <br>
-                <h3> QR Code จะหมดอายุวันที่ : '.date('d/m/Y H:i', $MS_MNS_QR_TIME + $limit_time).'</h3>
-                <h3 id="time"></h3>
-            </div>';
-            echo "<style>
+                <h3 style="text-align: center;"> QR Code จะหมดอายุวันที่ : '.date('d/m/Y H:i', $MNS_QR_TIME + $limit_time).'</h3>
+                <h3 id="time" style="text-align: center;"></h3>
+            </div>');
+            $customStyle = ("
             .MuiContainer-maxWidthXs {
                 max-width: 60%;
             }
@@ -105,9 +95,13 @@ class MS_Payment_Gateway_QR extends WC_Payment_Gateway
             .MuiGrid-root.MuiGrid-item.MuiGrid-grid-xs-12 > div > p {
                 margin-left: 10%;
                 margin-right: 10%;
-            }
-            </style>";
-            wp_enqueue_script('qr_mspayment', MS_PAYMENT_JS, array(), false, true);
+            }");
+
+            wp_register_style( 'custom-css-handle', false );
+            wp_enqueue_style( 'custom-css-handle' );
+            wp_add_inline_style( 'custom-css-handle', $customStyle );
+
+            wp_enqueue_script('qr_mspayment', MNS_PAYMENT_JS, array(), false, true);
             wc_enqueue_js('function startTimer(duration, display) {
                 var timer = duration, minutes, seconds;
                 var countDownDate = new Date();
@@ -131,7 +125,7 @@ class MS_Payment_Gateway_QR extends WC_Payment_Gateway
                         var hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
                         var minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
                         var seconds = Math.floor((distance % (1000 * 60)) / 1000);
-                        display.innerHTML = "QR Code จะหมดอายุในอีก "+minutes + " นาที " + seconds + " วินาที ";
+                        display.innerHTML = ("QR Code จะหมดอายุในอีก "+minutes + " นาที " + seconds + " วินาที ");
                     }
                 }, 1000);
             }
@@ -196,27 +190,27 @@ class MS_Payment_Gateway_QR extends WC_Payment_Gateway
     public function thankyou_page()
     {
         if ($this->instructions) {
-            echo wpautop(wptexturize($this->instructions));
+            _e(wpautop(wptexturize($this->instructions)));
         }
     }
 
     public function payment_fields()
     {
-        $payment_gateway_id = MS_ID;
+        $payment_gateway_id = MNS_ID;
         $payment_gateways = WC_Payment_Gateways::instance();
         $payment_gateway = $payment_gateways->payment_gateways()[$payment_gateway_id];
         $gateways = WC()->payment_gateways->get_available_payment_gateways();
         $ms_message2store = $gateways['moneyspace']->settings['message2store_setting'];
 
         if ($description = $this->get_description()) {
-            echo wpautop(wptexturize($description));
+            _e(wpautop(wptexturize($description)));
         }
         ?>
         <?php if ($ms_message2store != 0) { ?>
         <div id="custom_input">
             <p class="form-row form-row-wide">
                 <label for="message" class=""><?php _e(MNS_MESSAGE, $this->domain); ?></label>
-                <input type="text" class="" name="message_qr" id="message" placeholder="<?php echo MNS_MESSAGE2STORE; ?>">
+                <input type="text" class="" name="message_qr" id="message" placeholder="<?php _e(MNS_MESSAGE2STORE); ?>">
             </p>
         </div>
     <?php } ?>
@@ -231,13 +225,13 @@ class MS_Payment_Gateway_QR extends WC_Payment_Gateway
      */
     public function process_payment($order_id)
     {
-        $MS_special_instructions_to_merchant = get_post_meta($order_id, 'MS_special_instructions_to_merchant', true);
+        $MNS_special_instructions_to_merchant = get_post_meta($order_id, 'MNS_special_instructions_to_merchant', true);
         $message_qr = sanitize_text_field($_POST["message_qr"]);
-        if (strlen($MS_special_instructions_to_merchant) <= 150) {
+        if (strlen($MNS_special_instructions_to_merchant) <= 150) {
             if (get_woocommerce_currency() == "THB") {
-                update_post_meta($order_id, 'MS_special_instructions_to_merchant', $message_qr);
-                update_post_meta($order_id, 'MS_PAYMENT_TYPE', "Qrnone");
-                delete_post_meta($order_id, 'MS_transaction');
+                update_post_meta($order_id, 'MNS_special_instructions_to_merchant', $message_qr);
+                update_post_meta($order_id, 'MNS_PAYMENT_TYPE', "Qrnone");
+                delete_post_meta($order_id, 'MNS_transaction');
                 $order = wc_get_order($order_id);
                 return $this->_process_external_payment($order);
             } else {
@@ -256,8 +250,8 @@ class MS_Payment_Gateway_QR extends WC_Payment_Gateway
         $order = wc_get_order($order_id);
         $order_amount = $order->get_total();
 
-        $payment_gateway_id = MS_ID;
-        $payment_gateway_qr_id = MS_ID_QRPROM;
+        $payment_gateway_id = MNS_ID;
+        $payment_gateway_qr_id = MNS_ID_QRPROM;
 
         $payment_gateways = WC_Payment_Gateways::instance();
 
@@ -269,11 +263,11 @@ class MS_Payment_Gateway_QR extends WC_Payment_Gateway
         $ms_secret_id = $payment_gateway->settings['secret_id'];
         $ms_secret_key = $payment_gateway->settings['secret_key'];
 
-        $MS_PAYMENT_TYPE = get_post_meta($order->id, 'MS_PAYMENT_TYPE', true);
+        $MNS_PAYMENT_TYPE = get_post_meta($order->id, 'MNS_PAYMENT_TYPE', true);
 
         $ms_template_payment = $payment_gateway->settings['ms_template_payment'];
 
-        $MS_special_instructions_to_merchant = get_post_meta($order_id, 'MS_special_instructions_to_merchant', true);
+        $MNS_special_instructions_to_merchant = get_post_meta($order_id, 'MNS_special_instructions_to_merchant', true);
 
         $ms_time = date("YmdHis");
 
@@ -293,7 +287,7 @@ class MS_Payment_Gateway_QR extends WC_Payment_Gateway
             return;
         }
 
-        $body_post = set_body($order_id, $order, $gateways, $order_amount, $items_msg, $MS_special_instructions_to_merchant, $ms_fee, $ms_time);
+        $body_post = set_body($order_id, $order, $gateways, $order_amount, $items_msg, $MNS_special_instructions_to_merchant, $ms_fee, $ms_time);
         $ms_body = set_req_message($ms_secret_id, $ms_secret_key, $body_post, "qrnone", $return_url);
         unset($ms_body["agreement"]);
         return $this->create_payment_transaction($order_id, $ms_body, $ms_template_payment, $gateways, $payment_gateway_qr);
