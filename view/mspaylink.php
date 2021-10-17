@@ -71,9 +71,9 @@ if ($order && $pid) {
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <title><?php esc_html_e($ms_title); ?></title>
+    <title><?php _e($ms_title); ?></title>
     
-    <script id="moneyspace-util-js" src="<?php esc_html_e(MNS_ROOT_URL ."includes/libs/moneyspace/moneyspace_util.js"); ?>"></script>
+    <script id="moneyspace-util-js" src="<?php _e(MNS_ROOT_URL ."includes/libs/moneyspace/moneyspace_util.js"); ?>"></script>
 
     <style>
         .MuiPaper-root.MuiCard-root {
@@ -100,11 +100,11 @@ if ($order && $pid) {
         <?php if ($MNS_PAYMENT_TYPE == "Qrnone") { 
             
             ?>
-            <div id="moneyspace-payment" lang="eng" ms-title="<?php esc_html_e($ms_title); ?> " ms-key="<?php esc_html_e($MNS_PAYMENT_KEY); ?>"></div>
+            <div id="moneyspace-payment" lang="eng" ms-title="<?php _e($ms_title); ?> " ms-key="<?php _e($MNS_PAYMENT_KEY); ?>"></div>
             <br>
 
             <h3 style="text-align: center;">
-                QR Code จะหมดอายุวันที่ : <?php esc_html_e(date('d/m/Y H:i', $MNS_QR_TIME + $limit_time)); ?>
+                QR Code จะหมดอายุวันที่ : <?php _e(date('d/m/Y H:i', $MNS_QR_TIME + $limit_time)); ?>
             </h3>
             <h3 id="time" style="text-align: center;"></h3>
             <script>
@@ -124,7 +124,7 @@ if ($order && $pid) {
                         
                         timer -= 1;
                         if (timer === 0) {
-                            window.location="<?php esc_html_e($redirect_url); ?>";
+                            window.location="<?php _e($redirect_url); ?>";
                         } else if (timer > 0) {
                             // Time calculations for days, hours, minutes and seconds
                             var days = Math.floor(distance / (1000 * 60 * 60 * 24));
@@ -136,7 +136,7 @@ if ($order && $pid) {
                     }, 1000);
                 }
                 
-                var duration = <?php esc_html_e($limit_time); ?>,
+                var duration = <?php _e($limit_time); ?>,
                     display = document.querySelector("#time");
                 startTimer(duration, display);
             </script>
@@ -205,8 +205,8 @@ if ($order && $pid) {
                 }
             ");
             ?>
-            <form action="<?php esc_html_e(MNS_API_URL_PAY); ?>" id="pay_form" method="post" target="_top">
-                <input type="hidden" id="mskey" name="mskey" value="<?php esc_html_e($mskey); ?>">
+            <form action="<?php _e(MNS_API_URL_PAY); ?>" id="pay_form" method="post" target="_top">
+                <input type="hidden" id="mskey" name="mskey" value="<?php _e($mskey); ?>">
                 <input type="hidden" id="mspay" name="mspay" >
                 <div class="btn-submit-payment" style="display: none;">
                     <button type="submit" onclick="submit()" id="submit-form"></button>
@@ -226,8 +226,8 @@ else if ($ms_template_payment == "2"){
         <div id="moneyspace-payment"
              template="2"
              lang="eng"
-             ms-title="<?php esc_html_e($ms_title); ?>"
-             ms-key="<?php esc_html_e($MNS_PAYMENT_KEY); ?>"
+             ms-title="<?php _e($ms_title); ?>"
+             ms-key="<?php _e($MNS_PAYMENT_KEY); ?>"
              description="false">
         </div>
     </div>
@@ -235,13 +235,13 @@ else if ($ms_template_payment == "2"){
 <?php 
 } else { ?>
     <div align="left">
-        <div id="moneyspace-payment" lang="eng" ms-title="<?php esc_html_e($ms_title); ?>" ms-key="<?php esc_html_e($MNS_PAYMENT_KEY); ?>"></div>
+        <div id="moneyspace-payment" lang="eng" ms-title="<?php _e($ms_title); ?>" ms-key="<?php _e($MNS_PAYMENT_KEY); ?>"></div>
         <br>
         <?php if ($MNS_PAYMENT_TYPE == "Qrnone") { ?>
 
 
             <h3 style="text-align: center;">
-                QR Code จะหมดอายุวันที่ : <?php esc_html_e(date('d/m/Y H:i', $MNS_QR_TIME + $limit_time)); ?>
+                QR Code จะหมดอายุวันที่ : <?php _e(date('d/m/Y H:i', $MNS_QR_TIME + $limit_time)); ?>
             </h3>
             <h3 id="time" style="text-align: center;"></h3>
             <script>
@@ -261,7 +261,7 @@ else if ($ms_template_payment == "2"){
 
                         timer -= 1;
                         if (timer == 0) {
-                            window.location="<?php esc_html_e($redirect_url); ?>";
+                            window.location="<?php _e($redirect_url); ?>";
                         } else if (timer > 0) { 
                             var days = Math.floor(distance / (1000 * 60 * 60 * 24));
                             var hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
@@ -273,7 +273,7 @@ else if ($ms_template_payment == "2"){
                 }
                 
                 window.onload = function () {
-                    var duration = <?php esc_html_e($limit_time); ?>,
+                    var duration = <?php _e($limit_time); ?>,
                         display = document.querySelector("#time");
                     startTimer(duration, display);
                 };

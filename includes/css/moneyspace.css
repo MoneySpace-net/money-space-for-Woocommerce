@@ -112,3 +112,7 @@
     border-top-left-radius: 0;
     border-bottom-left-radius: 0;
   }
+
+#payment .payment_methods li p {
+    margin-bottom: 6px !important;
+}

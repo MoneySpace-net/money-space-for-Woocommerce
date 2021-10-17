@@ -67,7 +67,7 @@ class MNS_Payment_Gateway_QR extends WC_Payment_Gateway
             }else{
                 $limit_time = $auto_cancel;
             }
-            esc_html_e('<div align="center">
+            _e('<div align="center">
                 <div id="moneyspace-payment" 
                         template="2"
                         lang="eng"
@@ -190,7 +190,7 @@ class MNS_Payment_Gateway_QR extends WC_Payment_Gateway
     public function thankyou_page()
     {
         if ($this->instructions) {
-            esc_html_e(wpautop(wptexturize($this->instructions)));
+            _e(wpautop(wptexturize($this->instructions)));
         }
     }
 
@@ -203,14 +203,14 @@ class MNS_Payment_Gateway_QR extends WC_Payment_Gateway
         $ms_message2store = $gateways['moneyspace']->settings['message2store_setting'];
 
         if ($description = $this->get_description()) {
-            esc_html_e(wpautop(wptexturize($description)));
+            _e(wpautop(wptexturize($description)));
         }
         ?>
         <?php if ($ms_message2store != 0) { ?>
         <div id="custom_input">
             <p class="form-row form-row-wide">
                 <label for="message" class=""><?php _e(MNS_MESSAGE, $this->domain); ?></label>
-                <input type="text" class="" name="message_qr" id="message" placeholder="<?php esc_html_e(MNS_MESSAGE2STORE); ?>">
+                <input type="text" class="" name="message_qr" id="message" placeholder="<?php _e(MNS_MESSAGE2STORE); ?>">
             </p>
         </div>
     <?php } ?>
