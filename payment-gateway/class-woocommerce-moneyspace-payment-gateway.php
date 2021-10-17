@@ -520,11 +520,11 @@ function custom_order_details_after_order_table($order)
 add_action('woocommerce_order_details_after_order_table', 'ms_order_detail_display', 10, 1);
 
 function set_h6_html($msg) {
-    return '<h6 style="margin:0"><strong>' . $msg . '</strong></h6>';
+    return '<h6 style="margin:0; font-size: 1em;"><strong>' . $msg . '</strong></h6>';
 }
 
 function set_p_html($msg) {
-    return "<p style='color:#a7a6a6;margin:0'>" . $msg . " )</p>";
+    return "<p style='color:#a7a6a6; margin:0; font-size: 1em;'>" . $msg . " )</p>";
 }
 
 function ms_order_detail_display($order)
