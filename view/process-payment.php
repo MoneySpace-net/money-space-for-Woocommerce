@@ -8,9 +8,9 @@ $order = wc_get_order($pid);
 
 if ($order && $pid) {
 
-    $payment_gateway_id = MS_ID;
-    $payment_gateway_qr_id = MS_ID_QRPROM;
-    $payment_gateway_installment_id = MS_ID_INSTALLMENT;
+    $payment_gateway_id = MNS_ID;
+    $payment_gateway_qr_id = MNS_ID_QRPROM;
+    $payment_gateway_installment_id = MNS_ID_INSTALLMENT;
 
 
     $payment_gateways = WC_Payment_Gateways::instance();
@@ -31,16 +31,16 @@ if ($order && $pid) {
 
 
     $ms_time = date("YmdHis");
-    $MS_transaction_orderid = get_post_meta($order->id, 'MS_transaction_orderid', true);
-    $MS_PAYMENT_TYPE = get_post_meta($order->id, 'MS_PAYMENT_TYPE', true);
+    $MNS_transaction_orderid = get_post_meta($order->id, 'MNS_transaction_orderid', true);
+    $MNS_PAYMENT_TYPE = get_post_meta($order->id, 'MNS_PAYMENT_TYPE', true);
     $order_amount = $order->get_total();
-    $check_orderid = wp_remote_post(MS_API_URL_CHECK, array(
+    $check_orderid = wp_remote_post(MNS_API_URL_CHECK, array(
         'method' => 'POST',
         'timeout' => 120,
         'body' => array(
             'secret_id' => $ms_secret_id,
             'secret_key' => $ms_secret_key,
-            'order_id' => $MS_transaction_orderid,
+            'order_id' => $MNS_transaction_orderid,
         )
     ));
 
@@ -53,7 +53,7 @@ if ($order && $pid) {
 
         if ($ms_status->status == "Pay Success") {
 
-            if($MS_PAYMENT_TYPE == "Card"){
+            if($MNS_PAYMENT_TYPE == "Card"){
 
                 if(empty($ms_order_select)){
                     $order->update_status("wc-processing");
@@ -63,7 +63,7 @@ if ($order && $pid) {
 
 
 
-            }else if($MS_PAYMENT_TYPE == "Qrnone"){
+            }else if($MNS_PAYMENT_TYPE == "Qrnone"){
 
                 if(empty($ms_order_select_qr)){
                     $order->update_status("wc-processing");
@@ -72,7 +72,7 @@ if ($order && $pid) {
                 }
 
 
-            } else if($MS_PAYMENT_TYPE == "Installment"){
+            } else if($MNS_PAYMENT_TYPE == "Installment"){
 
                 if(empty($ms_order_select_installment)){
                     $order->update_status("wc-processing");
@@ -85,8 +85,8 @@ if ($order && $pid) {
                 $order->reduce_order_stock();
             }
 
-            update_post_meta($order->id, 'MS_PAYMENT_PAID', $ms_status->amount);
-            update_post_meta($order->id, 'MS_PAYMENT_STATUS', $ms_status->status);
+            update_post_meta($order->id, 'MNS_PAYMENT_PAID', $ms_status->amount);
+            update_post_meta($order->id, 'MNS_PAYMENT_STATUS', $ms_status->status);
             wp_redirect(wc_get_order($order->id)->get_checkout_order_received_url());
         } else if ($ms_status->status == "Cancel") {
             $order->update_status("wc-cancelled");
@@ -107,18 +107,18 @@ if ($order && $pid) {
 
 function cancel_payment($order_id, $payment_gateway)
 {
-    $MS_transaction = get_post_meta($order_id, 'MS_transaction', true);
+    $MNS_transaction = get_post_meta($order_id, 'MNS_transaction', true);
 
     $ms_secret_id = $payment_gateway->settings['secret_id'];
     $ms_secret_key = $payment_gateway->settings['secret_key'];
     // trigger kill transaction id
-    $call_cancel = wp_remote_post(MS_CANCEL_TRANSACTION, array(
+    $call_cancel = wp_remote_post(MNS_CANCEL_TRANSACTION, array(
         'method' => 'POST',
         'timeout' => 120,
         'body' => array(
             'secret_id' => $ms_secret_id,
             'secret_key' => $ms_secret_key,
-            'transaction_ID' => $MS_transaction,
+            'transaction_ID' => $MNS_transaction,
         )
     ));
     $json_status = json_decode($call_cancel["body"]);

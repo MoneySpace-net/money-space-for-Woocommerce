@@ -1,14 +1,14 @@
 <?php
 
-class MS_Cancel
+class MNS_Cancel
 {
 
     public static function init()
     {
-        add_action('ms_router_generate_routes', array(get_class(), 'generate_routes'), 10, 1);
+        add_action('mns_router_generate_routes', array(get_class(), 'generate_routes'), 10, 1);
     }
 
-    public static function generate_routes(MS_Router $router)
+    public static function generate_routes(MNS_Router $router)
     {
         $router->add_route('cancel', array(
             'path' => '^ms/cancel/(.*?)$',
