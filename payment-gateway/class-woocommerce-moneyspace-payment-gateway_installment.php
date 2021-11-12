@@ -178,7 +178,7 @@ class MNS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
         $payment_gateway = $payment_gateways->payment_gateways()[$payment_gateway_id];
         $gateways = WC()->payment_gateways->get_available_payment_gateways();
         $ms_message2store = $gateways['moneyspace_installment']->settings['message2store_setting'];
-        $ms_fee = $gateways['moneyspace_installment']->settings['fee_setting'];
+        $ms_fee = $gateways['moneyspace_installment']->settings['fee_setting'] ?? "include";
         $ktc_max_months_setting = $gateways['moneyspace_installment']->settings['ktc_max_months_setting']; 
         $bay_max_months_setting = $gateways['moneyspace_installment']->settings['bay_max_months_setting']; 
         $fcy_max_months_setting = $gateways['moneyspace_installment']->settings['fcy_max_months_setting']; 
