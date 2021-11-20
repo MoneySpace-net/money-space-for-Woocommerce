@@ -433,6 +433,8 @@
 
 # Changelog
 
+- 2021-11-21 : fix bug payment form not compatible themes
+
 - 2021-10-17 : fix bug render html text
 
 - 2021-10-09 : fix bug installment channel

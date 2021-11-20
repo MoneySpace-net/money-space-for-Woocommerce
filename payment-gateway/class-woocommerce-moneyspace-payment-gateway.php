@@ -344,7 +344,7 @@ class MNS_Payment_Gateway extends WC_Payment_Gateway
         }
         ?>
         <?php if ($ms_message2store != 0) { ?>
-        <div id="custom_input" class="container">
+        <div id="custom_input" class="container ms-box">
             <div class="form-group">
                 <label for="message_card"><?php _e(MNS_MESSAGE, $this->domain); ?></label>
                 <input type="text" class="form-control" id="message_card" name="message_card" placeholder="<?php _e(MNS_MESSAGE2STORE); ?>">

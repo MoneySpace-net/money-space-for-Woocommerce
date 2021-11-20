@@ -404,8 +404,8 @@ class MNS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
 
         <div id="custom_input">
             <p class="form-row form-row-wide">
-                <label for="message_card" class=""><?php _e("", $this->domain); ?></label>
-                <input type="text" class="" name="message_card" id="message_card" placeholder="<?php _e(MESSAGE2STORE); ?>">
+                <label for="message_card" class=""><?php _e(MNS_MESSAGE, $this->domain); ?></label>
+                <input type="text" class="" name="message_card" id="message_card" placeholder="<?php _e(MNS_MESSAGE2STORE); ?>">
             </p>
         </div>
 
@@ -414,7 +414,7 @@ class MNS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
         <?php if ($ms_message2store != "Enable"){ ?>
 
 
-        <input type="text" class="" name="message_card" id="message_card" placeholder="<?php _e(MESSAGE2STORE); ?>" value="" hidden>
+        <input type="text" class="" name="message_card" id="message_card" placeholder="<?php _e(MNS_MESSAGE2STORE); ?>" value="" hidden>
 
 
         <?php } ?>

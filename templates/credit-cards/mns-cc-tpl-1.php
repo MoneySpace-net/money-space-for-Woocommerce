@@ -12,7 +12,7 @@ if (document.getElementById('order_review') !== null) {
 function render_creditcard() {
 ?>
 
-<div class="container" id="credit-card-form">
+<div class="container ms-box" id="credit-card-form">
     <div class="card">
         <div class="card-body">
             <div>

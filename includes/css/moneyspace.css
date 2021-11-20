@@ -2,6 +2,54 @@
     display: flex;
 }
 
+.ms-box {
+  width: 100% !important;
+  height: 100% !important;
+  padding: 0 !important;
+}
+
+.wc_payment_method > label > img {
+  height: 2em !important;
+}
+
+input[type=text] {
+  box-sizing: border-box !important;
+  font-size: inherit !important;
+  width: 100% !important;
+}
+
+select.form-control {
+  font-size: inherit !important;
+}
+
+.woocommerce-checkout #payment ul.payment_methods li img {
+  height: 25px !important;
+}
+
+#order_comments_field label, .shipping_address label, #payment label, .woocommerce-billing-fields label {
+  font-weight: 400 !important;
+  display: inline !important;
+  width: 100% !important;
+}
+
+hr {
+  background-color: #ccc;
+  border: 0;
+  height: 1px !important;
+  margin: 0 0 1.41575em;
+}
+
+.woocommerce-checkout #payment ul.payment_methods li img {
+  vertical-align: middle;
+  margin: 0 0 0 0.5em;
+  padding: 0;
+  position: relative;
+  box-shadow: none;
+  display: block;
+  float: right;
+  padding-top: 2px;
+}
+
 .justify-content-between {
     -ms-flex-pack: justify!important;
     justify-content: space-between!important;

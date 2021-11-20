@@ -42,6 +42,11 @@
 
 input[type=text] {
     box-sizing: border-box !important;
+    font-size: inherit !important;
+}
+
+select.form-control {
+    font-size: inherit !important;
 }
 
 @media (max-width: 767px) {
