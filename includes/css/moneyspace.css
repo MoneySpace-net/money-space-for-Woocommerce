@@ -20,6 +20,11 @@ input[type=text] {
 
 select.form-control {
   font-size: inherit !important;
+  /* border-style: solid; */
+  /* border-color: var(--formFieldBorderColor);
+  border-width: var(--formFieldBorderWidth);
+  padding: var(--formFieldPadding);
+  margin: 8px 0; */
 }
 
 .woocommerce-checkout #payment ul.payment_methods li img {
@@ -164,3 +169,30 @@ hr {
 #payment .payment_methods li p {
     margin-bottom: 6px !important;
 }
+
+.col-md-6 {
+  -ms-flex: 0 0 50%;
+  flex: 0 0 50%;
+  max-width: 50%;
+  padding-right: 15px;
+  padding-left: 15px;
+}
+
+.row {
+  display: -ms-flexbox;
+  display: flex;
+  -ms-flex-wrap: wrap;
+  flex-wrap: wrap;
+  margin-right: -15px;
+  margin-left: -15px;
+}
+
+/* @media (min-width: 768px){
+  .col-md-6 {
+      -ms-flex: 0 0 50%;
+      flex: 0 0 50%;
+      max-width: 50%;
+      padding-right: 15px;
+      padding-left: 15px;
+  }
+} */

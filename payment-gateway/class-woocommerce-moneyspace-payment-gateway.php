@@ -339,7 +339,9 @@ class MNS_Payment_Gateway extends WC_Payment_Gateway
             _e(wpautop(wptexturize($description)));
         }
         if ($ms_template_payment == "1" && $ms_fees == "include") {
-            wp_enqueue_style( "moneyspace-style", MNS_PAYMENT_FORM_CSS, array(), "1.0.0", "");
+            // wp_enqueue_style( "bootstrap-grid-style", MNS_ROOT_URL ."includes/libs/bootstrap-4.6.0-dist/css/bootstrap-grid.css", array(), "4.6.0", "all");
+            wp_enqueue_style( "moneyspace-style", MNS_PAYMENT_FORM_CSS, array(""), "1.0.0", "");
+
             require_once MNS_ROOT . '/templates/credit-cards/mns-cc-tpl-1.php';
         }
         ?>
