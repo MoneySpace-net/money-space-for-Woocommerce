@@ -1,1 +1,4 @@
 /.idea/
+*.bat
+.scannerwork/
+.sonarqube/
