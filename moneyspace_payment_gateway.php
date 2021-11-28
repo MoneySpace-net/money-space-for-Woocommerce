@@ -93,11 +93,13 @@ if (in_array('woocommerce/woocommerce.php', $active_plugins)) {
                 require_once plugin_dir_path(__FILE__) . 'router/mspaylink.php';
                 require_once plugin_dir_path(__FILE__) . 'router/payform.php';
                 require_once plugin_dir_path(__FILE__) . 'router/cancel.php';
+                require_once plugin_dir_path(__FILE__) . 'router/test-connect-gw.php';
                 add_action(MNS_Router_Utility::PLUGIN_INIT_HOOK, array('MNS_Processpayment', 'init'), 1, 0);
                 add_action(MNS_Router_Utility::PLUGIN_INIT_HOOK, array('MNS_Webhook', 'init'), 1, 0);
                 add_action(MNS_Router_Utility::PLUGIN_INIT_HOOK, array('MNS_Paylink', 'init'), 1, 0);
                 add_action(MNS_Router_Utility::PLUGIN_INIT_HOOK, array('MNS_Payform', 'init'), 1, 0);
                 add_action(MNS_Router_Utility::PLUGIN_INIT_HOOK, array('MNS_Cancel', 'init'), 1, 0);
+                add_action(MNS_Router_Utility::PLUGIN_INIT_HOOK, array('MNS_Connect_GW', 'init'), 1, 0);
 
                 require_once plugin_dir_path(__FILE__) . 'includes/helper.php';
             }
