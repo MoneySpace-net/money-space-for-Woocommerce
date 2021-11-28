@@ -50,6 +50,7 @@ define('MNS_FORM_FIELD_MS_LABEL', 'Select');
 define('MNS_FORM_FIELD_KTC_ENABLE', 'KTC Enable / Disable');
 define('MNS_FORM_FIELD_BAY_ENABLE', 'BAY Enable / Disable');
 define('MNS_FORM_FIELD_FCY_ENABLE', 'FCY Enable / Disable');
+define('MNS_FORM_FIELD_HEADER_SETTING_CHECK_CONNECTION', 'Test connect moneyspace gateway');
 
 define('MNS_YOUR_DOMAIN', 'Domain');
 define('MNS_YOUR_WEBHOOK', 'Webhook');

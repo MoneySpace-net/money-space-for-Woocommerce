@@ -312,8 +312,14 @@ class MNS_Payment_Gateway extends WC_Payment_Gateway
                 'type' => 'checkbox',
                 'label' => __(MNS_FORM_FIELD_MS_LABEL, $this->domain),
                 'default' => 'yes'
-            )
+            ),
+            'header_setting_check_connection' => array(
+                'title' => __(set_title_html(MNS_FORM_FIELD_HEADER_SETTING_CHECK_CONNECTION), $this->domain),
+                'type' => 'title'
+            ),
         );
+
+        
     }
 
     public function thankyou_page()
