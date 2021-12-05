@@ -13,6 +13,7 @@ class MNS_Payment_Gateway_QR extends WC_Payment_Gateway
         $this->method_title = __(MNS_METHOD_TITLE . "( " . MNS_TYPE_PAYMENT_QR . " )", $this->domain);
         $this->method_description = __(MNS_DESCRIPTION_QR, $this->domain);
         $this->has_fields = true;
+        $this->logger = wc_get_logger();
 
         $this->init_form_fields();
         $this->init_settings();
@@ -32,6 +33,8 @@ class MNS_Payment_Gateway_QR extends WC_Payment_Gateway
             'timeout' => 120,
             'body' => $ms_body
         ));
+
+        $this->logger->info(json_encode($response));
 
         if (is_wp_error($response)) {
             wc_add_notice(__(MNS_NOTICE_ERROR_SETUP, $this->domain), 'error');

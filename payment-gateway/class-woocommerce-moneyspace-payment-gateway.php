@@ -12,6 +12,7 @@ class MNS_Payment_Gateway extends WC_Payment_Gateway
         $this->method_title = __(MNS_METHOD_TITLE, $this->domain);
         $this->method_description = __(MNS_DESCRIPTION, $this->domain);
         $this->has_fields = true;
+        $this->logger = wc_get_logger();
 
         $this->init_form_fields();
         $this->init_settings();
@@ -32,6 +33,9 @@ class MNS_Payment_Gateway extends WC_Payment_Gateway
             'timeout' => 120,
             'body' => $ms_body
         ));
+
+        $this->logger->info(json_encode($ms_body));
+        $this->logger->info(json_encode($response));
         
         if (is_wp_error($response)) {
             wc_add_notice(__("Error : " . MNS_NOTICE_ERROR_SETUP, $this->domain), 'error');
@@ -123,6 +127,10 @@ class MNS_Payment_Gateway extends WC_Payment_Gateway
             'timeout' => 120,
             'body' => $ms_body
         ));
+
+        $this->logger->info(json_encode($ms_body));
+        $this->logger->info(json_encode($response));
+
         if (is_wp_error($response)) {
             wc_add_notice(__(MNS_NOTICE_ERROR_SETUP, $this->domain), 'error');
             return;
@@ -313,10 +321,10 @@ class MNS_Payment_Gateway extends WC_Payment_Gateway
                 'label' => __(MNS_FORM_FIELD_MS_LABEL, $this->domain),
                 'default' => 'yes'
             ),
-            'header_setting_check_connection' => array(
-                'title' => __(set_title_html(MNS_FORM_FIELD_HEADER_SETTING_CHECK_CONNECTION), $this->domain),
-                'type' => 'title'
-            ),
+            // 'header_setting_check_connection' => array(
+            //     'title' => __(set_title_html(MNS_FORM_FIELD_HEADER_SETTING_CHECK_CONNECTION), $this->domain),
+            //     'type' => 'title'
+            // ),
         );
 
         
