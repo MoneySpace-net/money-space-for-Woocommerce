@@ -44,6 +44,7 @@ class MNS_Payment_Gateway extends WC_Payment_Gateway
 
         $data_status = json_decode($response["body"]);
         if (empty($data_status) || $data_status[0]->status != "success") {
+            $this->logger->error(json_encode($data_status));
             wc_add_notice(__("Error ms102 : " . MNS_NOTICE_CHECK_TRANSACTION, $this->domain), 'error');
             return;
         }

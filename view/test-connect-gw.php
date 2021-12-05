@@ -31,8 +31,8 @@ $response = wp_remote_retrieve_body( $request );
 // $response = curl_exec($curl);
 
 // curl_close($curl);
-
 echo "<pre>";
 echo $response;
 // var_dump($gateways['moneyspace']->settings);
 echo "</pre>";
+echo phpinfo();
