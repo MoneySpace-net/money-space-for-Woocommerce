@@ -3,7 +3,7 @@
  * Plugin Name:       Money Space
  * Plugin URI:        https://github.com/MoneySpace-net/money-space-for-Woocommerce/releases
  * Description:       Would you like to provide a streamlined and secure checkout experience for your customer? Every business does. Payment process is vital to the success eCommerce businesses. While WooCommerce merchants maximize their online products, we can help you take care of  payments and deliver a better overall customer experience for your online customers. By integrating your Magento website to your MoneySpace Payment Gateway account, your customer can pay for their products securely through credit card online. MoneySpace also supports up to 27 foreign currencies and Alipay/ WechatPay payments so you can begin receiving payment and expand your customer base worldwide. MoneySpace is PCI DSS certified and had been approved by Bank of Thailand as a payment method. To get to know more about MoneySpace payment gateway, visit our website at https://www.moneyspace.net
- * Version:           2.6.13
+ * Version:           2.6.14
  * Author:            Money Space
  * Author URI:        https://moneyspace.net
  */
@@ -100,12 +100,17 @@ if (in_array('woocommerce/woocommerce.php', $active_plugins)) {
                 add_action(MNS_Router_Utility::PLUGIN_INIT_HOOK, array('MNS_Payform', 'init'), 1, 0);
                 add_action(MNS_Router_Utility::PLUGIN_INIT_HOOK, array('MNS_Cancel', 'init'), 1, 0);
                 add_action(MNS_Router_Utility::PLUGIN_INIT_HOOK, array('MNS_Connect_GW', 'init'), 1, 0);
-
+                add_action('admin_enqueue_scripts', 'load_custom_wp_admin_style');
                 require_once plugin_dir_path(__FILE__) . 'includes/helper.php';
             }
         }
         // Fire it up!
         MNS_Router_load();
+    }
+
+    function load_custom_wp_admin_style(){
+        wp_register_style( 'custom_wp_admin_css', plugin_dir_url( __FILE__ )."includes/css/admin-style.css", false, '1.0.0' );
+        wp_enqueue_style( 'custom_wp_admin_css' );
     }
 
     if( ! class_exists( 'Moneyspace_Updater' ) ){

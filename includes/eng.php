@@ -84,3 +84,6 @@ define('MNS_PAY_INS', 'Monthly installments');
 define('MNS_PAY_QR', 'Pay bills with QR Code');
 
 define('MNS_INS_MESSAGE_WARNING', 'The amount of balance must be 3,000.01 baht or more in order to make the installment payment.');
+
+define('MNS_ADMIN_SETTING_CC_DESC', 'Description Credit Card Pay');
+define('MNS_ADMIN_SETTING_STATUS_AFTER_PAY', "Status After Pay <br> 'Pending payment', <br>'Processing', <br>'On hold', <br>'Completed', <br>'Cancelled', <br>'Refunded', <br>'Failed'");

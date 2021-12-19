@@ -3,7 +3,7 @@ Contributors: moneyspace
 Tags: credit card, moneyspace, payment request, thaibank, woocommerce, automattic, bay, ktc, fcy, installment
 Requires at least: 4.9
 Tested up to: 5.8.2
-Stable tag: 2.6.13
+Stable tag: 2.6.14
 Requires PHP: 5.6
 Requires WordPress: 4.9
 License: GPLv3
@@ -23,15 +23,11 @@ MoneySpace is available for Store Owners and Merchants in:
 
 * Thailand
 
-MoneySpace is a simple way to accept payments online. With MoneySpace you can accept Visa, MasterCard, American Express, Discover, JCB, and Diners Club cards, even Bitcoin, directly on your store.
+MoneySpace is a simple way to accept payments online. With MoneySpace you can accept Visa, MasterCard, JCB, Union Pay, Promtpay and Instalment payment plans, directly on your store.
 
 = Why choose MoneySpace? =
 
-MoneySpace has no setup fees, no monthly fees, no hidden costs: you only get charged when you earn money! Earnings are transferred to your bank account on a 7-day rolling basis.
-
-= Web Payments API Support =
-
-MoneySpace includes [Web Payments API](https://www.w3.org/TR/payment-request/) support, which means customers can pay using payment details associated to their mobile devices, in browsers supporting the Web Payments API (Chrome for Android, amongst others). Checkout is now just a few taps away on mobile. Only supports simple, variable, and Subscription products for now. More support to come.
+MoneySpace has no setup fees, no monthly fees, no hidden costs: you only get charged when you earn money.
 
 == Installation ==
 You can download an [older version of this gateway for older versions of MoneySpace from here](https://bitbucket.org/MoneySpace/money-space-for-woocommerce/downloads/).
@@ -54,25 +50,9 @@ Automatic updates should work like a charm; as always though, ensure you backup 
 
 == Frequently Asked Questions ==
 
-= Does this support recurring payments, like for subscriptions? =
-
-Yes!
-
 = Does this require an SSL certificate? =
 
 Yes! In Live Mode, an SSL certificate must be installed on your site to use MoneySpace. In addition to SSL encryption.
-
-= Does this support both production mode and sandbox mode for testing? =
-
-Yes, it does - production and Test (sandbox) mode is driven by the API keys you use with a checkbox in the admin settings to toggle between both.
-
-= Where can I find documentation? =
-
-For help setting up and configuring, please refer to our [documentation](https://moneyspace.net/integrations.html).
-
-= Where can I get support or talk to other users? =
-
-If you get stuck, you can ask for help in the Plugin Forum.
 
 == Screenshots ==
 
@@ -83,6 +63,7 @@ If you get stuck, you can ask for help in the Plugin Forum.
 == Changelog ==
 = 1.0.0 - 2021-05-12 =
 
+* 2021-12-19 : fix bug create card payment with buyer pay fee and add description of status after pay 
 * 2021-11-21 : fix bug payment form not compatible themes
 * 2021-10-17 : fix bug render html text
 * 2021-10-09 : fix bug installment channel

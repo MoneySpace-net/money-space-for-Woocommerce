@@ -84,3 +84,6 @@ define('MNS_PAY_INS', 'ผ่อนชำระรายเดือน');
 define('MNS_PAY_QR', 'จ่ายบิลด้วยคิวอาร์โค้ด');
 
 define('MNS_INS_MESSAGE_WARNING', 'จำนวนยอดเงินต้อง 3,000.01 บาทขึ้นไปถึงจะทำการผ่อนชำระได้');
+
+define('MNS_ADMIN_SETTING_CC_DESC', 'รายละเอียดการจ่ายเครดิตการ์ด');
+define('MNS_ADMIN_SETTING_STATUS_AFTER_PAY', "สถานะหลังชำระเงิน <br>'Pending payment', <br>'Processing', <br>'On hold', <br>'Completed', <br>'Cancelled', <br>'Refunded', <br>'Failed'");

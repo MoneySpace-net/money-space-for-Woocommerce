@@ -12,7 +12,6 @@ class MNS_Payment_Gateway extends WC_Payment_Gateway
         $this->method_title = __(MNS_METHOD_TITLE, $this->domain);
         $this->method_description = __(MNS_DESCRIPTION, $this->domain);
         $this->has_fields = true;
-        $this->logger = wc_get_logger();
 
         $this->init_form_fields();
         $this->init_settings();
@@ -23,19 +22,14 @@ class MNS_Payment_Gateway extends WC_Payment_Gateway
         add_action('woocommerce_receipt_' . $this->id, array($this, 'paymentgateway_form'), 10, 1);
         add_action('woocommerce_update_options_payment_gateways_' . $this->id, array($this, 'process_admin_options'));
         add_action('woocommerce_thankyou_custom', array($this, 'thankyou_page'));
-       
     }
 
     public function create_payment_transaction($order_id, $ms_body, $ms_template_payment, $gateways) {
-
         $response = wp_remote_post(MNS_API_URL_CREATE, array(
             'method' => 'POST',
             'timeout' => 120,
             'body' => $ms_body
         ));
-
-        $this->logger->info(json_encode($ms_body));
-        $this->logger->info(json_encode($response));
         
         if (is_wp_error($response)) {
             wc_add_notice(__("Error : " . MNS_NOTICE_ERROR_SETUP, $this->domain), 'error');
@@ -44,7 +38,6 @@ class MNS_Payment_Gateway extends WC_Payment_Gateway
 
         $data_status = json_decode($response["body"]);
         if (empty($data_status) || $data_status[0]->status != "success") {
-            $this->logger->error(json_encode($data_status));
             wc_add_notice(__("Error ms102 : " . MNS_NOTICE_CHECK_TRANSACTION, $this->domain), 'error');
             return;
         }
@@ -60,7 +53,6 @@ class MNS_Payment_Gateway extends WC_Payment_Gateway
         update_post_meta($order_id, 'MNS_transaction_orderid', $ms_body['order_id']);
         update_post_meta($order_id, 'MNS_transaction', $tranId);
         update_post_meta($order_id, 'MNS_PAYMENT_KEY', $mskey);
-
         if ($ms_template_payment == "1") {
             wp_redirect(get_site_url() . "/mspaylink/" . $order_id);
         }
@@ -122,15 +114,11 @@ class MNS_Payment_Gateway extends WC_Payment_Gateway
     }
 
     public function create_payment_transaction_v2($order_id, $ms_secret_key, $ms_body, $ms_template_payment, $gateways) {
-        
         $response = wp_remote_post(MNS_API_URL_V2_CREATE_PAYMENT, array(
             'method' => 'POST',
             'timeout' => 120,
             'body' => $ms_body
         ));
-
-        $this->logger->info(json_encode($ms_body));
-        $this->logger->info(json_encode($response));
 
         if (is_wp_error($response)) {
             wc_add_notice(__(MNS_NOTICE_ERROR_SETUP, $this->domain), 'error');
@@ -142,15 +130,15 @@ class MNS_Payment_Gateway extends WC_Payment_Gateway
             wc_add_notice(__(MNS_NOTICE_ERROR_SETUP, $this->domain), 'error');
             return;
         } 
-        $urlpayment = "Transaction ID";
+        $trans_ID = "Transaction ID";
         $json_tranId = json_decode($response["body"]);
-        $tranId = $json_tranId[0]->$urlpayment;
+        $tranId = $json_tranId[0]->$trans_ID;
         $ms_time = $ms_body['timeHash'];
         $ms_secret_id = $ms_body['secreteID'];
         $hash_link = hash_hmac('sha256', $tranId . $ms_time, $ms_secret_key);
         $link = "https://www.moneyspace.net/merchantapi/makepayment/linkpaymentcard?transactionID=" . $tranId . "&timehash=" . $ms_time . "&secreteID=" . $ms_secret_id . "&hash=" . $hash_link;
         update_post_meta($order_id, 'MNS_transaction', $tranId);
-        update_post_meta($order_id, 'MNS_transaction_orderid', $ms_body["order_id"]);
+        update_post_meta($order_id, 'MNS_transaction_orderid', $ms_body["customer_order_id"]);
         update_post_meta($order_id, 'MNS_LINK', $link);
         WC()->cart->empty_cart();
         wp_redirect($link);
@@ -201,10 +189,12 @@ class MNS_Payment_Gateway extends WC_Payment_Gateway
                 'type' => 'textarea',
                 'default' => __("", $this->domain),
                 'desc_tip' => true,
+                'description' => __(MNS_ADMIN_SETTING_CC_DESC, $this->domain)
             ),
             'desc_domain_webhook1' => array(
                 'title' => __(set_title_html(MNS_HEAD_DOMAIN_WEBHOOK), $this->domain),
                 'type' => 'title',
+                'desc_tip' => true,
                 'description' => MNS_DOMAIN_WEBHOOK
             ),
             'ms_domain' => array(
@@ -237,7 +227,8 @@ class MNS_Payment_Gateway extends WC_Payment_Gateway
                 'class' => 'wc-enhanced-select',
                 'default' => 'include',
                 'desc_tip' => true,
-                'options' => ["include" => MNS_FEE_INCLUDE,"exclude" => MNS_FEE_EXCLUDE]
+                'options' => ["include" => MNS_FEE_INCLUDE,"exclude" => MNS_FEE_EXCLUDE],
+                'description' => __(MNS_FEE_HEADER, $this->domain)
             ),
             'message2store_setting' => array(
                 'title' => __(MNS_MESSAGE2STORE_HEADER, $this->domain),
@@ -253,7 +244,8 @@ class MNS_Payment_Gateway extends WC_Payment_Gateway
                 'class' => 'wc-enhanced-select',
                 'default' => 'wc-processing',
                 'desc_tip' => true,
-                'options' => wc_get_order_statuses()
+                'options' => wc_get_order_statuses(),
+                'description' => __(MNS_ADMIN_SETTING_STATUS_AFTER_PAY, $this->domain)
             ),
             'ms_stock_setting' => array(
                 'title' => __(MNS_STOCKSETTING_HEAD, $this->domain),
@@ -328,6 +320,7 @@ class MNS_Payment_Gateway extends WC_Payment_Gateway
             // ),
         );
 
+        
         
     }
 

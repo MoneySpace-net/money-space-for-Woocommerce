@@ -13,7 +13,6 @@ class MNS_Payment_Gateway_QR extends WC_Payment_Gateway
         $this->method_title = __(MNS_METHOD_TITLE . "( " . MNS_TYPE_PAYMENT_QR . " )", $this->domain);
         $this->method_description = __(MNS_DESCRIPTION_QR, $this->domain);
         $this->has_fields = true;
-        $this->logger = wc_get_logger();
 
         $this->init_form_fields();
         $this->init_settings();
@@ -34,8 +33,6 @@ class MNS_Payment_Gateway_QR extends WC_Payment_Gateway
             'body' => $ms_body
         ));
 
-        $this->logger->info(json_encode($response));
-
         if (is_wp_error($response)) {
             wc_add_notice(__(MNS_NOTICE_ERROR_SETUP, $this->domain), 'error');
             return;
@@ -43,7 +40,6 @@ class MNS_Payment_Gateway_QR extends WC_Payment_Gateway
 
         $data_status = json_decode($response["body"]);
         if (empty($data_status) || $data_status[0]->status != "success") {
-            $this->logger->error(json_encode($data_status));
             wc_add_notice(__("Error ms102 : " . MNS_NOTICE_CHECK_TRANSACTION, $this->domain), 'error');
             return;
         }

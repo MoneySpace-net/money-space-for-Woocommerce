@@ -87,7 +87,7 @@ class MNS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
                 'title' => __(MNS_FORM_FIELD_DESCRIPTION, $this->domain),
                 'type' => 'textarea',
                 'default' => __("", $this->domain),
-                'desc_tip' => true,
+                'desc_tip' => true
             ),
             'fee_setting' => array(
                 'title' => __("เลือกผู้รับผิดชอบดอกเบี้ยรายเดือน", $this->domain),
