@@ -3,7 +3,6 @@
 global $wpdb;
 
 global $woocommerce;
-
 $order = wc_get_order($pid);
 
 if ($order && $pid) {

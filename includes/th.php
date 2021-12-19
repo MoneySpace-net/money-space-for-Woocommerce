@@ -49,6 +49,7 @@ define('MNS_FORM_FIELD_MS_LABEL', 'กรอก');
 define('MNS_FORM_FIELD_KTC_ENABLE', 'KTC เปิดใช้งาน / ปิดการใช้งาน');
 define('MNS_FORM_FIELD_BAY_ENABLE', 'BAY เปิดใช้งาน / ปิดการใช้งาน');
 define('MNS_FORM_FIELD_FCY_ENABLE', 'FCY เปิดใช้งาน / ปิดการใช้งาน');
+define('MNS_FORM_FIELD_HEADER_SETTING_CHECK_CONNECTION', 'ทดสอบเชื่อมต่อ moneyspace gateway');
 
 define('MNS_YOUR_DOMAIN', 'โดเมนของท่าน');
 define('MNS_YOUR_WEBHOOK', 'Webhook ของท่าน');
@@ -83,3 +84,6 @@ define('MNS_PAY_INS', 'ผ่อนชำระรายเดือน');
 define('MNS_PAY_QR', 'จ่ายบิลด้วยคิวอาร์โค้ด');
 
 define('MNS_INS_MESSAGE_WARNING', 'จำนวนยอดเงินต้อง 3,000.01 บาทขึ้นไปถึงจะทำการผ่อนชำระได้');
+
+define('MNS_ADMIN_SETTING_CC_DESC', 'รายละเอียดการจ่ายเครดิตการ์ด');
+define('MNS_ADMIN_SETTING_STATUS_AFTER_PAY', "สถานะหลังชำระเงิน <br>'Pending payment', <br>'Processing', <br>'On hold', <br>'Completed', <br>'Cancelled', <br>'Refunded', <br>'Failed'");

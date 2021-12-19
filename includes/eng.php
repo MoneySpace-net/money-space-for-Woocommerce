@@ -50,6 +50,7 @@ define('MNS_FORM_FIELD_MS_LABEL', 'Select');
 define('MNS_FORM_FIELD_KTC_ENABLE', 'KTC Enable / Disable');
 define('MNS_FORM_FIELD_BAY_ENABLE', 'BAY Enable / Disable');
 define('MNS_FORM_FIELD_FCY_ENABLE', 'FCY Enable / Disable');
+define('MNS_FORM_FIELD_HEADER_SETTING_CHECK_CONNECTION', 'Test connect moneyspace gateway');
 
 define('MNS_YOUR_DOMAIN', 'Domain');
 define('MNS_YOUR_WEBHOOK', 'Webhook');
@@ -83,3 +84,6 @@ define('MNS_PAY_INS', 'Monthly installments');
 define('MNS_PAY_QR', 'Pay bills with QR Code');
 
 define('MNS_INS_MESSAGE_WARNING', 'The amount of balance must be 3,000.01 baht or more in order to make the installment payment.');
+
+define('MNS_ADMIN_SETTING_CC_DESC', 'Description Credit Card Pay');
+define('MNS_ADMIN_SETTING_STATUS_AFTER_PAY', "Status After Pay <br> 'Pending payment', <br>'Processing', <br>'On hold', <br>'Completed', <br>'Cancelled', <br>'Refunded', <br>'Failed'");
