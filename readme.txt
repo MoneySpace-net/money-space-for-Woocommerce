@@ -3,7 +3,7 @@ Contributors: moneyspace
 Tags: credit card, moneyspace, payment request, thaibank, woocommerce, automattic, bay, ktc, fcy, installment
 Requires at least: 4.9
 Tested up to: 5.8.2
-Stable tag: 2.6.14
+Stable tag: 2.6.15
 Requires PHP: 5.6
 Requires WordPress: 4.9
 License: GPLv3
@@ -63,6 +63,7 @@ Yes! In Live Mode, an SSL certificate must be installed on your site to use Mone
 == Changelog ==
 = 1.0.0 - 2021-05-12 =
 
+* 2022-01-13 : fix bug action hook not triggered
 * 2021-12-19 : fix bug create card payment with buyer pay fee and add description of status after pay 
 * 2021-11-21 : fix bug payment form not compatible themes
 * 2021-10-17 : fix bug render html text

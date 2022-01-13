@@ -433,6 +433,8 @@
 
 # Changelog
 
+- 2022-01-13 : fix bug action hook not triggered
+
 - 2021-12-19 : fix bug create card payment with buyer pay fee and add description of status after pay 
 
 - 2021-11-21 : fix bug payment form not compatible themes
