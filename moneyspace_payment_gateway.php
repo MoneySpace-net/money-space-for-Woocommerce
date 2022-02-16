@@ -58,7 +58,7 @@ if (in_array('woocommerce/woocommerce.php', $active_plugins)) {
             return $gateways;
         }
         wp_register_style( "moneyspace-style", MNS_PAYMENT_FORM_CSS, array(), "1.0.0", "");
-        wp_enqueue_style( "moneyspace-style");
+        wp_enqueue_style( "moneyspace-style", MNS_PAYMENT_FORM_CSS, array(), "1.0.0", "");
         require_once plugin_dir_path(__FILE__) . 'payment-gateway/class-woocommerce-moneyspace-payment-gateway.php';
         require_once plugin_dir_path(__FILE__) . 'payment-gateway/class-woocommerce-moneyspace-payment-gateway_QrProm.php';
         require_once plugin_dir_path(__FILE__) . 'payment-gateway/class-woocommerce-moneyspace-payment-gateway_installment.php';
