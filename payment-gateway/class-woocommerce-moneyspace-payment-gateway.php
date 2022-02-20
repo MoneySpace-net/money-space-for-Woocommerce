@@ -68,7 +68,8 @@ class MNS_Payment_Gateway extends WC_Payment_Gateway
                     description="false">
             </div>
             </div>');
-            wp_enqueue_script( 'cc_mspayment', MNS_PAYMENT_FORM_JS, array(), false, true);
+            wp_register_script('cc_mspayment', MNS_PAYMENT_FORM_JS, array(), false, true);
+            wp_enqueue_script('cc_mspayment', MNS_PAYMENT_FORM_JS, array(), false, true);
             $customStyle = ("
             input[type=text]{
                 box-sizing: content-box !important;
@@ -348,7 +349,8 @@ class MNS_Payment_Gateway extends WC_Payment_Gateway
         }
         if ($ms_template_payment == "1" && $ms_fees == "include") {
             // wp_enqueue_style( "bootstrap-grid-style", MNS_ROOT_URL ."includes/libs/bootstrap-4.6.0-dist/css/bootstrap-grid.css", array(), "4.6.0", "all");
-            wp_enqueue_style( "moneyspace-style", MNS_PAYMENT_FORM_CSS, array(""), "1.0.0", "");
+            wp_register_style( "moneyspace-style", MNS_PAYMENT_FORM_CSS, array(), "1.0.0", "");
+            wp_enqueue_style( "moneyspace-style", MNS_PAYMENT_FORM_CSS, array(), "1.0.0", "");
 
             require_once MNS_ROOT . '/templates/credit-cards/mns-cc-tpl-1.php';
         }
@@ -473,6 +475,7 @@ class MNS_Payment_Gateway extends WC_Payment_Gateway
         $order = new WC_Order($order_id);
         if (strtolower($order->get_status()) != "cancelled")
         {
+            wp_register_style( "bootstrap-style", MNS_ROOT_URL ."includes/libs/bootstrap-4.6.0-dist/css/bootstrap.css", array(), "4.6.0", "all" );
             wp_enqueue_style( "bootstrap-style", MNS_ROOT_URL ."includes/libs/bootstrap-4.6.0-dist/css/bootstrap.css", array(), "4.6.0", "all");
             require_once MNS_ROOT . '/templates/credit-cards/mns-cc-tpl-1.php';
             
