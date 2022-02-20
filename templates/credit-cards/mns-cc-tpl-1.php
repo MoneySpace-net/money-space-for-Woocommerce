@@ -52,10 +52,10 @@ function render_creditcard() {
                         </div>
                     </div>
                 </div>
-                <div class="form-check">
+                <!-- <div class="form-check">
                     <input type="checkbox" class="form-check-input" id="exampleCheck1">
                     <label class="form-check-label" for="exampleCheck1"><?php _e(MNS_CC_REMEMBER); ?></label>
-                </div>
+                </div> -->
             </div>
         </div>
     </div>
