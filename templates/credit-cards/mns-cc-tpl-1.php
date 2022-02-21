@@ -18,17 +18,17 @@ function render_creditcard() {
             <div>
                 <input type="hidden" id="mspay" name="mspay" :value="mspay_message">
                 <div class="form-group">
-                    <label for="txtCardNumber">Card Number <abbr class="required" title="required">*</abbr></label>
+                    <label for="txtCardNumber"><?php _e(MNS_CC_NO); ?> <abbr class="required" title="required">*</abbr></label>
                     <input type="text" class="form-control" v-model="cardNumber" id="txtCardNumber" name="cardNumber" :required="validateCardNumber()"  v-on:keypress="checkCardNumber" placeholder="0000 0000 0000 0000">
                 </div>
                 <div class="form-group">
-                    <label for="txtHolder">Card Holder <abbr class="required" title="required">*</abbr></label>
+                    <label for="txtHolder"><?php _e(MNS_CC_NAME); ?> <abbr class="required" title="required">*</abbr></label>
                     <input type="text" class="form-control" v-model="cardHolder" id="txtHolder" name="cardHolder" :required="validateCardHolder()" @keypress="checkCardName" placeholder="TONY ELSDEN">
                 </div>
                 <div class="row">
                     <div class="col-md-6">
                         <div class="form-group">
-                            <label for="txtExpDate">Exp Date <abbr class="required" title="required">*</abbr></label>
+                            <label for="txtExpDate"><?php _e(MNS_CC_EXP); ?> <abbr class="required" title="required">*</abbr></label>
                             <div class="input-group">
                                 <select v-model="expDate" id="txtExpDate" name="cardExpDate" class="form-control" :required="validateCardExpDate()">
                                     <option value="" disabled selected>Month</option>
@@ -47,15 +47,20 @@ function render_creditcard() {
                     </div>
                     <div class="col-md-6">
                         <div class="form-group">
-                            <label for="txtCVV">CVV <abbr class="required" title="required">*</abbr></label>
+                            <label for="txtCVV"><?php _e(MNS_CC_CVV); ?> <abbr class="required" title="required">*</abbr></label>
                             <input type="text" class="form-control" v-model="cardCVV" id="txtCVV" name="cardCVV" @keypress="checkCVV" placeholder="000" :required="validateCardCVV()">
                         </div>
                     </div>
                 </div>
+                <!-- <div class="form-check">
+                    <input type="checkbox" class="form-check-input" id="exampleCheck1">
+                    <label class="form-check-label" for="exampleCheck1"><?php _e(MNS_CC_REMEMBER); ?></label>
+                </div> -->
             </div>
         </div>
     </div>
 </div>
+<br>
 <script>
     if (typeof createCreditCard === 'function') 
         createCreditCard();

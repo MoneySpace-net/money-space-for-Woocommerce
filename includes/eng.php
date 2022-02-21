@@ -87,3 +87,9 @@ define('MNS_INS_MESSAGE_WARNING', 'The amount of balance must be 3,000.01 baht o
 
 define('MNS_ADMIN_SETTING_CC_DESC', 'Description Credit Card Pay');
 define('MNS_ADMIN_SETTING_STATUS_AFTER_PAY', "Status After Pay <br> 'Pending payment', <br>'Processing', <br>'On hold', <br>'Completed', <br>'Cancelled', <br>'Refunded', <br>'Failed'");
+
+define('MNS_CC_NAME', 'Card Holder');
+define('MNS_CC_NO', 'Card Number');
+define('MNS_CC_EXP', 'Exp Date');
+define('MNS_CC_CVV', 'CVV');
+define('MNS_CC_REMEMBER', 'Save my card details securely for future payment');

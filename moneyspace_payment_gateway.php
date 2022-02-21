@@ -3,7 +3,7 @@
  * Plugin Name:       Money Space
  * Plugin URI:        https://github.com/MoneySpace-net/money-space-for-Woocommerce/releases
  * Description:       Would you like to provide a streamlined and secure checkout experience for your customer? Every business does. Payment process is vital to the success eCommerce businesses. While WooCommerce merchants maximize their online products, we can help you take care of  payments and deliver a better overall customer experience for your online customers. By integrating your Magento website to your MoneySpace Payment Gateway account, your customer can pay for their products securely through credit card online. MoneySpace also supports up to 27 foreign currencies and Alipay/ WechatPay payments so you can begin receiving payment and expand your customer base worldwide. MoneySpace is PCI DSS certified and had been approved by Bank of Thailand as a payment method. To get to know more about MoneySpace payment gateway, visit our website at https://www.moneyspace.net
- * Version:           2.6.15
+ * Version:           2.6.16
  * Author:            Money Space
  * Author URI:        https://moneyspace.net
  */
@@ -57,6 +57,7 @@ if (in_array('woocommerce/woocommerce.php', $active_plugins)) {
             $gateways[] = 'MNS_Payment_Gateway_INSTALLMENT';
             return $gateways;
         }
+        wp_register_style( "moneyspace-style", MNS_PAYMENT_FORM_CSS, array(), "1.0.0", "");
         wp_enqueue_style( "moneyspace-style", MNS_PAYMENT_FORM_CSS, array(), "1.0.0", "");
         require_once plugin_dir_path(__FILE__) . 'payment-gateway/class-woocommerce-moneyspace-payment-gateway.php';
         require_once plugin_dir_path(__FILE__) . 'payment-gateway/class-woocommerce-moneyspace-payment-gateway_QrProm.php';

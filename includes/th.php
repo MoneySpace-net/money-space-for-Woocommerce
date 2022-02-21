@@ -87,3 +87,9 @@ define('MNS_INS_MESSAGE_WARNING', 'จำนวนยอดเงินต้อ
 
 define('MNS_ADMIN_SETTING_CC_DESC', 'รายละเอียดการจ่ายเครดิตการ์ด');
 define('MNS_ADMIN_SETTING_STATUS_AFTER_PAY', "สถานะหลังชำระเงิน <br>'Pending payment', <br>'Processing', <br>'On hold', <br>'Completed', <br>'Cancelled', <br>'Refunded', <br>'Failed'");
+
+define('MNS_CC_NAME', 'ชื่อผู้ถือบัตร');
+define('MNS_CC_NO', 'หมายเลขบัตรเครดิต');
+define('MNS_CC_EXP', 'วันหมดอายุ');
+define('MNS_CC_CVV', 'รหัสป้องกัน');
+define('MNS_CC_REMEMBER', 'บันทึกข้อมูลบัตรสำหรับการสั่งซื้อรอบถัดไป');
