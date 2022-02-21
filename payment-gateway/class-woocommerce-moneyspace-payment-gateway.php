@@ -68,7 +68,8 @@ class MNS_Payment_Gateway extends WC_Payment_Gateway
                     description="false">
             </div>
             </div>');
-            wp_enqueue_script( 'cc_mspayment', MNS_PAYMENT_FORM_JS, array(), false, true);
+            wp_register_script('cc_mspayment', MNS_PAYMENT_FORM_JS, array(), false, true);
+            wp_enqueue_script('cc_mspayment', MNS_PAYMENT_FORM_JS, array(), false, true);
             $customStyle = ("
             input[type=text]{
                 box-sizing: content-box !important;
@@ -348,7 +349,8 @@ class MNS_Payment_Gateway extends WC_Payment_Gateway
         }
         if ($ms_template_payment == "1" && $ms_fees == "include") {
             // wp_enqueue_style( "bootstrap-grid-style", MNS_ROOT_URL ."includes/libs/bootstrap-4.6.0-dist/css/bootstrap-grid.css", array(), "4.6.0", "all");
-            wp_enqueue_style( "moneyspace-style", MNS_PAYMENT_FORM_CSS, array(""), "1.0.0", "");
+            wp_register_style( "moneyspace-style", MNS_PAYMENT_FORM_CSS, array(), "1.0.0", "");
+            wp_enqueue_style( "moneyspace-style", MNS_PAYMENT_FORM_CSS, array(), "1.0.0", "");
 
             require_once MNS_ROOT . '/templates/credit-cards/mns-cc-tpl-1.php';
         }
@@ -456,7 +458,10 @@ class MNS_Payment_Gateway extends WC_Payment_Gateway
             $body_post["successUrl"] = $return_url;
             $body_post["failUrl"] = $return_url;
             $body_post["cancelUrl"] = $return_url;
-            $hash_data = $body_post["firstname"] . $body_post["lastname"] . $body_post["email"] . $body_post["phone"] . $body_post["amount"] . $body_post["currency"] . preg_replace( "/<br>|\n/", "", $body_post["description"] ) . $body_post["address"] . $body_post["message"] . $body_post["feeType"] . $body_post["timeHash"] . $body_post["customer_order_id"] . $body_post["gatewayType"] . $body_post["successUrl"] . $body_post["failUrl"] . $body_post["cancelUrl"];
+            $hash_data = $body_post["firstname"] . $body_post["lastname"] . $body_post["email"] . $body_post["phone"] 
+            . $body_post["amount"] . $body_post["currency"] . preg_replace( "/<br>|\n/", "", $body_post["description"] ) 
+            . $body_post["address"] . $body_post["message"] . $body_post["feeType"] . $body_post["timeHash"] . $body_post["customer_order_id"] 
+            . $body_post["gatewayType"] . $body_post["successUrl"] . $body_post["failUrl"] . $body_post["cancelUrl"];
             $hash_body = hash_hmac('sha256', $hash_data, $ms_secret_key);
             $ms_body = array('secreteID' => $ms_secret_id, 'firstname' => $body_post["firstname"], 'lastname' => $body_post["lastname"], 'email' => $body_post["email"], 'phone' => $body_post["phone"], 'amount' => $body_post["amount"], 'currency' => $body_post["currency"], 'description' => preg_replace( "/<br>|\n/", "", $body_post["description"] ), 'address' => $body_post["address"], 'message' => $body_post["message"], 'feeType' => $body_post["feeType"], 'customer_order_id' => $body_post["customer_order_id"], 'gatewayType' => $body_post["gatewayType"], 'timeHash' => $body_post["timeHash"], 'hash' => $hash_body, 'successUrl' => $body_post["successUrl"], 'failUrl' => $body_post["failUrl"], 'cancelUrl' => $body_post["cancelUrl"]);
             // $ms_body = set_req_message($ms_secret_id, $ms_secret_key, $body_post, "", $return_url, $hash_body);
@@ -470,6 +475,7 @@ class MNS_Payment_Gateway extends WC_Payment_Gateway
         $order = new WC_Order($order_id);
         if (strtolower($order->get_status()) != "cancelled")
         {
+            wp_register_style( "bootstrap-style", MNS_ROOT_URL ."includes/libs/bootstrap-4.6.0-dist/css/bootstrap.css", array(), "4.6.0", "all" );
             wp_enqueue_style( "bootstrap-style", MNS_ROOT_URL ."includes/libs/bootstrap-4.6.0-dist/css/bootstrap.css", array(), "4.6.0", "all");
             require_once MNS_ROOT . '/templates/credit-cards/mns-cc-tpl-1.php';
             
