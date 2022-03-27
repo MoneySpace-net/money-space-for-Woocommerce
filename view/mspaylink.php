@@ -1,7 +1,6 @@
 <?php
 
-// date_default_timezone_set(MNS_TIME_ZONE);
-
+date_default_timezone_set("Asia/Bangkok");
 
 global $wpdb;
 
@@ -104,14 +103,14 @@ if ($order && $pid) {
             <br>
 
             <h3 style="text-align: center;">
-                QR Code จะหมดอายุวันที่ : <?php _e(date('d/m/Y H:i', $MNS_QR_TIME + $limit_time)); ?>
+                QR Code จะหมดอายุวันที่ : <?php _e(date('Y/m/d H:i', $MNS_QR_TIME + $limit_time)); ?>
             </h3>
             <h3 id="time" style="text-align: center;"></h3>
             <script>
                 function startTimer(duration, display) {
                     var timer = duration, minutes, seconds;
                     var countDownDate = new Date();
-                    countDownDate.setMinutes(countDownDate.getMinutes()+ (duration/60) );
+                    countDownDate.setMinutes(countDownDate.getMinutes()+ (duration/60));
                     setInterval(function () {
                         var now = new Date().getTime();
                         var distance = countDownDate - now;
@@ -123,22 +122,26 @@ if ($order && $pid) {
                         seconds = seconds < 10 ? "0" + seconds : seconds;
                         
                         timer -= 1;
-                        if (timer === 0) {
-                            window.location="<?php _e($redirect_url); ?>";
+                        console.log('timer <= 0', timer <= 0, timer);
+                        if (timer <= 0) {
+                            console.log('force redirect', "<?php _e($redirect_url); ?>");
+                            window.location="<?php _e($redirect_url); ?>", true;
                         } else if (timer > 0) {
+                            console.log('show html text');
                             // Time calculations for days, hours, minutes and seconds
                             var days = Math.floor(distance / (1000 * 60 * 60 * 24));
                             var hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
                             var minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
                             var seconds = Math.floor((distance % (1000 * 60)) / 1000);
-                            display.innerHTML = ("QR Code จะหมดอายุในอีก "+minutes + " นาที " + seconds + " วินาที ");
+                            display.innerHTML = ("QR Code จะหมดอายุในอีก " + minutes + " นาที " + seconds + " วินาที ");
                         }
                     }, 1000);
                 }
                 
                 var duration = <?php _e($limit_time); ?>,
-                    display = document.querySelector("#time");
-                startTimer(duration, display);
+                display = document.querySelector("#time");
+                var timeDiff = (Date.parse("<?php _e(date('Y/m/d H:i', $MNS_QR_TIME + $limit_time)); ?>") - (new Date()))/1000;
+                startTimer(parseInt(timeDiff), display);
             </script>
 
         <?php 
@@ -241,10 +244,11 @@ else if ($ms_template_payment == "2"){
 
 
             <h3 style="text-align: center;">
-                QR Code จะหมดอายุวันที่ : <?php _e(date('d/m/Y H:i', $MNS_QR_TIME + $limit_time)); ?>
+                QR Code จะหมดอายุวันที่ : <?php _e(date('Y/m/d H:i', $MNS_QR_TIME + $limit_time)); ?>
             </h3>
             <h3 id="time" style="text-align: center;"></h3>
             <script>
+                
                 function startTimer(duration, display) {
                     var timer = duration, minutes, seconds;
                     var countDownDate = new Date();
@@ -261,7 +265,7 @@ else if ($ms_template_payment == "2"){
 
                         timer -= 1;
                         if (timer == 0) {
-                            window.location="<?php _e($redirect_url); ?>";
+                            window.location="<?php _e($redirect_url); ?>", true;
                         } else if (timer > 0) { 
                             var days = Math.floor(distance / (1000 * 60 * 60 * 24));
                             var hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
@@ -275,7 +279,8 @@ else if ($ms_template_payment == "2"){
                 window.onload = function () {
                     var duration = <?php _e($limit_time); ?>,
                         display = document.querySelector("#time");
-                    startTimer(duration, display);
+                    var timeDiff = (Date.parse("<?php _e(date('Y/m/d H:i', $MNS_QR_TIME + $limit_time)); ?>") - (new Date()))/1000;
+                    startTimer(timeDiff, display);
                 };
             </script>
 
