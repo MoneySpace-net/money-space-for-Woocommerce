@@ -539,7 +539,7 @@ class MNS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
         , "success_Url" => $return_url
         , "fail_Url" => $return_url
         , "cancel_Url" => $return_url
-        , "agreement" => $agreement_setting
+        , "agreement" => $agreement_setting 
         , "bankType" => $bankType
         , "startTerm" => $endTerm
         , "endTerm" => $endTerm);
