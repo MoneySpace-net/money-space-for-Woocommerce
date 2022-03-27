@@ -111,7 +111,7 @@ if ($order && $pid) {
                     var timer = duration, minutes, seconds;
                     var countDownDate = new Date();
                     countDownDate.setMinutes(countDownDate.getMinutes()+ (duration/60));
-                    setInterval(function () {
+                    var refreshId = setInterval(function () {
                         var now = new Date().getTime();
                         var distance = countDownDate - now;
 
@@ -126,6 +126,7 @@ if ($order && $pid) {
                         if (timer <= 0) {
                             console.log('force redirect', "<?php _e($redirect_url); ?>");
                             window.location="<?php _e($redirect_url); ?>", true;
+                            clearInterval(refreshId);
                         } else if (timer > 0) {
                             console.log('show html text');
                             // Time calculations for days, hours, minutes and seconds
