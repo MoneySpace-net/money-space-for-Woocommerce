@@ -108,27 +108,17 @@ if ($order && $pid) {
             <h3 id="time" style="text-align: center;"></h3>
             <script>
                 function startTimer(duration, display) {
-                    var timer = duration, minutes, seconds;
                     var countDownDate = new Date();
-                    countDownDate.setMinutes(countDownDate.getMinutes()+ (duration/60));
+                    countDownDate.setMinutes(countDownDate.getMinutes()+ Math.round(duration/60000));
                     var refreshId = setInterval(function () {
                         var now = new Date().getTime();
                         var distance = countDownDate - now;
 
-                        minutes = parseInt(timer / 60, 10);
-                        seconds = parseInt(timer % 60, 10);
-                
-                        minutes = minutes < 10 ? "0" + minutes : minutes;
-                        seconds = seconds < 10 ? "0" + seconds : seconds;
-                        
-                        timer -= 1;
-                        console.log('timer <= 0', timer <= 0, timer);
-                        if (timer <= 0) {
-                            console.log('force redirect', "<?php _e($redirect_url); ?>");
+                        if (countDownDate.getTime() <=  now) {
                             window.location="<?php _e($redirect_url); ?>", true;
                             clearInterval(refreshId);
-                        } else if (timer > 0) {
-                            console.log('show html text');
+                        } else {
+                            // console.log('show html text');
                             // Time calculations for days, hours, minutes and seconds
                             var days = Math.floor(distance / (1000 * 60 * 60 * 24));
                             var hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
@@ -141,8 +131,10 @@ if ($order && $pid) {
                 
                 var duration = <?php _e($limit_time); ?>,
                 display = document.querySelector("#time");
-                var timeDiff = (Date.parse("<?php _e(date('Y/m/d H:i', $MNS_QR_TIME + $limit_time)); ?>") - (new Date()))/1000;
-                startTimer(parseInt(timeDiff), display);
+                var endDate = new Date(Date.parse("<?php _e(date('Y/m/d H:i', $MNS_QR_TIME + $limit_time)); ?>")).getTime();
+                var startDate = new Date().getTime();
+                var resultDiffInMinutes = Math.round(endDate - startDate);
+                startTimer(resultDiffInMinutes, display);
             </script>
 
         <?php 
@@ -254,7 +246,7 @@ else if ($ms_template_payment == "2"){
                     var timer = duration, minutes, seconds;
                     var countDownDate = new Date();
                     countDownDate.setMinutes(countDownDate.getMinutes()+ (duration/60) );
-                    setInterval(function () {
+                    var refreshId = setInterval(function () {
                         var now = new Date().getTime();
                         var distance = countDownDate - now;
 
@@ -267,6 +259,7 @@ else if ($ms_template_payment == "2"){
                         timer -= 1;
                         if (timer == 0) {
                             window.location="<?php _e($redirect_url); ?>", true;
+                            clearInterval(refreshId);
                         } else if (timer > 0) { 
                             var days = Math.floor(distance / (1000 * 60 * 60 * 24));
                             var hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
