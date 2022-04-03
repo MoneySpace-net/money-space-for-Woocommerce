@@ -1,5 +1,7 @@
 <?php
 
+date_default_timezone_set("Asia/Bangkok");
+
 class MNS_Payment_Gateway_QR extends WC_Payment_Gateway
 {
 
@@ -76,7 +78,7 @@ class MNS_Payment_Gateway_QR extends WC_Payment_Gateway
                         description="false">
                 </div>
                 <br>
-                <h3 style="text-align: center;"> QR Code จะหมดอายุวันที่ : '.date('d/m/Y H:i', $MNS_QR_TIME + $limit_time).'</h3>
+                <h3 style="text-align: center;"> QR Code จะหมดอายุวันที่ : '.date('Y/m/d H:i', $MNS_QR_TIME + $limit_time).'</h3>
                 <h3 id="time" style="text-align: center;"></h3>
             </div>');
             $customStyle = ("
@@ -103,23 +105,16 @@ class MNS_Payment_Gateway_QR extends WC_Payment_Gateway
 
             wp_enqueue_script('qr_mspayment', MNS_PAYMENT_JS, array(), false, true);
             wc_enqueue_js('function startTimer(duration, display) {
-                var timer = duration, minutes, seconds;
                 var countDownDate = new Date();
-                countDownDate.setMinutes(countDownDate.getMinutes()+ (duration/60) );
-                setInterval(function () {
-                    
+                countDownDate.setMinutes(countDownDate.getMinutes() + Math.round(duration/60000));
+                var refreshId = setInterval(function () {
                     var now = new Date().getTime();
                     var distance = countDownDate - now;
 
-                    minutes = parseInt(timer / 60, 10);
-                    seconds = parseInt(timer % 60, 10);
-            
-                    minutes = minutes < 10 ? "0" + minutes : minutes;
-                    seconds = seconds < 10 ? "0" + seconds : seconds;
-                    timer -= 1;
-                    if (timer == 0) {
-                        window.location="'.get_site_url() . "/ms/cancel/" . $order_id.'";
-                    } else if (timer > 0) {
+                    if (countDownDate.getTime() <=  now) {
+                        window.location="'.get_site_url() . "/ms/cancel/" . $order_id.'", true;
+                        clearInterval(refreshId);
+                    } else {
                         // Time calculations for days, hours, minutes and seconds
                         var days = Math.floor(distance / (1000 * 60 * 60 * 24));
                         var hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
@@ -129,13 +124,14 @@ class MNS_Payment_Gateway_QR extends WC_Payment_Gateway
                     }
                 }, 1000);
             }
+
+            var display = document.querySelector("#time");
+            var endDate = new Date(Date.parse("'.date('Y/m/d H:i', $MNS_QR_TIME + $limit_time).'")).getTime();
+            var startDate = new Date().getTime();
+            var resultDiffInMinutes = Math.round(endDate - startDate);
+            startTimer(resultDiffInMinutes, display);
             
-            window.onload = function () {
-                var fiveMinutes = '.$limit_time.',
-                    display = document.querySelector("#time");
-                startTimer(fiveMinutes, display);
-            };');
-            // add_action('after_woocommerce_pay', array($this, 'custom_order_pay'), 10, 1);
+            ');
         } else {
             wp_redirect(get_site_url() . "/mspaylink/" . $order_id);
             exit;

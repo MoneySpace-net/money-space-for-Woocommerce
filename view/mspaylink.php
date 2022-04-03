@@ -129,7 +129,6 @@ if ($order && $pid) {
                     }, 1000);
                 }
                 
-                var duration = <?php _e($limit_time); ?>,
                 display = document.querySelector("#time");
                 var endDate = new Date(Date.parse("<?php _e(date('Y/m/d H:i', $MNS_QR_TIME + $limit_time)); ?>")).getTime();
                 var startDate = new Date().getTime();
@@ -243,24 +242,16 @@ else if ($ms_template_payment == "2"){
             <script>
                 
                 function startTimer(duration, display) {
-                    var timer = duration, minutes, seconds;
                     var countDownDate = new Date();
-                    countDownDate.setMinutes(countDownDate.getMinutes()+ (duration/60) );
+                    countDownDate.setMinutes(countDownDate.getMinutes() + Math.round(duration/60000));
                     var refreshId = setInterval(function () {
                         var now = new Date().getTime();
                         var distance = countDownDate - now;
 
-                        minutes = parseInt(timer / 60, 10);
-                        seconds = parseInt(timer % 60, 10);
-                
-                        minutes = minutes < 10 ? "0" + minutes : minutes;
-                        seconds = seconds < 10 ? "0" + seconds : seconds;
-
-                        timer -= 1;
-                        if (timer == 0) {
+                        if (countDownDate.getTime() <=  now) {
                             window.location="<?php _e($redirect_url); ?>", true;
                             clearInterval(refreshId);
-                        } else if (timer > 0) { 
+                        } else { 
                             var days = Math.floor(distance / (1000 * 60 * 60 * 24));
                             var hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
                             var minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
@@ -270,12 +261,11 @@ else if ($ms_template_payment == "2"){
                     }, 1000);
                 }
                 
-                window.onload = function () {
-                    var duration = <?php _e($limit_time); ?>,
-                        display = document.querySelector("#time");
-                    var timeDiff = (Date.parse("<?php _e(date('Y/m/d H:i', $MNS_QR_TIME + $limit_time)); ?>") - (new Date()))/1000;
-                    startTimer(timeDiff, display);
-                };
+                var display = document.querySelector("#time");
+                var endDate = new Date(Date.parse("<?php _e(date('Y/m/d H:i', $MNS_QR_TIME + $limit_time)); ?>")).getTime();
+                var startDate = new Date().getTime();
+                var resultDiffInMinutes = Math.round(endDate - startDate);
+                startTimer(resultDiffInMinutes, display);
             </script>
 
         <?php } ?>

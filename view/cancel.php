@@ -8,9 +8,6 @@ global $woocommerce;
 $order = wc_get_order($pid);
 
 if ($order && $pid) {
-
-
-
     $payment_gateway_id = MNS_ID;
     $payment_gateway_qr_id = MNS_ID_QRPROM;
     $payment_gateway_installment_id = MNS_ID_INSTALLMENT;
@@ -61,20 +58,20 @@ if ($order && $pid) {
                 if($json_status[0]->status == "success" && $json_status[0]->message == $text_check){
 
                     $order->update_status("wc-cancelled");
-                    wp_redirect(wc_get_order($order->id)->get_checkout_order_received_url());
+                    wp_redirect(wc_get_order($order->id)->get_cancel_order_url());
 
                 }else{
-                    wp_redirect(wc_get_order($order->id)->get_checkout_order_received_url());
+                    wp_redirect(wc_get_order($order->id)->get_cancel_order_url());
                 }
             }else{
-                wp_redirect(wc_get_order($order->id)->get_checkout_order_received_url());
+                wp_redirect(wc_get_order($order->id)->get_cancel_order_url());
             }
         }else{
-            wp_redirect(wc_get_order($order->id)->get_checkout_order_received_url());
+            wp_redirect(wc_get_order($order->id)->get_cancel_order_url());
         }
     }else{
-        wp_redirect(wc_get_order($order->id)->get_checkout_order_received_url());
+        wp_redirect(wc_get_order($order->id)->get_cancel_order_url());
     }
 } else {
-    wp_redirect(wc_get_order($order->id)->get_checkout_order_received_url());
+    wp_redirect(wc_get_order($order->id)->get_cancel_order_url());
 }
