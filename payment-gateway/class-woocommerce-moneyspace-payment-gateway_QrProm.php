@@ -202,14 +202,14 @@ class MNS_Payment_Gateway_QR extends WC_Payment_Gateway
             _e(wpautop(wptexturize($description)));
         }
         ?>
-        <?php if ($ms_message2store != 0) { ?>
+        <!-- <?php if ($ms_message2store != 0) { ?>
         <div id="custom_input">
             <p class="form-row form-row-wide">
                 <label for="message" class=""><?php _e(MNS_MESSAGE, $this->domain); ?></label>
                 <input type="text" class="" name="message_qr" id="message" placeholder="<?php _e(MNS_MESSAGE2STORE); ?>">
             </p>
         </div>
-    <?php } ?>
+    <?php } ?> -->
         <?php
     }
 

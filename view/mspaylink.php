@@ -87,6 +87,10 @@ if ($order && $pid) {
             margin-left: 10%;
             margin-right: 10%;
         }
+
+        /* .MuiGrid-root.MuiGrid-item.MuiGrid-grid-xs-12 > div > p[align="left"] {
+            display: none;
+        } */
     </style>
 </head>
 <body>
