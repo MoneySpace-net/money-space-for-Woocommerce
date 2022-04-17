@@ -55,7 +55,7 @@ function set_body($order_id, $order, $gateways, $amount, $items_msg, $message, $
             , "currency" => "THB"
             , "timeHash" => $ms_time
             , "description" => $items_msg
-            , "message" => $order_id // $message // $MNS_special_instructions_to_merchant
+            , "message" => "Order ID#".$order_id // $message // $MNS_special_instructions_to_merchant
             , "feeType" => $feeType // "include"
             , "customer_order_id" => $order_id . "MS" . $ms_time
             , "gatewayType" => $gatewayType);

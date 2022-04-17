@@ -29,7 +29,7 @@ class MNS_Payment_Gateway_QR extends WC_Payment_Gateway
     }
 
     public function create_payment_transaction($order_id, $ms_body, $ms_template_payment, $gateways, $payment_gateway_qr) {
-        $response = wp_remote_post(MNS_API_URL_CREATE, array(
+        $response = wp_remote_post(MNS_API_URL_CREATE_LINK_PAYMENT, array(
             'method' => 'POST',
             'timeout' => 120,
             'body' => $ms_body
@@ -50,61 +50,50 @@ class MNS_Payment_Gateway_QR extends WC_Payment_Gateway
             wc_add_notice(__("Error ms100 : " . MNS_NOTICE_CHECK_TRANSACTION . $data_status[0]->status, $this->domain), 'error');
             return;
         }
+        // $logger = wc_get_logger();
+        // $logger->info("create payment result");
+        // $logger->info(print_r($data_status));
 
         $tranId = $data_status[0]->transaction_ID;
-        $mskey = $data_status[0]->mskey;
+        // $mskey = $data_status[0]->mskey;
+        $image_qrprom = $data_status[0]->image_qrprom;
 
         update_post_meta($order_id, 'MNS_transaction_orderid', $ms_body["order_id"]);
         update_post_meta($order_id, 'MNS_transaction', $tranId);
-        update_post_meta($order_id, 'MNS_PAYMENT_KEY', $mskey);
+        // update_post_meta($order_id, 'MNS_PAYMENT_KEY', $mskey);
+        update_post_meta($order_id, 'MNS_PAYMENT_IMAGE_QRPROMT', $image_qrprom);
         update_post_meta($order_id, 'MNS_QR_TIME', time());
-        if ($ms_template_payment == "2") {
+        $order = wc_get_order($order_id);
+        $items = $order->get_items();
 
-            // date_default_timezone_set(MNS_TIME_ZONE);
+        if ($ms_template_payment == "1") {
+            // do_action('woocommerce_email_order_details', $order);
+            
+            wc_get_template(
+                'emails/email-order-details.php',
+                array(
+                  'order' => $order
+                )
+              );
+            // woocommerce_email_order_details
+            // wc_get_email_order_items( $orer, array() );
+            
+            date_default_timezone_set("Asia/Bangkok");
             $MNS_QR_TIME = get_post_meta($order_id, 'MNS_QR_TIME', true);
             $auto_cancel = $payment_gateway_qr->settings['auto_cancel'];
-
+            
+            // payment link
+            _e('<div style="text-align: center;">
+            <embed type="image/jpeg" src="'.$image_qrprom.'" />
+            </div>
+            ');
             if(empty($auto_cancel)){
                 $limit_time = 1200;
             }else{
                 $limit_time = $auto_cancel;
             }
-            _e('<div align="center">
-                <div id="moneyspace-payment" 
-                        template="2"
-                        lang="eng"
-                        ms-title="' . $gateways['moneyspace_qrprom']->settings['title'] . '" 
-                        ms-key="' . $mskey . '" 
-                        description="false">
-                </div>
-                <br>
-                <h3 style="text-align: center;"> QR Code จะหมดอายุวันที่ : '.date('Y/m/d H:i', $MNS_QR_TIME + $limit_time).'</h3>
-                <h3 id="time" style="text-align: center;"></h3>
-            </div>');
-            $customStyle = ("
-            .MuiContainer-maxWidthXs {
-                max-width: 60%;
-            }
 
-            .MuiPaper-root.MuiCard-root {
-                width: 100%;
-            }
-    
-            .MuiGrid-root.MuiGrid-item.MuiGrid-grid-xs-12 > div > p > img {
-                display: inline-flex;
-            }
-            
-            .MuiGrid-root.MuiGrid-item.MuiGrid-grid-xs-12 > div > p {
-                margin-left: 10%;
-                margin-right: 10%;
-            }");
-
-            wp_register_style( 'custom-css-handle', false );
-            wp_enqueue_style( 'custom-css-handle' );
-            wp_add_inline_style( 'custom-css-handle', $customStyle );
-
-            wp_enqueue_script('qr_mspayment', MNS_PAYMENT_JS, array(), false, true);
-            wc_enqueue_js('function startTimer(duration, display) {
+            wc_enqueue_js('function startTimer(duration) {
                 var countDownDate = new Date();
                 countDownDate.setMinutes(countDownDate.getMinutes() + Math.round(duration/60000));
                 var refreshId = setInterval(function () {
@@ -120,16 +109,15 @@ class MNS_Payment_Gateway_QR extends WC_Payment_Gateway
                         var hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
                         var minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
                         var seconds = Math.floor((distance % (1000 * 60)) / 1000);
-                        display.innerHTML = ("QR Code จะหมดอายุในอีก "+minutes + " นาที " + seconds + " วินาที ");
+                        // display.innerHTML = ("QR Code จะหมดอายุในอีก "+minutes + " นาที " + seconds + " วินาที ");
                     }
                 }, 1000);
             }
-
-            var display = document.querySelector("#time");
             var endDate = new Date(Date.parse("'.date('Y/m/d H:i', $MNS_QR_TIME + $limit_time).'")).getTime();
+            
             var startDate = new Date().getTime();
             var resultDiffInMinutes = Math.round(endDate - startDate);
-            startTimer(resultDiffInMinutes, display);
+            startTimer(resultDiffInMinutes); //display
             
             ');
         } else {

@@ -6,6 +6,7 @@ global $woocommerce;
 
 
 $order = wc_get_order($pid);
+$force_cancelling = false;
 
 if ($order && $pid) {
     $payment_gateway_id = MNS_ID;
@@ -56,22 +57,34 @@ if ($order && $pid) {
                 $text_check = "Transaction id : ".$MNS_transaction." Canceled";
 
                 if($json_status[0]->status == "success" && $json_status[0]->message == $text_check){
-
-                    $order->update_status("wc-cancelled");
-                    wp_redirect(wc_get_order($order->id)->get_cancel_order_url());
+                    $force_cancelling = true;
+                    // do_action( 'woocommerce_cancelled_order', $order->id ); 
+                    // // $order->update_status("wc-cancelled");
+                    // wp_redirect(wc_get_order($order->id)->get_cancel_order_url());
 
                 }else{
-                    wp_redirect(wc_get_order($order->id)->get_cancel_order_url());
+                    $force_cancelling = true;
+                    // wp_redirect(wc_get_order($order->id)->get_cancel_order_url());
                 }
             }else{
-                wp_redirect(wc_get_order($order->id)->get_cancel_order_url());
+                $force_cancelling = true;
+                // wp_redirect(wc_get_order($order->id)->get_cancel_order_url());
             }
         }else{
-            wp_redirect(wc_get_order($order->id)->get_cancel_order_url());
+            $force_cancelling = true;
+            // wp_redirect(wc_get_order($order->id)->get_cancel_order_url());
         }
     }else{
-        wp_redirect(wc_get_order($order->id)->get_cancel_order_url());
+        $force_cancelling = true;
+        // wp_redirect(wc_get_order($order->id)->get_cancel_order_url());
     }
 } else {
+    $force_cancelling = true;
+    // wp_redirect(wc_get_order($order->id)->get_cancel_order_url());
+}
+
+if ($force_cancelling) {
+    do_action( 'woocommerce_cancelled_order', $order->id);
+    $order->update_status("wc-cancelled");
     wp_redirect(wc_get_order($order->id)->get_cancel_order_url());
 }
