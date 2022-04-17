@@ -1,6 +1,7 @@
 == Changelog ==
 = 1.0.0 - 2021-03-11 =
 
+* 2022-04-18 : add log data for investigated and update payment api
 * 2022-02-20 : fix bug wordpress 5.9 not auto enqueue style
 * 2022-01-13 : fix bug action hook not triggered
 * 2021-12-19 : fix bug create card payment with buyer pay fee and add description of status after pay 

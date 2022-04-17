@@ -1,4 +1,5 @@
 <?php
+date_default_timezone_set("Asia/Bangkok");
 
 class MNS_Payment_Gateway_QR extends WC_Payment_Gateway
 {
@@ -23,16 +24,15 @@ class MNS_Payment_Gateway_QR extends WC_Payment_Gateway
         add_action('woocommerce_update_options_payment_gateways_' . $this->id, array($this, 'process_admin_options'));
         add_action('woocommerce_thankyou_custom', array($this, 'thankyou_page'));
         add_action('woocommerce_receipt_' . $this->id, array($this, 'paymentgateway_form'), 10, 1);
-        
     }
 
     public function create_payment_transaction($order_id, $ms_body, $ms_template_payment, $gateways, $payment_gateway_qr) {
-        $response = wp_remote_post(MNS_API_URL_CREATE, array(
+        $response = wp_remote_post(MNS_API_URL_CREATE_LINK_PAYMENT, array(
             'method' => 'POST',
             'timeout' => 120,
             'body' => $ms_body
         ));
-
+        (new Mslogs())->insert($response["body"], 3, 'Create Transaction QR', date("Y-m-d H:i:s"), json_encode($ms_body));
         if (is_wp_error($response)) {
             wc_add_notice(__(MNS_NOTICE_ERROR_SETUP, $this->domain), 'error');
             return;
@@ -50,92 +50,68 @@ class MNS_Payment_Gateway_QR extends WC_Payment_Gateway
         }
 
         $tranId = $data_status[0]->transaction_ID;
-        $mskey = $data_status[0]->mskey;
+        $image_qrprom = $data_status[0]->image_qrprom;
 
         update_post_meta($order_id, 'MNS_transaction_orderid', $ms_body["order_id"]);
         update_post_meta($order_id, 'MNS_transaction', $tranId);
-        update_post_meta($order_id, 'MNS_PAYMENT_KEY', $mskey);
+        update_post_meta($order_id, 'MNS_PAYMENT_IMAGE_QRPROMT', $image_qrprom);
         update_post_meta($order_id, 'MNS_QR_TIME', time());
-        if ($ms_template_payment == "2") {
+        $order = wc_get_order($order_id);
+        $items = $order->get_items();
 
-            // date_default_timezone_set(MNS_TIME_ZONE);
+        if ($ms_template_payment == "1") {
+            wc_get_template(
+                'emails/email-order-details.php',
+                array(
+                  'order' => $order
+                )
+            );
+            
             $MNS_QR_TIME = get_post_meta($order_id, 'MNS_QR_TIME', true);
             $auto_cancel = $payment_gateway_qr->settings['auto_cancel'];
-
+            
+            // payment link
+            _e('<div style="text-align: center;">
+            <embed type="image/jpeg" src="'.$image_qrprom.'" />
+            </div>
+            ');
             if(empty($auto_cancel)){
                 $limit_time = 1200;
             }else{
                 $limit_time = $auto_cancel;
             }
-            _e('<div align="center">
-                <div id="moneyspace-payment" 
-                        template="2"
-                        lang="eng"
-                        ms-title="' . $gateways['moneyspace_qrprom']->settings['title'] . '" 
-                        ms-key="' . $mskey . '" 
-                        description="false">
-                </div>
-                <br>
-                <h3 style="text-align: center;"> QR Code จะหมดอายุวันที่ : '.date('d/m/Y H:i', $MNS_QR_TIME + $limit_time).'</h3>
-                <h3 id="time" style="text-align: center;"></h3>
-            </div>');
-            $customStyle = ("
-            .MuiContainer-maxWidthXs {
-                max-width: 60%;
-            }
 
-            .MuiPaper-root.MuiCard-root {
-                width: 100%;
-            }
-    
-            .MuiGrid-root.MuiGrid-item.MuiGrid-grid-xs-12 > div > p > img {
-                display: inline-flex;
-            }
+            $payment_gateway_id = MNS_ID;
+            $payment_gateways = WC_Payment_Gateways::instance();
+            $payment_gateway = $payment_gateways->payment_gateways()[$payment_gateway_id];
+            $mns_secret_id = $payment_gateway->settings['secret_id'];
+            $mns_secret_key = $payment_gateway->settings['secret_key'];
             
-            .MuiGrid-root.MuiGrid-item.MuiGrid-grid-xs-12 > div > p {
-                margin-left: 10%;
-                margin-right: 10%;
-            }");
-
-            wp_register_style( 'custom-css-handle', false );
-            wp_enqueue_style( 'custom-css-handle' );
-            wp_add_inline_style( 'custom-css-handle', $customStyle );
-
-            wp_enqueue_script('qr_mspayment', MNS_PAYMENT_JS, array(), false, true);
-            wc_enqueue_js('function startTimer(duration, display) {
-                var timer = duration, minutes, seconds;
+            wc_enqueue_js('function startTimer(duration) {
                 var countDownDate = new Date();
-                countDownDate.setMinutes(countDownDate.getMinutes()+ (duration/60) );
-                setInterval(function () {
-                    
+                countDownDate.setMinutes(countDownDate.getMinutes() + Math.round(duration/60000));
+                var refreshId = setInterval(function () {
                     var now = new Date().getTime();
                     var distance = countDownDate - now;
 
-                    minutes = parseInt(timer / 60, 10);
-                    seconds = parseInt(timer % 60, 10);
-            
-                    minutes = minutes < 10 ? "0" + minutes : minutes;
-                    seconds = seconds < 10 ? "0" + seconds : seconds;
-                    timer -= 1;
-                    if (timer == 0) {
-                        window.location="'.get_site_url() . "/ms/cancel/" . $order_id.'";
-                    } else if (timer > 0) {
+                    if (countDownDate.getTime() <=  now) {
+                        window.location="'.(get_site_url() . "/ms/cancel/" . $order_id).'", true;
+                        clearInterval(refreshId);
+                    } else {
                         // Time calculations for days, hours, minutes and seconds
                         var days = Math.floor(distance / (1000 * 60 * 60 * 24));
                         var hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
                         var minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
                         var seconds = Math.floor((distance % (1000 * 60)) / 1000);
-                        display.innerHTML = ("QR Code จะหมดอายุในอีก "+minutes + " นาที " + seconds + " วินาที ");
+                        // display.innerHTML = ("QR Code จะหมดอายุในอีก "+minutes + " นาที " + seconds + " วินาที ");
                     }
                 }, 1000);
             }
-            
-            window.onload = function () {
-                var fiveMinutes = '.$limit_time.',
-                    display = document.querySelector("#time");
-                startTimer(fiveMinutes, display);
-            };');
-            // add_action('after_woocommerce_pay', array($this, 'custom_order_pay'), 10, 1);
+            var endDate = new Date(Date.parse("'.date('Y/m/d H:i', $MNS_QR_TIME + $limit_time).'")).getTime();
+            var startDate = new Date().getTime();
+            var resultDiffInMinutes = Math.round(endDate - startDate);
+            startTimer(resultDiffInMinutes); //display
+            ');
         } else {
             wp_redirect(get_site_url() . "/mspaylink/" . $order_id);
             exit;
@@ -205,16 +181,6 @@ class MNS_Payment_Gateway_QR extends WC_Payment_Gateway
         if ($description = $this->get_description()) {
             _e(wpautop(wptexturize($description)));
         }
-        ?>
-        <?php if ($ms_message2store != 0) { ?>
-        <div id="custom_input">
-            <p class="form-row form-row-wide">
-                <label for="message" class=""><?php _e(MNS_MESSAGE, $this->domain); ?></label>
-                <input type="text" class="" name="message_qr" id="message" placeholder="<?php _e(MNS_MESSAGE2STORE); ?>">
-            </p>
-        </div>
-    <?php } ?>
-        <?php
     }
 
     /**

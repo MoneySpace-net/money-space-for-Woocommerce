@@ -120,6 +120,7 @@ class MNS_Payment_Gateway extends WC_Payment_Gateway
             'timeout' => 120,
             'body' => $ms_body
         ));
+        (new Mslogs())->insert($response["body"], 1, 'Create Transaction Card', date("Y-m-d H:i:s"), json_encode($ms_body));
 
         if (is_wp_error($response)) {
             wc_add_notice(__(MNS_NOTICE_ERROR_SETUP, $this->domain), 'error');
@@ -152,6 +153,7 @@ class MNS_Payment_Gateway extends WC_Payment_Gateway
             'timeout' => 120,
             'body' => $ms_body
         ));
+        (new Mslogs())->insert($response["body"], 2, 'Create Transaction Card 2', date("Y-m-d H:i:s"), json_encode($ms_body));
 
         if (is_wp_error($response)) {
             wc_add_notice(__("Error : " . MNS_NOTICE_ERROR_SETUP, $this->domain), 'error');
@@ -230,14 +232,6 @@ class MNS_Payment_Gateway extends WC_Payment_Gateway
                 'desc_tip' => true,
                 'options' => ["include" => MNS_FEE_INCLUDE,"exclude" => MNS_FEE_EXCLUDE],
                 'description' => __(MNS_FEE_HEADER, $this->domain)
-            ),
-            'message2store_setting' => array(
-                'title' => __(MNS_MESSAGE2STORE_HEADER, $this->domain),
-                'type' => 'select',
-                'class' => 'wc-enhanced-select',
-                'default' => false,
-                'desc_tip' => true,
-                'options' => [true => "Enable", false => "Disable"]
             ),
             'order_status_if_success' => array(
                 'title' => __(MNS_FORM_FIELD_SET_ORDER_STATUS, $this->domain),
@@ -334,13 +328,7 @@ class MNS_Payment_Gateway extends WC_Payment_Gateway
 
     public function payment_fields()
     {
-        $order_amount = round(WC()->cart->cart_contents_total, 2);
-
-        $payment_gateway_id = MNS_ID;
-        $payment_gateways = WC_Payment_Gateways::instance();
-        $payment_gateway = $payment_gateways->payment_gateways()[$payment_gateway_id];
         $gateways = WC()->payment_gateways->get_available_payment_gateways();
-        $ms_message2store = $gateways['moneyspace']->settings['message2store_setting'];
         $ms_template_payment = $gateways['moneyspace']->settings['ms_template_payment'];
         $ms_fees = $gateways['moneyspace']->settings['fee_setting'];
 
@@ -355,14 +343,7 @@ class MNS_Payment_Gateway extends WC_Payment_Gateway
             require_once MNS_ROOT . '/templates/credit-cards/mns-cc-tpl-1.php';
         }
         ?>
-        <?php if ($ms_message2store != 0) { ?>
-        <div id="custom_input" class="container ms-box">
-            <div class="form-group">
-                <label for="message_card"><?php _e(MNS_MESSAGE, $this->domain); ?></label>
-                <input type="text" class="form-control" id="message_card" name="message_card" placeholder="<?php _e(MNS_MESSAGE2STORE); ?>">
-            </div>
-        </div>
-    <?php } ?>
+       
         <?php
     }
     
@@ -419,9 +400,7 @@ class MNS_Payment_Gateway extends WC_Payment_Gateway
         $ms_secret_id = $payment_gateway->settings['secret_id'];
         $ms_secret_key = $payment_gateway->settings['secret_key'];
         $ms_fee = $payment_gateway->settings['fee_setting'];
-        $MNS_PAYMENT_TYPE = get_post_meta($order->id, 'MNS_PAYMENT_TYPE', true);
         $ms_template_payment = $gateways['moneyspace']->settings['ms_template_payment'];
-        $ms_message2store = $gateways['moneyspace']->settings['message2store_setting'];
 
         $MNS_special_instructions_to_merchant = get_post_meta($order_id, 'MNS_special_instructions_to_merchant', true);
         $ms_time = date("YmdHis");
@@ -436,11 +415,6 @@ class MNS_Payment_Gateway extends WC_Payment_Gateway
             _e("Error : " . MNS_NOTICE_ERROR_CONTINUE);
         }
 
-        // if (!is_user_logged_in()) {
-        //     wc_add_notice(__("Please login !", $this->domain), 'error');
-        //     return;
-        // }
-
         if (strlen($message_ins) > 150) {
             wc_add_notice(__("Message to the store (150 characters maximum)", $this->domain), 'error');
             return;
@@ -454,7 +428,7 @@ class MNS_Payment_Gateway extends WC_Payment_Gateway
         }
 
         if ($ms_fee == "exclude") {
-            $body_post["message"] = $ms_message2store == "Enable" ? $MNS_special_instructions_to_merchant : "";
+            $body_post["message"] = "Order ID#".$order_id;
             $body_post["successUrl"] = $return_url;
             $body_post["failUrl"] = $return_url;
             $body_post["cancelUrl"] = $return_url;
@@ -545,19 +519,12 @@ function set_p_html($msg) {
 
 function ms_order_detail_display($order)
 {
-    $gateways = WC()->payment_gateways->get_available_payment_gateways();
-    $ms_secret_id = $gateways['moneyspace']->settings['secret_id'];
-    $ms_secret_key = $gateways['moneyspace']->settings['secret_key'];
-    $ms_order_select = $gateways['moneyspace']->settings['order_status_if_success'];
-
     $MNS_PAYMENT_TYPE = get_post_meta($order->id, 'MNS_PAYMENT_TYPE', true);
     $MNS_transaction = get_post_meta($order->id, 'MNS_transaction', true);
     $MNS_transaction_orderid = get_post_meta($order->id, 'MNS_transaction_orderid', true);
     $MNS_PAYMENT_PAID = get_post_meta($order->id, 'MNS_PAYMENT_PAID', true);
     $MNS_PAYMENT_STATUS = get_post_meta($order->id, 'MNS_PAYMENT_STATUS', true);
 
-    $order_amount = $order->get_total();
-    $ms_time = date("YmdHis");
     $new_line = "<br>";
     if ($MNS_PAYMENT_STATUS == "Pay Success") {
         if ($MNS_PAYMENT_TYPE == "Qrnone" || $MNS_PAYMENT_TYPE == "Card") {
