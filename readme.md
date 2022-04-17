@@ -433,6 +433,8 @@
 
 # Changelog
 
+- 2022-04-18 : add log data for investigated and update payment api
+
 - 2022-02-20 : fix bug wordpress 5.9 not auto enqueue style
 
 - 2022-01-13 : fix bug action hook not triggered

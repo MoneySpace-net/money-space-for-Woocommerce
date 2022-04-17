@@ -161,8 +161,6 @@ class MNS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
                 'default' => 'yes'
             ),
         );
-
-
     }
 
     public function thankyou_page()
@@ -326,9 +324,6 @@ class MNS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
             <hr />
         <?php } ?>
 
-        
-        
-
         <?php if ($bay_enabled == "yes") { ?>
         <div class="form-check">
             <input class="form-check-input" type="radio" style="width: 0px" name="selectbank" id="selectbank-bay" value="BAY" onclick="BAY();">
@@ -363,8 +358,6 @@ class MNS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
                 <hr />
         <?php } ?>
 
-       
-        
         <?php if ($fcy_enabled == "yes") { ?>
         <div class="form-check">
             <input class="form-check-input" type="radio" style="width: 0px" name="selectbank" id="selectbank-fcy" value="FCY" onclick="FCY();">
@@ -552,7 +545,8 @@ class MNS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
             'body' => json_encode($payment_data)
             )
         );
-
+        (new Mslogs())->insert($response["body"], 4, 'Create Transaction Installment', date("Y-m-d H:i:s"), json_encode($payment_data));
+        
         if (is_wp_error($response)) {
             wc_add_notice(__($response, $this->domain), 'error');
             return;

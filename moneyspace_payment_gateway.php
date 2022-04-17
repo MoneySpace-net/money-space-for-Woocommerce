@@ -3,7 +3,7 @@
  * Plugin Name:       Money Space
  * Plugin URI:        https://github.com/MoneySpace-net/money-space-for-Woocommerce/releases
  * Description:       Would you like to provide a streamlined and secure checkout experience for your customer? Every business does. Payment process is vital to the success eCommerce businesses. While WooCommerce merchants maximize their online products, we can help you take care of  payments and deliver a better overall customer experience for your online customers. By integrating your Magento website to your MoneySpace Payment Gateway account, your customer can pay for their products securely through credit card online. MoneySpace also supports up to 27 foreign currencies and Alipay/ WechatPay payments so you can begin receiving payment and expand your customer base worldwide. MoneySpace is PCI DSS certified and had been approved by Bank of Thailand as a payment method. To get to know more about MoneySpace payment gateway, visit our website at https://www.moneyspace.net
- * Version:           2.6.16
+ * Version:           2.7.0
  * Author:            Money Space
  * Author URI:        https://moneyspace.net
  */
@@ -12,18 +12,20 @@ define('MNS_ID', 'moneyspace');
 define('MNS_ID_QRPROM', 'moneyspace_qrprom');
 define('MNS_ID_INSTALLMENT', 'moneyspace_installment');
 define('MNS_TITLE', 'Money Space');
-define('MNS_API_URL_PREFIX', 'https://a.moneyspace.net'); //'http://127.0.0.1:8000');
-define('MNS_STATIC_URL_PREFIX', 'https://a.moneyspace.net/static'); //'http://127.0.0.1:8000/static');
-define('MNS_API_URL_CREATE', MNS_API_URL_PREFIX . '/CreateTransactionID');
-define('MNS_API_URL_CHECK', MNS_API_URL_PREFIX . '/CheckOrderID');
-define('MNS_API_URL_GETPAY', MNS_API_URL_PREFIX . '/Getpay');
-define('MNS_API_URL_PAY', MNS_API_URL_PREFIX . '/Pay');
+define('MNS_API_ENDPOINT', 'https://a.moneyspace.net');
+define('MNS_STATIC_URL_ENDPOINT', 'https://a.moneyspace.net/static'); //'http://127.0.0.1:8000/static');
+define('MNS_API_URL_CREATE_LINK_PAYMENT', MNS_API_ENDPOINT . '/payment/CreateTransaction');
+define('MNS_API_URL_CHECK_PAYMENT', MNS_API_ENDPOINT . '/CheckPayment');
+define('MNS_API_URL_CREATE', MNS_API_ENDPOINT . '/CreateTransactionID');
+define('MNS_API_URL_CHECK', MNS_API_ENDPOINT . '/CheckOrderID');
+define('MNS_API_URL_GETPAY', MNS_API_ENDPOINT . '/Getpay');
+define('MNS_API_URL_PAY', MNS_API_ENDPOINT . '/Pay');
 define('MNS_API_URL_V2_CREATE_PAYMENT', 'https://www.moneyspace.net/merchantapi/v2/createpayment/obj');
 define('MNS_API_URL_CREATE_INSTALLMENT', 'https://a.moneyspace.net/payment/Createinstallment/');
-define('MNS_LOGO', MNS_STATIC_URL_PREFIX . '/img/type/Master_VISA_JCB_UNION_180.png');
-define('MNS_LOGO_QR', MNS_STATIC_URL_PREFIX. '/img/type/QRCode_160.png');
-define('MNS_LOGO_INSTALLMENT', MNS_STATIC_URL_PREFIX . '/img/type/Installment_220.png');
-define('MNS_PAYMENT_JS', plugins_url( "includes/moneyspace_payment.js", __FILE__ )); // MNS_STATIC_URL_PREFIX . '/moneyspace_payment.js'); //
+define('MNS_LOGO', MNS_STATIC_URL_ENDPOINT . '/img/type/Master_VISA_JCB_UNION_180.png');
+define('MNS_LOGO_QR', MNS_STATIC_URL_ENDPOINT. '/img/type/QRCode_160.png');
+define('MNS_LOGO_INSTALLMENT', MNS_STATIC_URL_ENDPOINT . '/img/type/Installment_220.png');
+define('MNS_PAYMENT_JS', plugins_url( "includes/moneyspace_payment.js", __FILE__ )); // MNS_STATIC_URL_ENDPOINT . '/moneyspace_payment.js'); //
 define('MNS_PAYMENT_FORM_JS', plugins_url( "includes/moneyspace_payment_form.js", __FILE__ ) );
 define('MNS_PAYMENT_FORM_CSS', plugins_url( "includes/css/moneyspace.css", __FILE__ ) );
 define('MNS_METHOD_TITLE', 'Money Space for WooCommerce');
@@ -95,14 +97,17 @@ if (in_array('woocommerce/woocommerce.php', $active_plugins)) {
                 require_once plugin_dir_path(__FILE__) . 'router/payform.php';
                 require_once plugin_dir_path(__FILE__) . 'router/cancel.php';
                 require_once plugin_dir_path(__FILE__) . 'router/test-connect-gw.php';
+                require_once plugin_dir_path(__FILE__) . 'router/info.php';
                 add_action(MNS_Router_Utility::PLUGIN_INIT_HOOK, array('MNS_Processpayment', 'init'), 1, 0);
                 add_action(MNS_Router_Utility::PLUGIN_INIT_HOOK, array('MNS_Webhook', 'init'), 1, 0);
                 add_action(MNS_Router_Utility::PLUGIN_INIT_HOOK, array('MNS_Paylink', 'init'), 1, 0);
                 add_action(MNS_Router_Utility::PLUGIN_INIT_HOOK, array('MNS_Payform', 'init'), 1, 0);
                 add_action(MNS_Router_Utility::PLUGIN_INIT_HOOK, array('MNS_Cancel', 'init'), 1, 0);
                 add_action(MNS_Router_Utility::PLUGIN_INIT_HOOK, array('MNS_Connect_GW', 'init'), 1, 0);
+                add_action(MNS_Router_Utility::PLUGIN_INIT_HOOK, array('MNS_Info', 'init'), 1, 0);
                 add_action('admin_enqueue_scripts', 'load_custom_wp_admin_style');
                 require_once plugin_dir_path(__FILE__) . 'includes/helper.php';
+                require_once plugin_dir_path(__FILE__) . 'includes/ms_log.php';
             }
         }
         // Fire it up!
