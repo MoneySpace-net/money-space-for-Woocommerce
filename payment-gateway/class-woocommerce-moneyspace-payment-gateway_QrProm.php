@@ -1,5 +1,4 @@
 <?php
-
 date_default_timezone_set("Asia/Bangkok");
 
 class MNS_Payment_Gateway_QR extends WC_Payment_Gateway
@@ -25,7 +24,7 @@ class MNS_Payment_Gateway_QR extends WC_Payment_Gateway
         add_action('woocommerce_update_options_payment_gateways_' . $this->id, array($this, 'process_admin_options'));
         add_action('woocommerce_thankyou_custom', array($this, 'thankyou_page'));
         add_action('woocommerce_receipt_' . $this->id, array($this, 'paymentgateway_form'), 10, 1);
-        
+        add_action('wp_ajax_mns_check_payment_status', array($this, 'check_payment_status'), 10 , 1);
     }
 
     public function create_payment_transaction($order_id, $ms_body, $ms_template_payment, $gateways, $payment_gateway_qr) {
@@ -78,7 +77,7 @@ class MNS_Payment_Gateway_QR extends WC_Payment_Gateway
             // woocommerce_email_order_details
             // wc_get_email_order_items( $orer, array() );
             
-            date_default_timezone_set("Asia/Bangkok");
+            
             $MNS_QR_TIME = get_post_meta($order_id, 'MNS_QR_TIME', true);
             $auto_cancel = $payment_gateway_qr->settings['auto_cancel'];
             
@@ -93,6 +92,12 @@ class MNS_Payment_Gateway_QR extends WC_Payment_Gateway
                 $limit_time = $auto_cancel;
             }
 
+            $payment_gateway_id = MNS_ID;
+            $payment_gateways = WC_Payment_Gateways::instance();
+            $payment_gateway = $payment_gateways->payment_gateways()[$payment_gateway_id];
+            $mns_secret_id = $payment_gateway->settings['secret_id'];
+            $mns_secret_key = $payment_gateway->settings['secret_key'];
+            
             wc_enqueue_js('function startTimer(duration) {
                 var countDownDate = new Date();
                 countDownDate.setMinutes(countDownDate.getMinutes() + Math.round(duration/60000));
@@ -101,7 +106,7 @@ class MNS_Payment_Gateway_QR extends WC_Payment_Gateway
                     var distance = countDownDate - now;
 
                     if (countDownDate.getTime() <=  now) {
-                        window.location="'.get_site_url() . "/ms/cancel/" . $order_id.'", true;
+                        window.location="'.(get_site_url() . "/ms/cancel/" . $order_id).'", true;
                         clearInterval(refreshId);
                     } else {
                         // Time calculations for days, hours, minutes and seconds
@@ -114,17 +119,106 @@ class MNS_Payment_Gateway_QR extends WC_Payment_Gateway
                 }, 1000);
             }
             var endDate = new Date(Date.parse("'.date('Y/m/d H:i', $MNS_QR_TIME + $limit_time).'")).getTime();
-            
             var startDate = new Date().getTime();
             var resultDiffInMinutes = Math.round(endDate - startDate);
             startTimer(resultDiffInMinutes); //display
-            
             ');
+
+            // wc_enqueue_js('function check_payment_status(s, k, t) {
+            //     var endDate = new Date(Date.parse("'.date('Y/m/d H:i', $MNS_QR_TIME + $limit_time).'")).getTime();
+            //     var startDate = new Date().getTime();
+            //     var isPay = false;
+            //     while(endDate > startDate && isPay === false) {
+            //         var form = new FormData();
+            //         form.append("secret_id", s);
+            //         form.append("secret_key", k);
+            //         form.append("transaction_ID", t);
+            //         jQuery.post("'.MNS_API_URL_CHECK_PAYMENT.'", form, function(res) {
+            //             console.log("res", res);
+            //         });
+            //     }
+            // }
+            // check_payment_status("'.$mns_secret_id.'", "'.$mns_secret_key.'", "'.$tranId.'");
+            // ');
+
+            do_action('wp_ajax_mns_check_payment_status', $order_id);
         } else {
             wp_redirect(get_site_url() . "/mspaylink/" . $order_id);
             exit;
         }
     }
+
+    public function check_payment_status($order_id) {
+        $payment_gateway_id = MNS_ID;
+        $payment_gateways = WC_Payment_Gateways::instance();
+        $payment_gateway = $payment_gateways->payment_gateways()[$payment_gateway_id];
+        $mns_secret_id = $payment_gateway->settings['secret_id'];
+        $mns_secret_key = $payment_gateway->settings['secret_key'];
+        $tranId = get_post_meta( $order_id, 'MNS_transaction', true);
+        $MNS_QR_TIME = get_post_meta($order_id, 'MNS_QR_TIME', true);
+        $auto_cancel = $payment_gateway_qr->settings['auto_cancel'];
+        $limit_time = empty($auto_cancel) ? 1200 : $auto_cancel;
+
+        $logger = wc_get_logger();
+        $logger->info("check_payment_status: ".$order_id);
+
+        $logger->info("mns_secret_id: ". $mns_secret_id);
+        $logger->info("mns_secret_key: ". $mns_secret_key);
+        $logger->info("transaction id: ". $tranId);
+        
+        $ms_body["secret_id"] = $mns_secret_id;
+        $ms_body["secret_key"] = $mns_secret_key;
+        $ms_body["transaction_ID"] = $tranId;
+
+        $is_error = false;
+        $dStart = date('Y/m/d H:i:s', $MNS_QR_TIME);
+        $dEnd = date('Y/m/d H:i:s', $MNS_QR_TIME+$limit_time);
+        $response = wp_remote_post(MNS_API_URL_CHECK_PAYMENT, array(
+                    'method' => 'POST',
+                    'timeout' => 120,
+                    'body' => $ms_body
+                ));
+        if (is_wp_error($response)) {
+            $is_error = true;
+        }
+        $res_body = json_decode($response["body"]);
+        // if ($res_body[0]["transaction id"]->status)
+        // while (date_create($dEnd) > date_create($dStart) && $is_error == false) {
+        //     # code...
+        //     $response = wp_remote_post(MNS_API_URL_CHECK_PAYMENT, array(
+        //         'method' => 'POST',
+        //         'timeout' => 120,
+        //         'body' => $ms_body
+        //     ));
+        //     if (is_wp_error($response)) {
+        //         $is_error = true;
+        //     }
+        //     $res_body = json_decode(wp_remote_retrieve_body($response), true);
+            
+        //     // if ($res_body[""]) {
+
+        //     // }
+        // }
+        // if (!is_wp_error($response) && json_decode(wp_remote_retrieve_body($response), true) )
+        $transaction_id = "transaction id";
+        $transaction_body = json_decode($res_body[0]->$transaction_id);
+        $logger->info("res_body". $transaction_body->status);
+    }
+
+    // public function check_payment_status($order_id) {
+    //     $logger = wc_get_logger();
+    //     $logger->error("check_payment_status: ".$order_id);
+    //     // Don't forget to stop execution afterward.
+    //     wp_die();
+
+    //     // update_post_meta($order_id, 'MNS_transaction', $tranId);
+    //     // $tranId = get_post_meta('MNS_transaction', $order_id);
+    //     // $response = wp_remote_post(MNS_API_URL_CREATE_LINK_PAYMENT, array(
+    //     //     'method' => 'POST',
+    //     //     'timeout' => 120,
+    //     //     'body' => $ms_body
+    //     // ));
+    // }
 
     public function init_form_fields()
     {

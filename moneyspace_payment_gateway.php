@@ -15,6 +15,7 @@ define('MNS_TITLE', 'Money Space');
 define('MNS_API_ENDPOINT', 'https://a.moneyspace.net');
 define('MNS_STATIC_URL_ENDPOINT', 'https://a.moneyspace.net/static'); //'http://127.0.0.1:8000/static');
 define('MNS_API_URL_CREATE_LINK_PAYMENT', MNS_API_ENDPOINT . '/payment/CreateTransaction');
+define('MNS_API_URL_CHECK_PAYMENT', MNS_API_ENDPOINT . '/CheckPayment');
 define('MNS_API_URL_CREATE', MNS_API_ENDPOINT . '/CreateTransactionID');
 define('MNS_API_URL_CHECK', MNS_API_ENDPOINT . '/CheckOrderID');
 define('MNS_API_URL_GETPAY', MNS_API_ENDPOINT . '/Getpay');
