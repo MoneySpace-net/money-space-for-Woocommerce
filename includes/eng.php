@@ -39,6 +39,8 @@ define('MNS_FORM_FIELD_DESCRIPTION', 'Description');
 define('MNS_FORM_FIELD_HEADER_SETTING_MS', 'Moneyspace');
 define('MNS_FORM_FIELD_MS_VAT', 'Vat');
 define('MNS_FORM_FIELD_SET_ORDER_STATUS', 'Set order status when payment is completed');
+define('MNS_FORM_FIELD_TEMPLATE', 'Choose Template');
+define('MNS_FORM_FIELD_SET_QRNONE_TIMEOUT', 'Set QR Code Timeout');
 define('MNS_FORM_FIELD_HEADER_SETTING_UI', 'Enter the buyer information in the transaction id');
 define('MNS_FORM_FIELD_MS_FIRSTNAME', 'First name');
 define('MNS_FORM_FIELD_MS_LASTNAME', 'Last name');

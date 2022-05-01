@@ -38,6 +38,8 @@ define('MNS_PAYMENT_FORM_CSS', plugins_url( "includes/css/moneyspace.css", __FIL
 define('MNS_METHOD_TITLE', 'Money Space for WooCommerce');
 // define('MNS_TIME_ZONE', "Asia/Bangkok");
 define('MNS_CANCEL_TRANSACTION', 'https://a.moneyspace.net/merchantapi/cancelpayment');
+define('MNS_CHECK_PAYMENT', 'https://a.moneyspace.net/CheckPayment');
+define('MNS_CHECK_PAYMENT_STATUS', '/ms/check-payment/');
 define("MNS_ROOT", __DIR__."/");
 define("MNS_ROOT_URL", plugin_dir_url(__FILE__));
 define("MNS_PAYMENT_TYPE_CARD", "card");
@@ -105,6 +107,8 @@ if (in_array('woocommerce/woocommerce.php', $active_plugins)) {
                 require_once plugin_dir_path(__FILE__) . 'router/cancel.php';
                 require_once plugin_dir_path(__FILE__) . 'router/test-connect-gw.php';
                 require_once plugin_dir_path(__FILE__) . 'router/info.php';
+                require_once plugin_dir_path(__FILE__) . 'router/check-payment.php';
+
                 add_action(MNS_Router_Utility::PLUGIN_INIT_HOOK, array('MNS_Processpayment', 'init'), 1, 0);
                 add_action(MNS_Router_Utility::PLUGIN_INIT_HOOK, array('MNS_Webhook', 'init'), 1, 0);
                 add_action(MNS_Router_Utility::PLUGIN_INIT_HOOK, array('MNS_Paylink', 'init'), 1, 0);
@@ -112,6 +116,8 @@ if (in_array('woocommerce/woocommerce.php', $active_plugins)) {
                 add_action(MNS_Router_Utility::PLUGIN_INIT_HOOK, array('MNS_Cancel', 'init'), 1, 0);
                 add_action(MNS_Router_Utility::PLUGIN_INIT_HOOK, array('MNS_Connect_GW', 'init'), 1, 0);
                 add_action(MNS_Router_Utility::PLUGIN_INIT_HOOK, array('MNS_Info', 'init'), 1, 0);
+                add_action(MNS_Router_Utility::PLUGIN_INIT_HOOK, array('MNS_CheckPayment', 'init'), 1, 0);
+
                 add_action('admin_enqueue_scripts', 'load_custom_wp_admin_style');
                 require_once plugin_dir_path(__FILE__) . 'includes/helper.php';
                 require_once plugin_dir_path(__FILE__) . 'includes/ms_log.php';

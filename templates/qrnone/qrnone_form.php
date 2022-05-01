@@ -30,13 +30,54 @@ wc_enqueue_js('function startTimer(duration) {
             var hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
             var minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
             var seconds = Math.floor((distance % (1000 * 60)) / 1000);
+            if (document.getElementById("showTime") !== null) {
+                document.getElementById("showTime").innerHTML = ("QR Code จะหมดอายุในอีก "+minutes + " นาที " + seconds + " วินาที ");
+            }
             // display.innerHTML = ("QR Code จะหมดอายุในอีก "+minutes + " นาที " + seconds + " วินาที ");
         }
     }, 1000);
 }
+
+function checkPayment(duration, pid) {
+    var countDownDate = new Date();
+    countDownDate.setMinutes(countDownDate.getMinutes() + Math.round(duration/60000));
+
+    var refreshIdOfChechPayment = setInterval(function() {
+        var now = new Date().getTime();
+        if (countDownDate.getTime() <=  now) {
+            clearInterval(refreshIdOfChechPayment);
+        }
+        fetch("'.(get_site_url() . MNS_CHECK_PAYMENT_STATUS . $order_id).'")
+        .then(function(res) {
+            return res.json();
+        })
+        .then(function(res) {
+            if (res.status === "completed") {
+                clearInterval(refreshIdOfChechPayment);
+                window.location = "'.wc_get_order($order_id)->get_checkout_order_received_url().'";
+            }
+            console.log(res);
+        });
+
+        // const response = await fetch("'.(get_site_url() . MNS_CHECK_PAYMENT_STATUS . $order_id).'");
+        // var resultBody = response.json();
+        // console.log("resultBody", resultBody);
+        // if (resultBody.status === "completed") {
+        //     clearInterval(refreshIdOfChechPayment);
+        //     window.location = "'.wc_get_order($order_id)->get_checkout_order_received_url().'"
+        // }
+        
+    }, 2000);
+}
+
+
 var endDate = new Date(Date.parse("'.date('Y/m/d H:i', $MNS_QR_TIME + $limit_time).'")).getTime();
 var startDate = new Date().getTime();
 var resultDiffInMinutes = Math.round(endDate - startDate);
 startTimer(resultDiffInMinutes); //display
+checkPayment(resultDiffInMinutes, '.$order_id.');
+
+
 ');
+
 ?>

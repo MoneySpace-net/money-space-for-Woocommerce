@@ -21,7 +21,6 @@ if ($order && $pid) {
 
     $gateways = WC()->payment_gateways->get_available_payment_gateways();
 
-
     $ms_secret_id = $payment_gateway->settings['secret_id'];
     $ms_secret_key = $payment_gateway->settings['secret_key'];
 
@@ -40,35 +39,38 @@ if ($order && $pid) {
         }
 
         if ((time() - $MNS_QR_TIME) > $limit_time){
-
-            $call_cancel = wp_remote_post(MNS_CANCEL_TRANSACTION, array(
-                'method' => 'POST',
-                'timeout' => 120,
-                'body' => array(
-                    'secret_id' => $ms_secret_id,
-                    'secret_key' => $ms_secret_key,
-                    'transaction_ID' => $MNS_transaction,
-                )
-            ));
-
-            if (!is_wp_error($call_cancel)) {
-
-                $json_status = json_decode($call_cancel["body"]);
-                $text_check = "Transaction id : ".$MNS_transaction." Canceled";
-
-                if($json_status[0]->status == "success" && $json_status[0]->message == $text_check){
-                    $force_cancelling = true;
-                    // do_action( 'woocommerce_cancelled_order', $order->id ); 
-                    // // $order->update_status("wc-cancelled");
-                    // wp_redirect(wc_get_order($order->id)->get_cancel_order_url());
-
+            if (checkPaymentStatus($ms_secret_id, $ms_secret_key, $MNS_transaction) != true) {
+                $call_cancel = wp_remote_post(MNS_CANCEL_TRANSACTION, array(
+                    'method' => 'POST',
+                    'timeout' => 120,
+                    'body' => array(
+                        'secret_id' => $ms_secret_id,
+                        'secret_key' => $ms_secret_key,
+                        'transaction_ID' => $MNS_transaction,
+                    )
+                ));
+    
+                if (!is_wp_error($call_cancel)) {
+    
+                    $json_status = json_decode($call_cancel["body"]);
+                    $text_check = "Transaction id : ".$MNS_transaction." Canceled";
+    
+                    if($json_status[0]->status == "success" && $json_status[0]->message == $text_check){
+                        $force_cancelling = true;
+                        // do_action( 'woocommerce_cancelled_order', $order->id ); 
+                        // // $order->update_status("wc-cancelled");
+                        // wp_redirect(wc_get_order($order->id)->get_cancel_order_url());
+    
+                    }else{
+                        $force_cancelling = true;
+                        // wp_redirect(wc_get_order($order->id)->get_cancel_order_url());
+                    }
                 }else{
                     $force_cancelling = true;
                     // wp_redirect(wc_get_order($order->id)->get_cancel_order_url());
-                }
-            }else{
-                $force_cancelling = true;
-                // wp_redirect(wc_get_order($order->id)->get_cancel_order_url());
+                } 
+            } else {
+                wp_redirect(wc_get_order($order->id)->get_checkout_order_received_url());
             }
         }else{
             $force_cancelling = true;
@@ -87,4 +89,27 @@ if ($force_cancelling) {
     do_action( 'woocommerce_cancelled_order', $order->id);
     $order->update_status("wc-cancelled");
     wp_redirect(wc_get_order($order->id)->get_cancel_order_url());
+}
+
+function checkPaymentStatus($ms_secret_id, $ms_secret_key, $MNS_transaction) {
+    $payment_status = wp_remote_post(MNS_CHECK_PAYMENT, array(
+        'method' => 'POST',
+        'timeout' => 120,
+        'body' => array(
+            'secret_id' => $ms_secret_id,
+            'secret_key' => $ms_secret_key,
+            'transaction_ID' => $MNS_transaction,
+        )
+    ));
+    if (!is_wp_error($payment_status)) {
+        $json_status = json_decode($payment_status["body"]);
+        $transactionField = "transaction id";
+        $status = $json_status[0]->$transactionField->status;
+        if (strtolower($status) == strtolower("Pay Success")) {
+            return true;
+        }
+        // other status return false
+    }
+
+    return false;
 }

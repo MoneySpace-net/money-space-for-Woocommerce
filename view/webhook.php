@@ -23,7 +23,11 @@ if (sanitize_text_field($_POST["transectionID"]) != "") {
 
     $ms_secret_id = $payment_gateway->settings['secret_id'];
     $ms_secret_key = $payment_gateway->settings['secret_key'];
-    $ms_stock_setting = $payment_gateway->settings['ms_stock_setting'];
+    
+    $ms_stock_setting = $payment_gateway->settings['ms_stock_setting']; // credit card mode stock reduce
+    $ms_qr_stock_setting = $payment_gateway_qr->settings['ms_stock_setting']; // qrnone mode stock reduce
+    $ms_install_stock_setting = $payment_gateway_installment->settings['ms_stock_setting']; // installment mode stock reduce
+
     $ms_time = date("YmdHis");
 
     $MNS_transaction_orderid = get_post_meta($order->id, 'MNS_transaction_orderid', true);
@@ -43,6 +47,10 @@ if (sanitize_text_field($_POST["transectionID"]) != "") {
     if ($hash == $process_payment_hash && $status == "paysuccess"){
         if($MNS_PAYMENT_TYPE == "Card"){
 
+            if ($ms_stock_setting != "Disable") {
+                $order->reduce_order_stock();
+            }
+
             if(empty($ms_order_select)){
                 $order->update_status("wc-processing");
             }else{
@@ -50,12 +58,21 @@ if (sanitize_text_field($_POST["transectionID"]) != "") {
             }
         } else if($MNS_PAYMENT_TYPE == "Qrnone"){
 
+            if ($ms_qr_stock_setting != "Disable") {
+                $order->reduce_order_stock();
+            }
+
             if(empty($ms_order_select_qr)){
                 $order->update_status("wc-processing");
             }else{
                 $order->update_status($ms_order_select_qr);
+                wp_redirect(wc_get_order($order->id)->get_checkout_order_received_url());
             }
         } else if($MNS_PAYMENT_TYPE == "Installment"){
+
+            if ($ms_order_select_installment != "Disable") {
+                $order->reduce_order_stock();
+            }
 
             if(empty($ms_order_select_installment)){
                 $order->update_status("wc-processing");
@@ -63,9 +80,7 @@ if (sanitize_text_field($_POST["transectionID"]) != "") {
                 $order->update_status($ms_order_select_installment);
             }
         }
-        if ($ms_stock_setting != "Disable") {
-            $order->reduce_order_stock();
-        }
+        
     } else {
         $order->update_status("wc-failed");
     }

@@ -60,7 +60,9 @@ class MNS_Payment_Gateway_QR extends WC_Payment_Gateway
         $items = $order->get_items();
 
         if ($ms_template_payment == "1") {
-            load_template( plugin_dir_path( __DIR__ ).'templates/qrnone/mns_tpl_qrnone_2.php', false, array(
+            $template = $payment_gateway_qr->settings['template'] ?? 'template_1';
+            $chooseTemplate = $template == 'template_1' ? 'mns_tpl_qrnone_1': 'mns_tpl_qrnone_2';
+            load_template( plugin_dir_path( __DIR__ ).'templates/qrnone/'.$chooseTemplate.'.php', false, array(
                 'order_id' => $order_id,
                 'payment_gateway_qr' => $payment_gateway_qr,
                 'image_qrprom' => $image_qrprom
@@ -99,13 +101,29 @@ class MNS_Payment_Gateway_QR extends WC_Payment_Gateway
                 'desc_tip' => true,
                 'options' => wc_get_order_statuses()
             ),
+            'ms_stock_setting' => array(
+                'title' => __(MNS_STOCKSETTING_HEAD, $this->domain),
+                'type' => 'select',
+                'class' => 'wc-enhanced-select',
+                'default' => 'Disable',
+                'desc_tip' => true,
+                'options' => ["Disable" => MNS_STOCKSETTING_DISABLE, "Enable" => MNS_STOCKSETTING_ENABLE]
+            ),
             'auto_cancel' => array(
-                'title' => __("ตั้งเวลาหมดอายุ", $this->domain),
+                'title' => __(MNS_FORM_FIELD_SET_QRNONE_TIMEOUT, $this->domain),
                 'type' => 'select',
                 'class' => 'wc-enhanced-select',
                 'default' => 1200,
                 'desc_tip' => true,
                 'options' => [900 => "15 นาที",1200 => "20 นาที",1500 => "25 นาที",1800 => "30 นาที"]
+            ),
+            'template' => array(
+                'title' => __(MNS_FORM_FIELD_TEMPLATE, $this->domain),
+                'type' => 'select',
+                'class' => 'wc-enhanced-select',
+                'default' => 'template_1',
+                'desc_tip' => true,
+                'options' => ['template_1' => 'Template 1', 'template_2' => 'Template 2']
             ),
             'description' => array(
                 'title' => __(MNS_FORM_FIELD_DESCRIPTION, $this->domain),
