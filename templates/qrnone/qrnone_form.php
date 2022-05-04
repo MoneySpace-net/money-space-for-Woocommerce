@@ -56,17 +56,7 @@ function checkPayment(duration, pid) {
                 clearInterval(refreshIdOfChechPayment);
                 window.location = "'.wc_get_order($order_id)->get_checkout_order_received_url().'";
             }
-            console.log(res);
-        });
-
-        // const response = await fetch("'.(get_site_url() . MNS_CHECK_PAYMENT_STATUS . $order_id).'");
-        // var resultBody = response.json();
-        // console.log("resultBody", resultBody);
-        // if (resultBody.status === "completed") {
-        //     clearInterval(refreshIdOfChechPayment);
-        //     window.location = "'.wc_get_order($order_id)->get_checkout_order_received_url().'"
-        // }
-        
+        });        
     }, 2000);
 }
 
