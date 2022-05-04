@@ -433,13 +433,15 @@
 
 # Changelog
 
+- 2022-05-04 : fix bug qrnone not redirect after payment success and add option stock reduce in admin config
+
 - 2022-04-18 : add log data for investigated and update payment api
 
 - 2022-02-20 : fix bug wordpress 5.9 not auto enqueue style
 
 - 2022-01-13 : fix bug action hook not triggered
 
-- 2021-12-19 : fix bug create card payment with buyer pay fee and add description of status after pay 
+- 2021-12-19 : fix bug create card payment with buyer pay fee and add description of status after pay
 
 - 2021-11-21 : fix bug payment form not compatible themes
 
