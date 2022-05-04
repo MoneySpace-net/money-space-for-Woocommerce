@@ -38,6 +38,8 @@ define('MNS_FORM_FIELD_DESCRIPTION', 'รายละเอียด');
 define('MNS_FORM_FIELD_HEADER_SETTING_MS', 'Moneyspace');
 define('MNS_FORM_FIELD_MS_VAT', 'ภาษีมูลค่าเพิ่ม');
 define('MNS_FORM_FIELD_SET_ORDER_STATUS', 'เลือกสถานะเมื่อชำระเงินสำเร็จ');
+define('MNS_FORM_FIELD_TEMPLATE', 'เลือกรูปแบบ');
+define('MNS_FORM_FIELD_SET_QRNONE_TIMEOUT', 'ตั้งเวลาหมดอายุ');
 define('MNS_FORM_FIELD_HEADER_SETTING_UI', 'กรอกข้อมูลผู้ซื้อในรหัสการทำธุรกรรม');
 define('MNS_FORM_FIELD_MS_FIRSTNAME', 'ชื่อจริง');
 define('MNS_FORM_FIELD_MS_LASTNAME', 'นามสกุล');

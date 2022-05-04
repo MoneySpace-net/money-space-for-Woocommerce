@@ -3,7 +3,7 @@ Contributors: moneyspace
 Tags: credit card, moneyspace, payment request, thaibank, woocommerce, automattic, bay, ktc, fcy, installment
 Requires at least: 4.9
 Tested up to: 5.9
-Stable tag: 2.7.0
+Stable tag: 2.7.1
 Requires PHP: 5.6
 Requires WordPress: 4.9
 License: GPLv3
@@ -63,6 +63,7 @@ Yes! In Live Mode, an SSL certificate must be installed on your site to use Mone
 == Changelog ==
 = 1.0.0 - 2021-05-12 =
 
+* 2022-05-04 : fix bug qrnone not redirect after payment success and add option stock reduce in admin config
 * 2022-04-18 : add log data for investigated and update payment api
 * 2022-02-20 : fix bug wordpress 5.9 not auto enqueue style
 * 2022-01-13 : fix bug action hook not triggered
