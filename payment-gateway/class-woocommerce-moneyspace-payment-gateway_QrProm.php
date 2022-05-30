@@ -59,18 +59,13 @@ class MNS_Payment_Gateway_QR extends WC_Payment_Gateway
         $order = wc_get_order($order_id);
         $items = $order->get_items();
 
-        if ($ms_template_payment == "1") {
-            $template = $payment_gateway_qr->settings['template'] ?? 'template_1';
-            $chooseTemplate = $template == 'template_1' ? 'mns_tpl_qrnone_1': 'mns_tpl_qrnone_2';
-            load_template( plugin_dir_path( __DIR__ ).'templates/qrnone/'.$chooseTemplate.'.php', false, array(
-                'order_id' => $order_id,
-                'payment_gateway_qr' => $payment_gateway_qr,
-                'image_qrprom' => $image_qrprom
-            ));
-        } else {
-            wp_redirect(get_site_url() . "/mspaylink/" . $order_id);
-            exit;
-        }
+        $template = $payment_gateway_qr->settings['template'] ?? 'template_1';
+        $chooseTemplate = $template == 'template_1' ? 'mns_tpl_qrnone_1': 'mns_tpl_qrnone_2';
+        load_template( plugin_dir_path( __DIR__ ).'templates/qrnone/'.$chooseTemplate.'.php', false, array(
+            'order_id' => $order_id,
+            'payment_gateway_qr' => $payment_gateway_qr,
+            'image_qrprom' => $image_qrprom
+        ));
     }
 
     public function init_form_fields()

@@ -433,6 +433,8 @@
 
 # Changelog
 
+- 2022-05-30 : fix bug qrnone not rendering
+
 - 2022-05-04 : fix bug qrnone not redirect after payment success and add option stock reduce in admin config
 
 - 2022-04-18 : add log data for investigated and update payment api
