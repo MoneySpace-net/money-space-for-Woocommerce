@@ -52,7 +52,7 @@ function checkPayment(duration, pid) {
             return res.json();
         })
         .then(function(res) {
-            if (res.status === "completed") {
+            if (res.status === "Pay Success") {
                 clearInterval(refreshIdOfChechPayment);
                 window.location = "'.wc_get_order($order_id)->get_checkout_order_received_url().'";
             }

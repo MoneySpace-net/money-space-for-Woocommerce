@@ -526,7 +526,7 @@ class MNS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
         , "amount" => round($order_amount, 2)
         , "description" => preg_replace( "/<br>|\n/", "", $items_msg)
         , "address" => $order->get_billing_address_1() . " " . $order->get_billing_address_2() . " " . $order->get_billing_city() . " " . $order->get_billing_postcode()
-        , "message" => $MNS_special_instructions_to_merchant
+        // , "message" => $MNS_special_instructions_to_merchant
         , "feeType" => $ms_fee
         , "order_id" => $order_id . "MS" . $ms_time
         , "success_Url" => $return_url

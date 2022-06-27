@@ -5,21 +5,32 @@ global $woocommerce;
 
 $order = wc_get_order($pid);
 
+$payment_gateway_id = MNS_ID;
+$payment_gateways = WC_Payment_Gateways::instance();
+
+$payment_gateway = $payment_gateways->payment_gateways()[$payment_gateway_id];
+
+$ms_secret_id = $payment_gateway->settings['secret_id'];
+$ms_secret_key = $payment_gateway->settings['secret_key'];
+
+$ms_body = array(
+    "transaction_ID" => $order->get_meta("MNS_transaction"),
+    "secret_id" => $ms_secret_id,
+    "secret_key" => $ms_secret_key
+);
+
+$response = array();
+
+$response = wp_remote_post(MNS_API_URL_CHECK_PAYMENT, array(
+    'method' => 'POST',
+    'timeout' => 120,
+    'body' => $ms_body
+));
+
+$data_status = json_decode($response["body"]);
+$transaction_ID = "transaction id";
 $result = new stdClass();
 $result->order_id = $order->get_id();
 $result->transaction_id = $order->get_meta("MNS_transaction");
-$result->status = $order->get_status();
+$result->status = $data_status[0]->$transaction_ID->status;
 echo json_encode($result);
- 
-
-// $payment_gateway_id = MNS_ID;
-// $payment_gateway_qr_id = MNS_ID_QRPROM;
-// $payment_gateway_installment_id = MNS_ID_INSTALLMENT;
-// $payment_gateways = WC_Payment_Gateways::instance();
-
-// $payment_gateway = $payment_gateways->payment_gateways()[$payment_gateway_id];
-// $payment_gateway_qr = $payment_gateways->payment_gateways()[$payment_gateway_qr_id];
-// $payment_gateway_installment = $payment_gateways->payment_gateways()[$payment_gateway_installment_id];
-
-// $ms_secret_id = $payment_gateway->settings['secret_id'];
-// $ms_secret_key = $payment_gateway->settings['secret_key'];

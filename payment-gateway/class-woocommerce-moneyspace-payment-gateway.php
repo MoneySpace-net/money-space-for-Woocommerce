@@ -415,10 +415,10 @@ class MNS_Payment_Gateway extends WC_Payment_Gateway
             _e("Error : " . MNS_NOTICE_ERROR_CONTINUE);
         }
 
-        if (strlen($message_ins) > 150) {
-            wc_add_notice(__("Message to the store (150 characters maximum)", $this->domain), 'error');
-            return;
-        }
+        // if (strlen($message_ins) > 150) {
+        //     wc_add_notice(__("Message to the store (150 characters maximum)", $this->domain), 'error');
+        //     return;
+        // }
 
         $body_post = set_body($order_id, $order, $gateways, $order_amount, $items_msg, $MNS_special_instructions_to_merchant, $ms_fee, $ms_time);
             
