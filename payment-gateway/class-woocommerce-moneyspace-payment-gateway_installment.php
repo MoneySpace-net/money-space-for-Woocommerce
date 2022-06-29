@@ -79,7 +79,7 @@ class MNS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
                 'title' => __(MNS_FORM_FIELD_SET_ORDER_STATUS, $this->domain),
                 'type' => 'select',
                 'class' => 'wc-enhanced-select',
-                'default' => 'wc-processing',
+                'default' => 'wc-completed',
                 'desc_tip' => true,
                 'options' => wc_get_order_statuses()
             ),

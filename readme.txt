@@ -2,10 +2,9 @@
 Contributors: moneyspace
 Tags: credit card, moneyspace, payment request, thaibank, woocommerce, automattic, bay, ktc, fcy, installment
 Requires at least: 4.9
-Tested up to WP: 6.0
-Tested up to Woocommerce: 6.6.1
-Stable tag: 2.7.3
-Requires PHP: 5.6
+Tested up to: 6.0
+Stable tag: 2.7.4
+Requires PHP: 7.0
 Requires WordPress: 4.9
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
@@ -64,6 +63,7 @@ Yes! In Live Mode, an SSL certificate must be installed on your site to use Mone
 == Changelog ==
 = 1.0.0 - 2021-05-12 =
 
+* 2022-06-30 : fix bug checking qrnone status from api and set default enable stock reduce and force wc-completed after pay.
 * 2022-06-28 : fix bug checking qrnone status from api
 * 2022-05-30 : fix bug qrnone not rendering
 * 2022-05-04 : fix bug qrnone not redirect after payment success and add option stock reduce in admin config

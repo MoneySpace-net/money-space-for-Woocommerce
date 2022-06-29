@@ -92,7 +92,7 @@ class MNS_Payment_Gateway_QR extends WC_Payment_Gateway
                 'title' => __(MNS_FORM_FIELD_SET_ORDER_STATUS, $this->domain),
                 'type' => 'select',
                 'class' => 'wc-enhanced-select',
-                'default' => 'wc-processing',
+                'default' => 'wc-completed',
                 'desc_tip' => true,
                 'options' => wc_get_order_statuses()
             ),
@@ -100,7 +100,7 @@ class MNS_Payment_Gateway_QR extends WC_Payment_Gateway
                 'title' => __(MNS_STOCKSETTING_HEAD, $this->domain),
                 'type' => 'select',
                 'class' => 'wc-enhanced-select',
-                'default' => 'Disable',
+                'default' => 'Enable',
                 'desc_tip' => true,
                 'options' => ["Disable" => MNS_STOCKSETTING_DISABLE, "Enable" => MNS_STOCKSETTING_ENABLE]
             ),

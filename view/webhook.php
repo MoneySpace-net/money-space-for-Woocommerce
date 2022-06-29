@@ -4,7 +4,7 @@ global $wpdb;
 
 global $woocommerce;
 
-if (sanitize_text_field($_POST["transectionID"]) != "") {
+if (sanitize_text_field($_POST["transactionID"]) != "") {
 
     $getorderid = sanitize_text_field($_POST["orderid"]);
     preg_match_all('!\d+!', $getorderid, $arroid);
@@ -48,7 +48,8 @@ if (sanitize_text_field($_POST["transectionID"]) != "") {
         if($MNS_PAYMENT_TYPE == "Card"){
 
             if ($ms_stock_setting != "Disable") {
-                $order->reduce_order_stock();
+                $order->payment_complete();
+                // $order->reduce_order_stock();
             }
 
             if(empty($ms_order_select)){
@@ -59,7 +60,8 @@ if (sanitize_text_field($_POST["transectionID"]) != "") {
         } else if($MNS_PAYMENT_TYPE == "Qrnone"){
 
             if ($ms_qr_stock_setting != "Disable") {
-                $order->reduce_order_stock();
+                $order->payment_complete();
+                // $order->reduce_order_stock();
             }
 
             if(empty($ms_order_select_qr)){
@@ -71,11 +73,13 @@ if (sanitize_text_field($_POST["transectionID"]) != "") {
         } else if($MNS_PAYMENT_TYPE == "Installment"){
 
             if ($ms_order_select_installment != "Disable") {
-                $order->reduce_order_stock();
+                $order->payment_complete();
+                // $order->reduce_order_stock();
             }
 
             if(empty($ms_order_select_installment)){
-                $order->update_status("wc-processing");
+                // $order->update_status("wc-processing");
+                $order->payment_complete();
             }else{
                 $order->update_status($ms_order_select_installment);
             }
