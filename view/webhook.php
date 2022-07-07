@@ -4,7 +4,7 @@ global $wpdb;
 
 global $woocommerce;
 
-if (sanitize_text_field($_POST["transactionID"]) != "") {
+if (!empty(sanitize_text_field($_POST["transectionID"]))) {
 
     $getorderid = sanitize_text_field($_POST["orderid"]);
     preg_match_all('!\d+!', $getorderid, $arroid);
@@ -48,7 +48,11 @@ if (sanitize_text_field($_POST["transactionID"]) != "") {
         if($MNS_PAYMENT_TYPE == "Card"){
 
             if ($ms_stock_setting != "Disable") {
-                $order->payment_complete();
+                
+                $order->update_status("wc-processing");
+                wc_reduce_stock_levels($order->id);
+                
+                // $order->payment_complete();
                 // $order->reduce_order_stock();
             }
 
@@ -60,7 +64,9 @@ if (sanitize_text_field($_POST["transactionID"]) != "") {
         } else if($MNS_PAYMENT_TYPE == "Qrnone"){
 
             if ($ms_qr_stock_setting != "Disable") {
-                $order->payment_complete();
+                $order->update_status("wc-processing");
+                wc_reduce_stock_levels($order->id);
+                // $order->payment_complete();
                 // $order->reduce_order_stock();
             }
 
@@ -73,13 +79,17 @@ if (sanitize_text_field($_POST["transactionID"]) != "") {
         } else if($MNS_PAYMENT_TYPE == "Installment"){
 
             if ($ms_order_select_installment != "Disable") {
-                $order->payment_complete();
+                $order->update_status("wc-processing");
+                wc_reduce_stock_levels($order->id);
+                // $order->payment_complete();
                 // $order->reduce_order_stock();
             }
 
             if(empty($ms_order_select_installment)){
                 // $order->update_status("wc-processing");
-                $order->payment_complete();
+                $order->update_status("wc-processing");
+                wc_reduce_stock_levels($order->id);
+                // $order->payment_complete();
             }else{
                 $order->update_status($ms_order_select_installment);
             }

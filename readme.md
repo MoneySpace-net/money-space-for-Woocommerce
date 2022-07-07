@@ -433,6 +433,8 @@
 
 # Changelog
 
+- 2022-07-08 : fix bug callback not invalid parameter
+
 - 2022-06-30 : fix bug checking qrnone status from api and set default enable stock reduce and force wc-completed after pay.
 
 - 2022-06-28 : fix bug checking qrnone status from api

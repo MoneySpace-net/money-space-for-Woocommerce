@@ -81,7 +81,8 @@ if ($order && $pid) {
             }
 
             if ($ms_stock_setting != "Disable") {
-                $order->reduce_order_stock();
+                wc_reduce_stock_levels($order->id);
+                // $order->reduce_order_stock();
             }
 
             update_post_meta($order->id, 'MNS_PAYMENT_PAID', $ms_status->amount);
