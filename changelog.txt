@@ -1,6 +1,7 @@
 == Changelog ==
-= 1.0.0 - 2022-05-04 =
+= 1.0.0 - 2022-07-10 =
 
+* 2022-07-10 : custom payment status after payment is completed
 * 2022-07-08 : fix bug callback not invalid parameter
 * 2022-06-30 : fix bug checking qrnone status from api and set default enable stock reduce and force wc-completed after pay.
 * 2022-06-28 : fix bug checking qrnone status from api

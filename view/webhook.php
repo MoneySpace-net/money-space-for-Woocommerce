@@ -48,12 +48,7 @@ if (!empty(sanitize_text_field($_POST["transectionID"]))) {
         if($MNS_PAYMENT_TYPE == "Card"){
 
             if ($ms_stock_setting != "Disable") {
-                
-                $order->update_status("wc-processing");
                 wc_reduce_stock_levels($order->id);
-                
-                // $order->payment_complete();
-                // $order->reduce_order_stock();
             }
 
             if(empty($ms_order_select)){
@@ -64,10 +59,7 @@ if (!empty(sanitize_text_field($_POST["transectionID"]))) {
         } else if($MNS_PAYMENT_TYPE == "Qrnone"){
 
             if ($ms_qr_stock_setting != "Disable") {
-                $order->update_status("wc-processing");
                 wc_reduce_stock_levels($order->id);
-                // $order->payment_complete();
-                // $order->reduce_order_stock();
             }
 
             if(empty($ms_order_select_qr)){
@@ -79,17 +71,11 @@ if (!empty(sanitize_text_field($_POST["transectionID"]))) {
         } else if($MNS_PAYMENT_TYPE == "Installment"){
 
             if ($ms_order_select_installment != "Disable") {
-                $order->update_status("wc-processing");
                 wc_reduce_stock_levels($order->id);
-                // $order->payment_complete();
-                // $order->reduce_order_stock();
             }
 
             if(empty($ms_order_select_installment)){
-                // $order->update_status("wc-processing");
                 $order->update_status("wc-processing");
-                wc_reduce_stock_levels($order->id);
-                // $order->payment_complete();
             }else{
                 $order->update_status($ms_order_select_installment);
             }

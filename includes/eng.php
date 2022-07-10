@@ -95,3 +95,5 @@ define('MNS_CC_NO', 'Card Number');
 define('MNS_CC_EXP', 'Exp Date');
 define('MNS_CC_CVV', 'CVV');
 define('MNS_CC_REMEMBER', 'Save my card details securely for future payment');
+
+define('MNS_ORDER_STATUS_COMPLETED', 'Completed');

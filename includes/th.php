@@ -95,3 +95,5 @@ define('MNS_CC_NO', 'หมายเลขบัตรเครดิต');
 define('MNS_CC_EXP', 'วันหมดอายุ');
 define('MNS_CC_CVV', 'รหัสป้องกัน');
 define('MNS_CC_REMEMBER', 'บันทึกข้อมูลบัตรสำหรับการสั่งซื้อรอบถัดไป');
+
+define('MNS_ORDER_STATUS_COMPLETED', 'ชำระเงินเรียบร้อยแล้ว');
