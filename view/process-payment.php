@@ -59,9 +59,6 @@ if ($order && $pid) {
                 }else{
                     $order->update_status($ms_order_select);
                 }
-
-
-
             }else if($MNS_PAYMENT_TYPE == "Qrnone"){
 
                 if(empty($ms_order_select_qr)){
@@ -69,8 +66,6 @@ if ($order && $pid) {
                 }else{
                     $order->update_status($ms_order_select_qr);
                 }
-
-
             } else if($MNS_PAYMENT_TYPE == "Installment"){
 
                 if(empty($ms_order_select_installment)){
@@ -84,7 +79,6 @@ if ($order && $pid) {
                 wc_reduce_stock_levels($order->id);
                 // $order->reduce_order_stock();
             }
-
             update_post_meta($order->id, 'MNS_PAYMENT_PAID', $ms_status->amount);
             update_post_meta($order->id, 'MNS_PAYMENT_STATUS', $ms_status->status);
             wp_redirect(wc_get_order($order->id)->get_checkout_order_received_url());

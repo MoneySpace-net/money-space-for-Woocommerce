@@ -97,14 +97,14 @@ class MNS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
                 'desc_tip' => true,
                 'options' => ["include" => "ร้านค้ารับผิดชอบดอกเบี้ยรายเดือน" , "exclude" => " ผู้ถือบัตรรับผิดชอบดอกเบี้ยรายเดือน ( ดอกเบี้ย : 0.8% , 1% )"]
             ),
-            'message2store_setting' => array(
-                'title' => __(MNS_MESSAGE2STORE_HEADER, $this->domain),
-                'type' => 'select',
-                'class' => 'wc-enhanced-select',
-                'default' => 'Enable',
-                'desc_tip' => true,
-                'options' => ["Enable" => "Enable" , "Disable" => "Disable"]
-            ),
+            // 'message2store_setting' => array(
+            //     'title' => __(MNS_MESSAGE2STORE_HEADER, $this->domain),
+            //     'type' => 'select',
+            //     'class' => 'wc-enhanced-select',
+            //     'default' => 'Enable',
+            //     'desc_tip' => true,
+            //     'options' => ["Enable" => "Enable" , "Disable" => "Disable"]
+            // ),
             'ktc_max_months_setting' => array(
                 'title' => __("KTC ผ่อนสูงสุด", $this->domain),
                 'type' => 'select',
@@ -286,52 +286,51 @@ class MNS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
 
         </script>
 
-        <?php if($amount_total >= 3000.01){ ?>
+        <?php if($amount_total >= 3000.01) { ?>
             <h3 style="text-decoration: underline;">เลือกการผ่อนชำระ</h3>
             <br>
-
-        <?php if ($ktc_enabled == "yes") { ?>
-        <div class="form-check">
-            <input class="form-check-input" type="radio" style="width: 0px" name="selectbank" id="selectbank-ktc" value="KTC" onclick="KTC();">
-            <label class="form-check-label" for="selectbank-ktc">
-            เคทีซี (KTC)
-            <img src="<?php _e(MNS_ROOT_URL . 'includes/images/installment/ktc-logo.png'); ?>">
-            </label>
-        </div>
-            <?php if ($ms_fee == "include") { ?>
-            <div id="KTC" class="installment">
-                <select name="KTC_permonths" id="permonths" class="form-control">
-                    <?php foreach($KTC as $months){ ?>
-                        <?php if(round($amount_total / $months,2) >= 300 && $months <= $ktc_max_months_setting){ ?>
-                        <option value="<?php _e($months); ?>">ผ่อน <?php _e($months); ?> เดือน ( <?php _e(number_format($amount_total / $months,2)); ?> บาท / เดือน )</option>
+            <?php if ($ktc_enabled == "yes") { ?>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" style="width: 0px" name="selectbank" id="selectbank-ktc" value="KTC" onclick="KTC();">
+                    <label class="form-check-label" for="selectbank-ktc">
+                    เคทีซี (KTC)
+                    <img src="<?php _e(MNS_ROOT_URL . 'includes/images/installment/ktc-logo.png'); ?>">
+                    </label>
+                </div>
+                <?php if ($ms_fee == "include") { ?>
+                <div id="KTC" class="installment">
+                    <select name="KTC_permonths" id="permonths" class="form-control">
+                        <?php foreach($KTC as $months){ ?>
+                            <?php if(round($amount_total / $months,2) >= 300 && $months <= $ktc_max_months_setting){ ?>
+                            <option value="<?php _e($months); ?>">ผ่อน <?php _e($months); ?> เดือน ( <?php _e(number_format($amount_total / $months,2)); ?> บาท / เดือน )</option>
+                            <?php } ?>
                         <?php } ?>
-                    <?php } ?>
-                </select>
-            </div>
-            <?php } ?>
-            <?php if ($ms_fee == "exclude") { ?>
-            <div id="KTC" class="installment">
-                <select name="KTC_permonths" id="permonths" class="form-control">
-                    <?php foreach($KTC as $months){ ?>
-                        <?php if(round($amount_total / $months,2) >= 300 && $months <= $ktc_max_months_setting){ $ex_ktc_bay = $amount_total / 100 * 0.8 * $months + $amount_total; ?>
-                        <option value="<?php _e($months); ?>">ผ่อน <?php _e($months); ?> เดือน ( <?php _e(number_format($ex_ktc_bay / $months,2)); ?> บาท / เดือน )</option>
+                    </select>
+                </div>
+                <?php } ?>
+                <?php if ($ms_fee == "exclude") { ?>
+                <div id="KTC" class="installment">
+                    <select name="KTC_permonths" id="permonths" class="form-control">
+                        <?php foreach($KTC as $months){ ?>
+                            <?php if(round($amount_total / $months,2) >= 300 && $months <= $ktc_max_months_setting){ $ex_ktc_bay = $amount_total / 100 * 0.8 * $months + $amount_total; ?>
+                            <option value="<?php _e($months); ?>">ผ่อน <?php _e($months); ?> เดือน ( <?php _e(number_format($ex_ktc_bay / $months,2)); ?> บาท / เดือน )</option>
+                            <?php } ?>
                         <?php } ?>
-                    <?php } ?>
-                </select>
-            </div>
+                    </select>
+                </div>
+                <?php } ?>
+                <br />
+                <hr />
             <?php } ?>
-            <br />
-            <hr />
-        <?php } ?>
 
-        <?php if ($bay_enabled == "yes") { ?>
-        <div class="form-check">
-            <input class="form-check-input" type="radio" style="width: 0px" name="selectbank" id="selectbank-bay" value="BAY" onclick="BAY();">
-            <label class="form-check-label" for="selectbank-bay">
-            กรุงศรีฯ วีซ่า , เซ็นทรัล , เทสโก้โลตัส
-            <img src="<?php _e(MNS_ROOT_URL . 'includes/images/installment/bay_central_lotus.png'); ?>">
-            </label>
-        </div>
+            <?php if ($bay_enabled == "yes") { ?>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" style="width: 0px" name="selectbank" id="selectbank-bay" value="BAY" onclick="BAY();">
+                    <label class="form-check-label" for="selectbank-bay">
+                    กรุงศรีฯ วีซ่า , เซ็นทรัล , เทสโก้โลตัส
+                    <img src="<?php _e(MNS_ROOT_URL . 'includes/images/installment/bay_central_lotus.png'); ?>">
+                    </label>
+                </div>
                 <?php if ($ms_fee == "include") { ?>
                 <div id="BAY" class="installment">
                     <select name="BAY_permonths" id="permonths" class="form-control">
@@ -356,68 +355,46 @@ class MNS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
                 <?php } ?>
                 <br />
                 <hr />
-        <?php } ?>
-
-        <?php if ($fcy_enabled == "yes") { ?>
-        <div class="form-check">
-            <input class="form-check-input" type="radio" style="width: 0px" name="selectbank" id="selectbank-fcy" value="FCY" onclick="FCY();">
-            <label class="form-check-label" for="selectbank-fcy">
-            กรุงศรีเฟิร์สช้อยส์ , โฮมโปร , เมกาโฮม
-            <img src="<?php _e(MNS_ROOT_URL . 'includes/images/installment/fcy-logo.png'); ?>">
-            </label>
-        </div>
-            <?php if ($ms_fee == "include") { ?>
-            <div id="FCY" class="installment">
-                <select name="FCY_permonths" id="permonths" class="form-control">
-                    <?php foreach($FCY as $months){ ?>
-                        <?php if(round($amount_total / $months,2) >= 300 && $months <= $fcy_max_months_setting){ ?>
-                        <option value="<?php _e($months); ?>">ผ่อน <?php _e($months); ?> เดือน ( <?php _e(number_format($amount_total / $months,2)); ?> บาท / เดือน )</option>
-                        <?php } ?>
-                    <?php } ?>
-                </select>
-            </div>
             <?php } ?>
-            <?php if ($ms_fee == "exclude") { ?>
-            <div id="FCY" class="installment">
-                <select name="FCY_permonths" id="permonths" class="form-control">
-                    <?php foreach($FCY as $months){ ?>
-                        <?php if(round($amount_total / $months,2) >= 300 && $months <= $fcy_max_months_setting){ $ex_fcy = $amount_total / 100 * 1 * $months + $amount_total; ?>
-                        <option value="<?php _e($months); ?>">ผ่อน <?php _e($months); ?> เดือน ( <?php _e(number_format($ex_fcy / $months,2)); ?> บาท / เดือน )</option>
+
+            <?php if ($fcy_enabled == "yes") { ?>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" style="width: 0px" name="selectbank" id="selectbank-fcy" value="FCY" onclick="FCY();">
+                    <label class="form-check-label" for="selectbank-fcy">
+                    กรุงศรีเฟิร์สช้อยส์ , โฮมโปร , เมกาโฮม
+                    <img src="<?php _e(MNS_ROOT_URL . 'includes/images/installment/fcy-logo.png'); ?>">
+                    </label>
+                </div>
+                <?php if ($ms_fee == "include") { ?>
+                <div id="FCY" class="installment">
+                    <select name="FCY_permonths" id="permonths" class="form-control">
+                        <?php foreach($FCY as $months){ ?>
+                            <?php if(round($amount_total / $months,2) >= 300 && $months <= $fcy_max_months_setting){ ?>
+                            <option value="<?php _e($months); ?>">ผ่อน <?php _e($months); ?> เดือน ( <?php _e(number_format($amount_total / $months,2)); ?> บาท / เดือน )</option>
+                            <?php } ?>
                         <?php } ?>
-                    <?php } ?>
-                </select>
-            </div> 
+                    </select>
+                </div>
+                <?php } ?>
+                <?php if ($ms_fee == "exclude") { ?>
+                <div id="FCY" class="installment">
+                    <select name="FCY_permonths" id="permonths" class="form-control">
+                        <?php foreach($FCY as $months){ ?>
+                            <?php if(round($amount_total / $months,2) >= 300 && $months <= $fcy_max_months_setting){ $ex_fcy = $amount_total / 100 * 1 * $months + $amount_total; ?>
+                            <option value="<?php _e($months); ?>">ผ่อน <?php _e($months); ?> เดือน ( <?php _e(number_format($ex_fcy / $months,2)); ?> บาท / เดือน )</option>
+                            <?php } ?>
+                        <?php } ?>
+                    </select>
+                </div> 
+                <?php } ?>
+                <br />
+                <hr />
             <?php } ?>
-            <br />
-            <hr />
+            <br>
+
+        <?php } else if ($amount_total < 3000.01){ ?>
+            <h5 style="color:red; font-size: inherit;"><?php _e(MNS_INS_MESSAGE_WARNING); ?></h5>
         <?php } ?>
-        <br>
-
-        <?php if ($ms_message2store == "Enable"){ ?>
-
-        <div id="custom_input">
-            <p class="form-row form-row-wide">
-                <label for="message_card" class=""><?php _e(MNS_MESSAGE, $this->domain); ?></label>
-                <input type="text" class="" name="message_card" id="message_card" placeholder="<?php _e(MNS_MESSAGE2STORE); ?>">
-            </p>
-        </div>
-
-        <?php } ?>
-
-        <?php if ($ms_message2store != "Enable"){ ?>
-
-
-        <input type="text" class="" name="message_card" id="message_card" placeholder="<?php _e(MNS_MESSAGE2STORE); ?>" value="" hidden>
-
-
-        <?php } ?>
-
-        <?php }else if($amount_total < 3000.01){ ?>
-
-        <h5 style="color:red; font-size: inherit;"><?php _e(MNS_INS_MESSAGE_WARNING); ?></h5>
-
-        <?php } ?>
-        
         <?php
 
     }
