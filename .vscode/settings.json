@@ -1,0 +1,5 @@
+{
+    "intelephense.environment.includePaths": [
+        "./../woo-webapp/woo_data/"
+    ]
+}

@@ -4,7 +4,7 @@ $MNS_QR_TIME = get_post_meta($order_id, 'MNS_QR_TIME', true);
 $auto_cancel = $payment_gateway_qr->settings['auto_cancel'];
 
 _e('<div style="text-align: center;">
-    <embed type="image/jpeg" src="'.$image_qrprom.'" />
+    <img type="image/jpeg" style="display: initial" src="'.$image_qrprom.'"/>
     </div>
 ');
 
