@@ -2,3 +2,4 @@
 *.bat
 .scannerwork/
 .sonarqube/
+.vscode/settings.json
