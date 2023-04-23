@@ -433,6 +433,8 @@
 
 # Changelog
 
+- 2023-04-23 : fix bug qrcode can't update payment status
+
 - 2022-07-10 : custom payment status after payment is completed
 
 - 2022-07-08 : fix bug callback not invalid parameter

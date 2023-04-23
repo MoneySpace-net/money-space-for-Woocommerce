@@ -33,4 +33,13 @@ $result = new stdClass();
 $result->order_id = $order->get_id();
 $result->transaction_id = $order->get_meta("MNS_transaction");
 $result->status = $data_status[0]->$transaction_ID->status;
+
+if ($result->status == "Pay Success")
+{
+    wp_remote_post(get_site_url() . "/process/payment/" . $order->get_id(), array(
+        'method' => 'POST',
+        'timeout' => 120
+    ));
+}
+
 echo json_encode($result);
