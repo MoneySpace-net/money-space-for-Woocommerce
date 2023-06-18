@@ -112,6 +112,12 @@ class MNS_Payment_Gateway_QR extends WC_Payment_Gateway
                 'desc_tip' => true,
                 'options' => [900 => "15 นาที",1200 => "20 นาที",1500 => "25 นาที",1800 => "30 นาที"]
             ),
+            'enable_auto_check_result' => array(
+                'title' => __(MNS_FORM_FIELD_ENABLE_AUTO_CHECK_QR, $this->domain),
+                'type' => 'checkbox',
+                'label' => __(MNS_FORM_FIELD_ENABLE_LABEL, $this->domain),
+                'default' => 'yes'
+            ),
             'template' => array(
                 'title' => __(MNS_FORM_FIELD_TEMPLATE, $this->domain),
                 'type' => 'select',

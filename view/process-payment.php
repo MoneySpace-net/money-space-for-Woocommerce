@@ -28,6 +28,7 @@ if ($order && $pid) {
     $ms_order_select_qr = $payment_gateway_qr->settings['order_status_if_success'];
     $ms_order_select_installment = $payment_gateway_installment->settings['order_status_if_success'];
 
+    $enable_auto_check_result = $payment_gateway_qr->settings['enable_auto_check_result'];
 
     $ms_time = date("YmdHis");
     $MNS_transaction_orderid = get_post_meta($order->id, 'MNS_transaction_orderid', true);
@@ -65,6 +66,10 @@ if ($order && $pid) {
                     $order->update_status("wc-processing");
                 }else{
                     $order->update_status($ms_order_select_qr);
+
+                    if($enable_auto_check_result == "yes" || $enable_auto_check_result == "") {
+                        wp_redirect(wc_get_order($order->id)->get_checkout_order_received_url());
+                    }
                 }
             } else if($MNS_PAYMENT_TYPE == "Installment"){
 

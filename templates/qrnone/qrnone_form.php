@@ -2,6 +2,7 @@
 
 $MNS_QR_TIME = get_post_meta($order_id, 'MNS_QR_TIME', true);
 $auto_cancel = $payment_gateway_qr->settings['auto_cancel'];
+$enable_auto_check_result = $payment_gateway_qr->settings['enable_auto_check_result'];
 
 _e('<div style="text-align: center;">
     <img type="image/jpeg" style="display: initial" src="'.$image_qrprom.'"/>
@@ -65,9 +66,14 @@ var endDate = new Date(Date.parse("'.date('Y/m/d H:i', $MNS_QR_TIME + $limit_tim
 var startDate = new Date().getTime();
 var resultDiffInMinutes = Math.round(endDate - startDate);
 startTimer(resultDiffInMinutes); //display
-checkPayment(resultDiffInMinutes, '.$order_id.');
+var enableAutoCheckResult = "'.$enable_auto_check_result.'";
+if (enableAutoCheckResult == "") {
+    enableAutoCheckResult = "yes";
+}
 
-
+if (enableAutoCheckResult == "yes") {
+    checkPayment(resultDiffInMinutes, '.$order_id.');
+}
 ');
 
 ?>
