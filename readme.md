@@ -433,6 +433,8 @@
 
 # Changelog
 
+- 2023-10-12 : tested up with 6.3.1
+
 - 2023-06-19 : add option to disable auto check qrnone
 
 - 2023-04-23 : fix bug qrcode can't update payment status
