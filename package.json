@@ -1,0 +1,11 @@
+{
+  "name": "money-space-for-woocommerce",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "git@bitbucket.org:MoneySpace/money-space-for-woocommerce.git",
+  "author": "Ekapop.B <bus.ekapop@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "@woocommerce/dependency-extraction-webpack-plugin": "^2.3.0"
+  }
+}

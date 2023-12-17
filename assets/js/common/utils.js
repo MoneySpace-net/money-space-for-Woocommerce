@@ -1,0 +1,1 @@
+export const getMoneySpaceQueryParams = () => getSetting('queryParams');
