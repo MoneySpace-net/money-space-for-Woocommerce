@@ -11,6 +11,11 @@
  * @package MoneySpace
  */
 
+use MoneySpace\Payments\MoneySpace_CreditCard;
+use Automattic\WooCommerce\Blocks\Payments\PaymentMethodRegistry;
+use Automattic\WooCommerce\Blocks\Package;
+use Automattic\WooCommerce\Blocks\Assets\Api as AssetApi;
+
 if ( ! defined( 'MNS_PLUGIN_FILE' ) ) {
 	define( 'MNS_PLUGIN_FILE', __FILE__ );
 }
@@ -73,6 +78,43 @@ if (in_array('woocommerce/woocommerce.php', $active_plugins)) {
         require_once plugin_dir_path(__FILE__) . 'payment-gateway/class-woocommerce-moneyspace-payment-gateway.php';
         require_once plugin_dir_path(__FILE__) . 'payment-gateway/class-woocommerce-moneyspace-payment-gateway_QrProm.php';
         require_once plugin_dir_path(__FILE__) . 'payment-gateway/class-woocommerce-moneyspace-payment-gateway_installment.php';
+
+        require_once plugin_dir_path(__FILE__) . 'payment-gateway/moneyspace-creditcard.php';
+
+        
+        add_action( 'woocommerce_blocks_loaded', 'my_extension_woocommerce_blocks_support' );
+
+        function my_extension_woocommerce_blocks_support() {
+            if ( class_exists( 'Automattic\WooCommerce\Blocks\Payments\Integrations\AbstractPaymentMethodType' ) && class_exists('Automattic\WooCommerce\Blocks\Package') ) {
+                add_action(
+                'woocommerce_blocks_payment_method_type_registration',
+                function( PaymentMethodRegistry $payment_method_registry ) {
+                    Package::container()->register(
+                        MoneySpace_CreditCard::class,
+                        function( Container $container ) {
+                            $asset_api = $container->get( AssetApi::class );
+                            return new MoneySpace_CreditCard( $asset_api );
+                        }
+                    );
+                    
+                    // $asset_api = Package::container()->get( AssetApi::class );
+                    // var_dump(Package::container()->get( MoneySpace_CreditCard::class ));
+                    // exit();
+                    // $payment_method_registry->register(
+                    //     Package::container()->get( MoneySpace_CreditCard::class )
+                    // );
+                    // $payment_method_registry->register( MoneySpace\Payments\MoneySpace_CreditCard::class );
+                    // var_dump($payment_method_registry->get_all_active_registered());
+                    // exit();
+                    // if ($name == "moneyspace") {
+                    //     // echo $name;
+                    //     var_dump($this->registered_integrations[ $name ] );
+                    //     exit();
+                    // }
+                }
+                );
+            }
+        }
     }
 
     add_filter('plugin_action_links_' . plugin_basename(__FILE__), 'add_action_links');
