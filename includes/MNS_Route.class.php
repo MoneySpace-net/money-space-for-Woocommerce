@@ -1,5 +1,10 @@
 <?php
 
+namespace MoneySpace;
+
+use WP;
+use Exception;
+
 class MNS_Route extends MNS_Router_Utility
 {
     protected $id = '';

@@ -1,5 +1,7 @@
 <?php
 
+namespace MoneySpace;
+
 class MNS_Router_Page extends MNS_Router_Utility
 {
     const POST_TYPE = 'MNS_Router_page';

@@ -4,3 +4,4 @@
 .sonarqube/
 .vscode/settings.json
 node_modules/
+yarn.lock

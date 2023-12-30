@@ -1,5 +1,7 @@
 <?php
 
+namespace MoneySpace;
+
 class Moneyspace_Updater {
 
 	private $file;
@@ -23,8 +25,6 @@ class Moneyspace_Updater {
 		$this->file = $file;
 
 		add_action( 'admin_init', array( $this, 'set_plugin_properties' ) );
-
-		return $this;
 	}
 
 	public function set_plugin_properties() {

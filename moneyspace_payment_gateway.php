@@ -11,115 +11,223 @@
  * @package MoneySpace
  */
 
+namespace MoneySpace;
+
+use MoneySpace\MNS_Router_Utility;
+use MoneySpace\MNS_Router_Page;
+use MoneySpace\MNS_Router;
+use MoneySpace\MNS_Processpayment;
+use MoneySpace\MNS_Webhook;
+use MoneySpace\MNS_Paylink;
+use MoneySpace\MNS_Payform;
+use MoneySpace\MNS_Cancel;
+use MoneySpace\MNS_Info;
+use MoneySpace\MNS_CheckPayment;
+use MoneySpace\Moneyspace_Updater;
 use MoneySpace\Payments\MoneySpace_CreditCard;
+
 use Automattic\WooCommerce\Blocks\Payments\PaymentMethodRegistry;
 use Automattic\WooCommerce\Blocks\Package;
 use Automattic\WooCommerce\Blocks\Assets\Api as AssetApi;
 
-if ( ! defined( 'MNS_PLUGIN_FILE' ) ) {
-	define( 'MNS_PLUGIN_FILE', __FILE__ );
-}
+MoneySpacePayment::Import('MNS_Bootstrapper.php');
 
-define('MNS_ID', 'moneyspace');
-define('MNS_ID_QRPROM', 'moneyspace_qrprom');
-define('MNS_ID_INSTALLMENT', 'moneyspace_installment');
-define('MNS_TITLE', 'Money Space');
-define('MNS_API_ENDPOINT', 'https://a.moneyspace.net');
-define('MNS_STATIC_URL_ENDPOINT', 'https://a.moneyspace.net/static'); //'http://127.0.0.1:8000/static');
-define('MNS_API_URL_CREATE_LINK_PAYMENT', MNS_API_ENDPOINT . '/payment/CreateTransaction');
-define('MNS_API_URL_CHECK_PAYMENT', MNS_API_ENDPOINT . '/CheckPayment');
-define('MNS_API_URL_CREATE', MNS_API_ENDPOINT . '/CreateTransactionID');
-define('MNS_API_URL_CHECK', MNS_API_ENDPOINT . '/CheckOrderID');
-define('MNS_API_URL_GETPAY', MNS_API_ENDPOINT . '/Getpay');
-define('MNS_API_URL_PAY', MNS_API_ENDPOINT . '/Pay');
-define('MNS_API_URL_V2_CREATE_PAYMENT', 'https://www.moneyspace.net/merchantapi/v2/createpayment/obj');
-define('MNS_API_URL_CREATE_INSTALLMENT', 'https://a.moneyspace.net/payment/Createinstallment/');
-define('MNS_LOGO', MNS_STATIC_URL_ENDPOINT . '/img/type/Master_VISA_JCB_UNION_180.png');
-define('MNS_LOGO_QR', MNS_STATIC_URL_ENDPOINT. '/img/type/QRCode_160.png');
-define('MNS_LOGO_INSTALLMENT', MNS_STATIC_URL_ENDPOINT . '/img/type/Installment_220.png');
-define('MNS_PAYMENT_JS', plugins_url( "includes/moneyspace_payment.js", __FILE__ )); // MNS_STATIC_URL_ENDPOINT . '/moneyspace_payment.js'); //
-define('MNS_PAYMENT_FORM_JS', plugins_url( "includes/moneyspace_payment_form.js", __FILE__ ) );
-define('MNS_PAYMENT_FORM_CSS', plugins_url( "includes/css/moneyspace.css", __FILE__ ) );
-define('MNS_METHOD_TITLE', 'Money Space for WooCommerce');
-// define('MNS_TIME_ZONE', "Asia/Bangkok");
-define('MNS_CANCEL_TRANSACTION', 'https://a.moneyspace.net/merchantapi/cancelpayment');
-define('MNS_CHECK_PAYMENT', 'https://a.moneyspace.net/CheckPayment');
-define('MNS_CHECK_PAYMENT_STATUS', '/ms/check-payment/');
-define("MNS_ROOT", __DIR__."/");
-define("MNS_ROOT_URL", plugin_dir_url(__FILE__));
-define("MNS_PAYMENT_TYPE_CARD", "card");
-define("MNS_PAYMENT_TYPE_QR", "qrnone");
-define("MNS_PAYMENT_TYPE_INSTALLMENT", "installment");
+// $active_plugins = apply_filters('active_plugins', get_option('active_plugins'));
 
-if (get_locale() == 'th') {
-    include_once "includes/th.php";
-} else {
-    include_once "includes/eng.php";
-}
+// if (in_array('woocommerce/woocommerce.php', $active_plugins)) {
+//     add_action('plugins_loaded', 'load_MS_Payemnt_Gateway');
 
-$active_plugins = apply_filters('active_plugins', get_option('active_plugins'));
+//     function load_MS_Payemnt_Gateway()
+//     {
+//         add_filter('woocommerce_payment_gateways', 'add_MS_Payemnt_Gateway');
 
-if (in_array('woocommerce/woocommerce.php', $active_plugins)) {
-    add_action('plugins_loaded', 'load_MS_Payemnt_Gateway');
+//         function add_MS_Payemnt_Gateway($gateways)
+//         {
+//             $gateways[] = 'MNS_Payment_Gateway';
+//             $gateways[] = 'MNS_Payment_Gateway_QR';
+//             $gateways[] = 'MNS_Payment_Gateway_INSTALLMENT';
+//             return $gateways;
+//         }
+//         wp_register_style( "moneyspace-style", MNS_PAYMENT_FORM_CSS, array(), "1.0.0", "");
+//         wp_enqueue_style( "moneyspace-style", MNS_PAYMENT_FORM_CSS, array(), "1.0.0", "");
+//         require_once plugin_dir_path(__FILE__) . 'payment-gateway/class-woocommerce-moneyspace-payment-gateway.php';
+//         require_once plugin_dir_path(__FILE__) . 'payment-gateway/class-woocommerce-moneyspace-payment-gateway_QrProm.php';
+//         require_once plugin_dir_path(__FILE__) . 'payment-gateway/class-woocommerce-moneyspace-payment-gateway_installment.php';
 
-    function load_MS_Payemnt_Gateway()
-    {
-        add_filter('woocommerce_payment_gateways', 'add_MS_Payemnt_Gateway');
-
-        function add_MS_Payemnt_Gateway($gateways)
-        {
-            $gateways[] = 'MNS_Payment_Gateway';
-            $gateways[] = 'MNS_Payment_Gateway_QR';
-            $gateways[] = 'MNS_Payment_Gateway_INSTALLMENT';
-            return $gateways;
-        }
-        wp_register_style( "moneyspace-style", MNS_PAYMENT_FORM_CSS, array(), "1.0.0", "");
-        wp_enqueue_style( "moneyspace-style", MNS_PAYMENT_FORM_CSS, array(), "1.0.0", "");
-        require_once plugin_dir_path(__FILE__) . 'payment-gateway/class-woocommerce-moneyspace-payment-gateway.php';
-        require_once plugin_dir_path(__FILE__) . 'payment-gateway/class-woocommerce-moneyspace-payment-gateway_QrProm.php';
-        require_once plugin_dir_path(__FILE__) . 'payment-gateway/class-woocommerce-moneyspace-payment-gateway_installment.php';
-
-        require_once plugin_dir_path(__FILE__) . 'payment-gateway/moneyspace-creditcard.php';
+//         require_once plugin_dir_path(__FILE__) . 'payment-gateway/moneyspace-creditcard.php';
 
         
-        add_action( 'woocommerce_blocks_loaded', 'my_extension_woocommerce_blocks_support' );
+//         add_action( 'woocommerce_blocks_loaded', 'my_extension_woocommerce_blocks_support' );
 
-        function my_extension_woocommerce_blocks_support() {
-            if ( class_exists( 'Automattic\WooCommerce\Blocks\Payments\Integrations\AbstractPaymentMethodType' ) && class_exists('Automattic\WooCommerce\Blocks\Package') ) {
-                add_action(
-                'woocommerce_blocks_payment_method_type_registration',
-                function( PaymentMethodRegistry $payment_method_registry ) {
-                    Package::container()->register(
-                        MoneySpace_CreditCard::class,
-                        function( Container $container ) {
-                            $asset_api = $container->get( AssetApi::class );
-                            return new MoneySpace_CreditCard( $asset_api );
-                        }
-                    );
+//         function my_extension_woocommerce_blocks_support() {
+//             if ( class_exists( 'Automattic\WooCommerce\Blocks\Payments\Integrations\AbstractPaymentMethodType' ) && class_exists('Automattic\WooCommerce\Blocks\Package') ) {
+//                 add_action(
+//                 'woocommerce_blocks_payment_method_type_registration',
+//                 function( PaymentMethodRegistry $payment_method_registry ) {
+//                     Package::container()->register(
+//                         MoneySpace_CreditCard::class,
+//                         function( Container $container ) {
+//                             $asset_api = $container->get( AssetApi::class );
+//                             return new MoneySpace_CreditCard( $asset_api );
+//                         }
+//                     );
                     
-                    // $asset_api = Package::container()->get( AssetApi::class );
-                    // var_dump(Package::container()->get( MoneySpace_CreditCard::class ));
-                    // exit();
-                    // $payment_method_registry->register(
-                    //     Package::container()->get( MoneySpace_CreditCard::class )
-                    // );
-                    // $payment_method_registry->register( MoneySpace\Payments\MoneySpace_CreditCard::class );
-                    // var_dump($payment_method_registry->get_all_active_registered());
-                    // exit();
-                    // if ($name == "moneyspace") {
-                    //     // echo $name;
-                    //     var_dump($this->registered_integrations[ $name ] );
-                    //     exit();
-                    // }
-                }
-                );
-            }
+//                     // $asset_api = Package::container()->get( AssetApi::class );
+//                     // var_dump(Package::container()->get( MoneySpace_CreditCard::class ));
+//                     // exit();
+//                     // $payment_method_registry->register(
+//                     //     Package::container()->get( MoneySpace_CreditCard::class )
+//                     // );
+//                     // $payment_method_registry->register( MoneySpace\Payments\MoneySpace_CreditCard::class );
+//                     // var_dump($payment_method_registry->get_all_active_registered());
+//                     // exit();
+//                     // if ($name == "moneyspace") {
+//                     //     // echo $name;
+//                     //     var_dump($this->registered_integrations[ $name ] );
+//                     //     exit();
+//                     // }
+//                 }
+//                 );
+//             }
+//         }
+//     }
+
+//     add_filter('plugin_action_links_' . plugin_basename(__FILE__), 'add_action_links');
+
+//     function add_action_links($links)
+//     {
+//         $mylinks = array(
+//             '<a href="' . admin_url('admin.php?page=wc-settings&tab=checkout&section=moneyspace') . '">' . MNS_SETTING_LINK . '</a>',
+//         );
+//         return array_merge($links, $mylinks);
+//     }
+
+//     if (!function_exists('MNS_Router_load')) {
+//         function MNS_Router_load()
+//         {
+//             // load the base class
+//             require_once plugin_dir_path(__FILE__) . 'includes/MNS_Router_Utility.class.php';
+
+//             if (MNS_Router_Utility::prerequisites_met(phpversion(), get_bloginfo('version'))) {
+//                 // we can continue. Load all supporting files and hook into wordpress
+//                 require_once plugin_dir_path(__FILE__) . 'includes/MNS_Router.class.php';
+//                 require_once plugin_dir_path(__FILE__) . 'includes/MNS_Route.class.php';
+//                 require_once plugin_dir_path(__FILE__) . 'includes/MNS_Router_Page.class.php';
+//                 add_action('init', array('MNS_Router_Utility', 'init'), -100, 0);
+//                 add_action(MNS_Router_Utility::PLUGIN_INIT_HOOK, array('MNS_Router_Page', 'init'), 0, 0);
+//                 add_action(MNS_Router_Utility::PLUGIN_INIT_HOOK, array('MNS_Router', 'init'), 1, 0);
+
+//                 require_once plugin_dir_path(__FILE__) . 'router/processpayment.php';
+//                 require_once plugin_dir_path(__FILE__) . 'router/webhook.php';
+//                 require_once plugin_dir_path(__FILE__) . 'router/mspaylink.php';
+//                 require_once plugin_dir_path(__FILE__) . 'router/payform.php';
+//                 require_once plugin_dir_path(__FILE__) . 'router/cancel.php';
+//                 require_once plugin_dir_path(__FILE__) . 'router/info.php';
+//                 require_once plugin_dir_path(__FILE__) . 'router/check-payment.php';
+
+//                 add_action(MNS_Router_Utility::PLUGIN_INIT_HOOK, array('MNS_Processpayment', 'init'), 1, 0);
+//                 add_action(MNS_Router_Utility::PLUGIN_INIT_HOOK, array('MNS_Webhook', 'init'), 1, 0);
+//                 add_action(MNS_Router_Utility::PLUGIN_INIT_HOOK, array('MNS_Paylink', 'init'), 1, 0);
+//                 add_action(MNS_Router_Utility::PLUGIN_INIT_HOOK, array('MNS_Payform', 'init'), 1, 0);
+//                 add_action(MNS_Router_Utility::PLUGIN_INIT_HOOK, array('MNS_Cancel', 'init'), 1, 0);
+//                 add_action(MNS_Router_Utility::PLUGIN_INIT_HOOK, array('MNS_Info', 'init'), 1, 0);
+//                 add_action(MNS_Router_Utility::PLUGIN_INIT_HOOK, array('MNS_CheckPayment', 'init'), 1, 0);
+
+//                 add_action('admin_enqueue_scripts', 'load_custom_wp_admin_style');
+//                 require_once plugin_dir_path(__FILE__) . 'includes/helper.php';
+//                 require_once plugin_dir_path(__FILE__) . 'includes/ms_log.php';
+
+//                 add_filter('wc_order_statuses', 'wc_renaming_order_status');
+//             }
+//         }
+//         // Fire it up!
+//         MNS_Router_load();
+//     }
+
+//     function load_custom_wp_admin_style(){
+//         wp_register_style( 'custom_wp_admin_css', plugin_dir_url( __FILE__ )."includes/css/admin-style.css", false, '1.0.0' );
+//         wp_enqueue_style( 'custom_wp_admin_css' );
+//     }
+
+//     if( ! class_exists( 'Moneyspace_Updater' ) ){
+//         include_once( plugin_dir_path( __FILE__ ) . 'includes/updater.php' );
+//     }
+    
+//     $updater = new Moneyspace_Updater( __FILE__ );
+//     $updater->set_username( 'MoneySpace-net' );
+//     $updater->set_repository( 'money-space-for-woocommerce' );
+//     $updater->initialize();
+    
+// }
+
+class MoneySpacePayment {
+
+    public $active_plugins;
+    public $updater;
+
+    public function __construct() {
+
+    }
+
+    public static function Factory() {
+        return new MoneySpacePayment();
+    }
+
+    public function Initialize() {
+        
+        $this->active_plugins = apply_filters('active_plugins', get_option('active_plugins'));
+        if (in_array('woocommerce/woocommerce.php', $this->active_plugins)) {
+            add_action('plugins_loaded', array($this, 'load_MS_Payment_Gateway'));
+            add_filter('plugin_action_links_' . plugin_basename(__FILE__), array($this, 'add_action_links'));
         }
     }
 
-    add_filter('plugin_action_links_' . plugin_basename(__FILE__), 'add_action_links');
+    public function load_MS_Payment_Gateway() {
+        add_filter('woocommerce_payment_gateways', array($this, 'add_MS_Payemnt_Gateway'));
+        wp_register_style( "moneyspace-style", MNS_PAYMENT_FORM_CSS, array(), "1.0.0", "");
+        wp_enqueue_style( "moneyspace-style", MNS_PAYMENT_FORM_CSS, array(), "1.0.0", "");
 
-    function add_action_links($links)
+        MoneySpacePayment::Import('payment-gateway/class-woocommerce-moneyspace-payment-gateway.php');
+        MoneySpacePayment::Import('payment-gateway/class-woocommerce-moneyspace-payment-gateway_QrProm.php');
+        MoneySpacePayment::Import('payment-gateway/class-woocommerce-moneyspace-payment-gateway_installment.php');
+
+        // MoneySpacePayment::Import('includes/blocks/moneyspace-creditcard.php');
+
+        // load the base class
+        MoneySpacePayment::Import('includes/MNS_Router_Utility.class.php');
+        MoneySpacePayment::Import('includes/updater.php');
+
+        add_action('MoneySpaceInit', array($this, 'MNS_Router_load'));
+        add_action('MoneySpaceInit', array($this, 'MoneySpaceUpdater'));
+        do_action('MoneySpaceInit');
+
+        
+        add_action( 'woocommerce_blocks_loaded', array( __CLASS__, 'woocommerce_gateway_moneyspace_woocommerce_block_support' ) );
+    }
+
+    public function add_MS_Payemnt_Gateway($gateways) {
+        $gateways[] = 'MoneySpace\Payments\MNS_Payment_Gateway';
+        $gateways[] = 'MoneySpace\Payments\MNS_Payment_Gateway_QR';
+        $gateways[] = 'MoneySpace\Payments\MNS_Payment_Gateway_INSTALLMENT';
+        return $gateways;
+    }
+
+    public function mns_extension_woocommerce_blocks_support() {
+        if ( class_exists( 'Automattic\WooCommerce\Blocks\Payments\Integrations\AbstractPaymentMethodType' ) && class_exists('Automattic\WooCommerce\Blocks\Package') ) {
+            add_action('woocommerce_blocks_payment_method_type_registration',
+                function( PaymentMethodRegistry $payment_method_registry ) {
+                    // Package::container()->register(
+                    //     MoneySpace_CreditCard::class,
+                    //     function( Container $container ) {
+                    //         $asset_api = $container->get( AssetApi::class );
+                    //         return new MoneySpace_CreditCard( $asset_api );
+                    //     }
+                    // );
+                });
+        }
+    }
+
+    public function add_action_links($links)
     {
         $mylinks = array(
             '<a href="' . admin_url('admin.php?page=wc-settings&tab=checkout&section=moneyspace') . '">' . MNS_SETTING_LINK . '</a>',
@@ -127,60 +235,92 @@ if (in_array('woocommerce/woocommerce.php', $active_plugins)) {
         return array_merge($links, $mylinks);
     }
 
-    if (!function_exists('MNS_Router_load')) {
-        function MNS_Router_load()
-        {
-            // load the base class
-            require_once plugin_dir_path(__FILE__) . 'includes/MNS_Router_Utility.class.php';
+    public function MNS_Router_load()
+    {
+        // load the base class
+        MoneySpacePayment::Import('includes/MNS_Router_Utility.class.php');
 
-            if (MNS_Router_Utility::prerequisites_met(phpversion(), get_bloginfo('version'))) {
-                // we can continue. Load all supporting files and hook into wordpress
-                require_once plugin_dir_path(__FILE__) . 'includes/MNS_Router.class.php';
-                require_once plugin_dir_path(__FILE__) . 'includes/MNS_Route.class.php';
-                require_once plugin_dir_path(__FILE__) . 'includes/MNS_Router_Page.class.php';
-                add_action('init', array('MNS_Router_Utility', 'init'), -100, 0);
-                add_action(MNS_Router_Utility::PLUGIN_INIT_HOOK, array('MNS_Router_Page', 'init'), 0, 0);
-                add_action(MNS_Router_Utility::PLUGIN_INIT_HOOK, array('MNS_Router', 'init'), 1, 0);
+        if (MNS_Router_Utility::prerequisites_met(phpversion(), get_bloginfo('version'))) {
+            // we can continue. Load all supporting files and hook into wordpress
+            MoneySpacePayment::Import('includes/MNS_Router.class.php');
+            MoneySpacePayment::Import('includes/MNS_Route.class.php');
+            MoneySpacePayment::Import('includes/MNS_Router_Page.class.php');
+            MoneySpacePayment::Import('router/processpayment.php');
+            MoneySpacePayment::Import('router/webhook.php');
+            MoneySpacePayment::Import('router/mspaylink.php');
+            MoneySpacePayment::Import('router/payform.php');
+            MoneySpacePayment::Import('router/cancel.php');
+            MoneySpacePayment::Import('router/info.php');
+            MoneySpacePayment::Import('router/check-payment.php');
+            MoneySpacePayment::Import('includes/helper.php');
+            MoneySpacePayment::Import('includes/ms_log.php');
 
-                require_once plugin_dir_path(__FILE__) . 'router/processpayment.php';
-                require_once plugin_dir_path(__FILE__) . 'router/webhook.php';
-                require_once plugin_dir_path(__FILE__) . 'router/mspaylink.php';
-                require_once plugin_dir_path(__FILE__) . 'router/payform.php';
-                require_once plugin_dir_path(__FILE__) . 'router/cancel.php';
-                require_once plugin_dir_path(__FILE__) . 'router/info.php';
-                require_once plugin_dir_path(__FILE__) . 'router/check-payment.php';
+            add_action('init', array(MNS_Router_Utility::class, 'init'), -100, 0);
+            add_action(MNS_Router_Utility::PLUGIN_INIT_HOOK, array(MNS_Router_Page::class, 'init'), 0, 0);
+            add_action(MNS_Router_Utility::PLUGIN_INIT_HOOK, array(MNS_Router::class, 'init'), 1, 0);
+            add_action(MNS_Router_Utility::PLUGIN_INIT_HOOK, array(MNS_Processpayment::class, 'init'), 1, 0);
+            add_action(MNS_Router_Utility::PLUGIN_INIT_HOOK, array(MNS_Webhook::class, 'init'), 1, 0);
+            add_action(MNS_Router_Utility::PLUGIN_INIT_HOOK, array(MNS_Paylink::class, 'init'), 1, 0);
+            add_action(MNS_Router_Utility::PLUGIN_INIT_HOOK, array(MNS_Payform::class, 'init'), 1, 0);
+            add_action(MNS_Router_Utility::PLUGIN_INIT_HOOK, array(MNS_Cancel::class, 'init'), 1, 0);
+            add_action(MNS_Router_Utility::PLUGIN_INIT_HOOK, array(MNS_Info::class, 'init'), 1, 0);
+            add_action(MNS_Router_Utility::PLUGIN_INIT_HOOK, array(MNS_CheckPayment::class, 'init'), 1, 0);
 
-                add_action(MNS_Router_Utility::PLUGIN_INIT_HOOK, array('MNS_Processpayment', 'init'), 1, 0);
-                add_action(MNS_Router_Utility::PLUGIN_INIT_HOOK, array('MNS_Webhook', 'init'), 1, 0);
-                add_action(MNS_Router_Utility::PLUGIN_INIT_HOOK, array('MNS_Paylink', 'init'), 1, 0);
-                add_action(MNS_Router_Utility::PLUGIN_INIT_HOOK, array('MNS_Payform', 'init'), 1, 0);
-                add_action(MNS_Router_Utility::PLUGIN_INIT_HOOK, array('MNS_Cancel', 'init'), 1, 0);
-                add_action(MNS_Router_Utility::PLUGIN_INIT_HOOK, array('MNS_Info', 'init'), 1, 0);
-                add_action(MNS_Router_Utility::PLUGIN_INIT_HOOK, array('MNS_CheckPayment', 'init'), 1, 0);
-
-                add_action('admin_enqueue_scripts', 'load_custom_wp_admin_style');
-                require_once plugin_dir_path(__FILE__) . 'includes/helper.php';
-                require_once plugin_dir_path(__FILE__) . 'includes/ms_log.php';
-
-                add_filter('wc_order_statuses', 'wc_renaming_order_status');
-            }
+            add_action('admin_enqueue_scripts', array($this, 'load_custom_wp_admin_style'));
+            add_filter('wc_order_statuses', 'wc_renaming_order_status');
         }
-        // Fire it up!
-        MNS_Router_load();
     }
 
-    function load_custom_wp_admin_style(){
+    public function MoneySpaceUpdater() {
+        $updater = new Moneyspace_Updater( __FILE__ );
+        $updater->set_username( 'MoneySpace-net' );
+        $updater->set_repository( 'money-space-for-woocommerce' );
+        $updater->initialize();
+    }
+
+    public function load_custom_wp_admin_style(){
         wp_register_style( 'custom_wp_admin_css', plugin_dir_url( __FILE__ )."includes/css/admin-style.css", false, '1.0.0' );
         wp_enqueue_style( 'custom_wp_admin_css' );
     }
 
-    if( ! class_exists( 'Moneyspace_Updater' ) ){
-        include_once( plugin_dir_path( __FILE__ ) . 'includes/updater.php' );
+    /**
+	 * Plugin url.
+	 *
+	 * @return string
+	 */
+	public static function plugin_url() {
+		return untrailingslashit( plugins_url( '/', __FILE__ ) );
+	}
+
+	/**
+	 * Plugin url.
+	 *
+	 * @return string
+	 */
+	public static function plugin_abspath() {
+		return trailingslashit( plugin_dir_path( __FILE__ ) );
+	}
+
+    public static function Import($file) {
+        return require_once MoneySpacePayment::plugin_abspath().$file;
     }
-    
-    $updater = new Moneyspace_Updater( __FILE__ );
-    $updater->set_username( 'MoneySpace-net' );
-    $updater->set_repository( 'money-space-for-woocommerce' );
-    $updater->initialize();
-    
+
+    /**
+	 * Registers WooCommerce Blocks integration.
+	 *
+	 */
+	public static function woocommerce_gateway_moneyspace_woocommerce_block_support() {
+		if ( class_exists( 'Automattic\WooCommerce\Blocks\Payments\Integrations\AbstractPaymentMethodType' ) ) {
+			MoneySpacePayment::Import('includes/blocks/moneyspace-creditcard.php');
+            
+			add_action(
+				'woocommerce_blocks_payment_method_type_registration',
+				function(PaymentMethodRegistry $payment_method_registry ) {
+					$payment_method_registry->register( new MoneySpace_CreditCard() );
+				}
+			);
+		}
+	}
 }
+
+MoneySpacePayment::Factory()->Initialize();

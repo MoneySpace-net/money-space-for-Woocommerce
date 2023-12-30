@@ -1,11 +1,18 @@
 {
   "name": "money-space-for-woocommerce",
   "version": "1.0.0",
-  "main": "index.js",
-  "repository": "git@bitbucket.org:MoneySpace/money-space-for-woocommerce.git",
-  "author": "Ekapop.B <bus.ekapop@gmail.com>",
+  "author": "MoneySpace",
   "license": "MIT",
+  "keywords": [],
+	"engines": {
+		"node": ">=6.9.4",
+		"npm": ">=1.1.0"
+	},
   "dependencies": {
-    "@woocommerce/dependency-extraction-webpack-plugin": "^2.3.0"
+    "@woocommerce/dependency-extraction-webpack-plugin": "^2.3.0",
+    "@wordpress/scripts": "^26.19.0"
+  },
+  "scripts": {
+    "build": "wp-scripts build"
   }
 }

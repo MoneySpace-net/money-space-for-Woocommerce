@@ -3,7 +3,7 @@
 global $wp_version;
 global $woocommerce;
 
-
+use MoneySpace\Mslogs;
 
 // $payment_gateways = WC_Payment_Gateways::instance();
 // $payment_gateway = $payment_gateways->payment_gateways()[$payment_gateway_id];

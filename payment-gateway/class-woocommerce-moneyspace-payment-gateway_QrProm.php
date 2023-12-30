@@ -1,8 +1,18 @@
 <?php
+
+namespace MoneySpace\Payments;
+
+use WC_Payment_Gateway;
+use WC_Payment_Gateways;
+use WC_Order;
+use MoneySpace\Mslogs;
+
 date_default_timezone_set("Asia/Bangkok");
 
 class MNS_Payment_Gateway_QR extends WC_Payment_Gateway
 {
+    public $domain;
+    public $instructions;
 
     public function __construct()
     {

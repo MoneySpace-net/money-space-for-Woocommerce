@@ -1,5 +1,10 @@
 <?php
 
+namespace MoneySpace;
+
+use WP;
+use Exception;
+
 class MNS_Router extends MNS_Router_Utility
 {
     const ROUTE_CACHE_OPTION = 'MNS_Router_route_hash';
