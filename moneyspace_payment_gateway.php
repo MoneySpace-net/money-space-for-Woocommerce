@@ -25,6 +25,8 @@ use MoneySpace\MNS_Info;
 use MoneySpace\MNS_CheckPayment;
 use MoneySpace\Moneyspace_Updater;
 use MoneySpace\Payments\MoneySpace_CreditCard;
+use MoneySpace\Payments\MoneySpace_QRCode;
+use MoneySpace\Payments\MoneySpace_CreditCard_Installment;
 
 use Automattic\WooCommerce\Blocks\Payments\PaymentMethodRegistry;
 use Automattic\WooCommerce\Blocks\Package;
@@ -184,9 +186,6 @@ class MoneySpacePayment {
 
     public function load_MS_Payment_Gateway() {
         add_filter('woocommerce_payment_gateways', array($this, 'add_MS_Payemnt_Gateway'));
-        wp_register_style( "moneyspace-style", MNS_PAYMENT_FORM_CSS, array(), "1.0.0", "");
-        wp_enqueue_style( "moneyspace-style", MNS_PAYMENT_FORM_CSS, array(), "1.0.0", "");
-
         MoneySpacePayment::Import('payment-gateway/class-woocommerce-moneyspace-payment-gateway.php');
         MoneySpacePayment::Import('payment-gateway/class-woocommerce-moneyspace-payment-gateway_QrProm.php');
         MoneySpacePayment::Import('payment-gateway/class-woocommerce-moneyspace-payment-gateway_installment.php');
@@ -279,6 +278,8 @@ class MoneySpacePayment {
     }
 
     public function load_custom_wp_admin_style(){
+        wp_register_style( "moneyspace-style", MNS_PAYMENT_FORM_CSS, array(), "1.0.0", "");
+        wp_enqueue_style( "moneyspace-style", MNS_PAYMENT_FORM_CSS, array(), "1.0.0", "");
         wp_register_style( 'custom_wp_admin_css', plugin_dir_url( __FILE__ )."includes/css/admin-style.css", false, '1.0.0' );
         wp_enqueue_style( 'custom_wp_admin_css' );
     }
@@ -312,11 +313,15 @@ class MoneySpacePayment {
 	public static function woocommerce_gateway_moneyspace_woocommerce_block_support() {
 		if ( class_exists( 'Automattic\WooCommerce\Blocks\Payments\Integrations\AbstractPaymentMethodType' ) ) {
 			MoneySpacePayment::Import('includes/blocks/moneyspace-creditcard.php');
+            MoneySpacePayment::Import('includes/blocks/moneyspace-qrcode.php');
+            MoneySpacePayment::Import('includes/blocks/moneyspace-creditcard-installment.php');
             
 			add_action(
 				'woocommerce_blocks_payment_method_type_registration',
 				function(PaymentMethodRegistry $payment_method_registry ) {
 					$payment_method_registry->register( new MoneySpace_CreditCard() );
+                    $payment_method_registry->register( new MoneySpace_QRCode() );
+                    $payment_method_registry->register( new MoneySpace_CreditCard_Installment() );
 				}
 			);
 		}

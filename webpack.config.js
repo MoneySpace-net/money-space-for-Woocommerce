@@ -29,6 +29,8 @@ module.exports = {
 	...defaultConfig,
 	entry: {
 		'frontend/blocks-ms-creditcard': '/includes/assets/js/payment-method/creditcard.js',
+		'frontend/blocks-ms-qr': '/includes/assets/js/payment-method/qrcode.js',
+		'frontend/blocks-ms-creditcard-installment': '/includes/assets/js/payment-method/creditcard-installment.js',
 	},
 	output: {
 		path: path.resolve( __dirname, 'assets/js' ),
@@ -44,9 +46,4 @@ module.exports = {
 			requestToHandle
 		})
 	]
-	// plugins: [
-    //     new WooCommerceDependencyExtractionWebpackPlugin( {
-	// 		bundledPackages: [ '@woocommerce/components' ],
-	// 	} ),
-    // ],
 };
