@@ -68,7 +68,8 @@ class MoneySpace_CreditCard_Installment extends AbstractPaymentMethodType {
 				'version'      => '1.2.0'
 			);
 		$script_url        = MoneySpacePayment::plugin_url() . $script_path;
-
+		var_dump($script_url);
+		exit();
 		wp_register_script(
 			'wc-moneyspace-creditcard-installment',
 			$script_url,
