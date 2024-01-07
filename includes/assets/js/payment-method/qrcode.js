@@ -31,7 +31,7 @@ const options = {
 	ariaLabel: label,
 	canMakePayment: () => true,
 	supports: {
-		features: [],
+		features: settings.supports,
 	},
 };
 

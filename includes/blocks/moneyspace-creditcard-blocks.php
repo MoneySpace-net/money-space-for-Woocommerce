@@ -4,16 +4,15 @@ namespace MoneySpace\Payments;
 
 use MoneySpace\MoneySpacePayment;
 use Automattic\WooCommerce\Blocks\Payments\Integrations\AbstractPaymentMethodType;
-use Automattic\WooCommerce\Blocks\Assets\Api;
 
-/**
- * Class MoneySpace_CreditCard
- *
- * @package MoneySpace\Payments
- */
 class MoneySpace_CreditCard extends AbstractPaymentMethodType {
 
-	public $name = MNS_ID;
+	/**
+	 * Payment method name/id/slug.
+	 *
+	 * @var string
+	 */
+	protected $name = "moneyspace";
 
 	/**
 	 * The gateway instance.
@@ -29,9 +28,10 @@ class MoneySpace_CreditCard extends AbstractPaymentMethodType {
 	 * Initializes the payment method type.
 	 */
 	public function initialize() {
-		$this->settings = get_option( 'woocommerce_'.MNS_ID.'_settings', [] ); // '.MNS_ID.'_settings
+		$this->settings = get_option( 'woocommerce_moneyspace_settings', [] ); // '.MNS_ID.'_settings
 		$gateways       = WC()->payment_gateways->payment_gateways();
 		$this->gateway  = $gateways[ $this->name ];
+		
 	}
 
 	/**
@@ -40,18 +40,9 @@ class MoneySpace_CreditCard extends AbstractPaymentMethodType {
 	 * @return boolean
 	 */
 	public function is_active() {
-		return filter_var( $this->get_setting( 'enabled', false ), FILTER_VALIDATE_BOOLEAN );
+		// return filter_var( $this->get_setting( 'enabled', false ), FILTER_VALIDATE_BOOLEAN );
+		return true; // $this->gateway->is_available();
 	}
-
-	// /**
-	//  * Returns if this payment method should be active. If false, the scripts will not be enqueued.
-	//  *
-	//  * @return boolean
-	//  */
-	// public function is_active() {
-	// 	return $this->gateway->is_available();
-	// }
-
 
 	/**
 	 * Returns an array of scripts/handles to be registered for this payment method.
@@ -61,6 +52,7 @@ class MoneySpace_CreditCard extends AbstractPaymentMethodType {
 	public function get_payment_method_script_handles() {
 		$script_path       = '/assets/js/frontend/blocks-ms-creditcard.js';
 		$script_asset_path = MoneySpacePayment::plugin_abspath() . 'assets/js/frontend/blocks-ms-creditcard.asset.php';
+		
 		$script_asset      = file_exists( $script_asset_path )
 			? require( $script_asset_path )
 			: array(
@@ -68,16 +60,15 @@ class MoneySpace_CreditCard extends AbstractPaymentMethodType {
 				'version'      => '1.2.0'
 			);
 		$script_url        = MoneySpacePayment::plugin_url() . $script_path;
-
 		wp_register_script(
-			'wc-moneyspace-creditcard',
+			'wc-moneyspace-payments-blocks',
 			$script_url,
 			$script_asset[ 'dependencies' ],
 			$script_asset[ 'version' ],
 			true
 		);
 
-		return [ 'wc-moneyspace-creditcard' ];
+		return [ 'wc-moneyspace-payments-blocks' ];
 	}
 
 	/**

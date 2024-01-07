@@ -3,9 +3,7 @@ import { decodeEntities } from '@wordpress/html-entities';
 import { registerPaymentMethod  } from '@woocommerce/blocks-registry';
 
 const settings = getSetting( 'moneyspace_data', {} );
-console.log('settings mns : ', settings);
 const label = decodeEntities( settings.title );
-console.log('settings mns label : ', label);
 /**
  * Label component
  *
@@ -29,9 +27,10 @@ const options = {
 	content: <Content />,
 	edit:  <Content />,
 	ariaLabel: label,
+	paymentMethodId: 'moneyspace',
 	canMakePayment: () => true,
 	supports: {
-		features: [],
+		features: settings.supports,
 	},
 };
 

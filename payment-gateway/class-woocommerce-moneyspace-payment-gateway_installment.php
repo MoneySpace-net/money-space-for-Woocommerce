@@ -71,7 +71,7 @@ class MNS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
     {
         $this->form_fields = array(
             'header_setting' => array(
-                'title' => __('<h1><b> ' . MNS_FORM_FIELD_HEADER_SETTING . ' </b></h1>', $this->domain),
+                'title' => __(MNS_FORM_FIELD_HEADER_SETTING, $this->domain), // '<h1><b> ' . MNS_FORM_FIELD_HEADER_SETTING . ' </b></h1>'
                 'type' => 'title'
             ),
             'enabled' => array(

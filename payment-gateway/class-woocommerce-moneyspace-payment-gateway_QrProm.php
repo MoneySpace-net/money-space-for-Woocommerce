@@ -47,7 +47,6 @@ class MNS_Payment_Gateway_QR extends WC_Payment_Gateway
             wc_add_notice(__(MNS_NOTICE_ERROR_SETUP, $this->domain), 'error');
             return;
         }
-
         $data_status = json_decode($response["body"]);
         if (empty($data_status) || $data_status[0]->status != "success") {
             wc_add_notice(__("Error ms102 : " . MNS_NOTICE_CHECK_TRANSACTION, $this->domain), 'error');
@@ -71,6 +70,7 @@ class MNS_Payment_Gateway_QR extends WC_Payment_Gateway
 
         $template = $payment_gateway_qr->settings['template'] ?? 'template_1';
         $chooseTemplate = $template == 'template_1' ? 'mns_tpl_qrnone_1': 'mns_tpl_qrnone_2';
+        
         load_template( plugin_dir_path( __DIR__ ).'templates/qrnone/'.$chooseTemplate.'.php', false, array(
             'order_id' => $order_id,
             'payment_gateway_qr' => $payment_gateway_qr,
@@ -82,7 +82,7 @@ class MNS_Payment_Gateway_QR extends WC_Payment_Gateway
     {
         $this->form_fields = array(
             'header_setting' => array(
-                'title' => __('<h1><b> ' . MNS_FORM_FIELD_HEADER_SETTING . ' </b></h1>', $this->domain),
+                'title' => __(MNS_FORM_FIELD_HEADER_SETTING, $this->domain), // '<h1><b> ' . MNS_FORM_FIELD_HEADER_SETTING . ' </b></h1>'
                 'type' => 'title'
             ),
             'enabled' => array(

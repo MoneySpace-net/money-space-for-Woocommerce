@@ -18,7 +18,7 @@ class MoneySpace_CreditCard_Installment extends AbstractPaymentMethodType {
 	/**
 	 * The gateway instance.
 	 *
-	 * @var MNS_Payment_Gateway
+	 * @var MNS_Payment_Gateway_INSTALLMENT
 	 */
 	private $gateway;
 	
@@ -32,6 +32,8 @@ class MoneySpace_CreditCard_Installment extends AbstractPaymentMethodType {
 		$this->settings = get_option( 'woocommerce_'.$this->name.'_settings', [] );
 		$gateways       = WC()->payment_gateways->payment_gateways();
 		$this->gateway  = $gateways[ $this->name ];
+		// var_dump(json_encode($this->gateway));
+		// exit();
 	}
 
 	/**
@@ -65,11 +67,9 @@ class MoneySpace_CreditCard_Installment extends AbstractPaymentMethodType {
 			? require( $script_asset_path )
 			: array(
 				'dependencies' => array(),
-				'version'      => '1.2.0'
+				'version'      => '1.0.0'
 			);
 		$script_url        = MoneySpacePayment::plugin_url() . $script_path;
-		var_dump($script_url);
-		exit();
 		wp_register_script(
 			'wc-moneyspace-creditcard-installment',
 			$script_url,
@@ -77,6 +77,8 @@ class MoneySpace_CreditCard_Installment extends AbstractPaymentMethodType {
 			$script_asset[ 'version' ],
 			true
 		);
+
+		// wp_enqueue_script('wc-moneyspace-creditcard-installment');
 
 		return [ 'wc-moneyspace-creditcard-installment' ];
 	}
@@ -87,6 +89,7 @@ class MoneySpace_CreditCard_Installment extends AbstractPaymentMethodType {
 	 * @return array
 	 */
 	public function get_payment_method_data() {
+		
 		return [
 			'title'       => $this->get_setting( 'title' ),
 			'description' => $this->get_setting( 'description' ),

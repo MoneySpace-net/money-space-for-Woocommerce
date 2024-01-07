@@ -1,7 +1,7 @@
 <?php
 
 function set_title_html($title) {
-    return '<h1><b>'.$title.'</b></h1>';
+    return $title; //  '<h1><b>'.$title.'</b></h1>';
 }
 
 function set_item_message($items) {

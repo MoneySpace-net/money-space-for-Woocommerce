@@ -4,6 +4,7 @@ namespace MoneySpace;
 
 use WP;
 use Exception;
+use WP_Query;
 
 class MNS_Router extends MNS_Router_Utility
 {

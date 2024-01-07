@@ -6,6 +6,7 @@ use WC_Payment_Gateway;
 use WC_Payment_Gateways;
 use WC_Order;
 use MoneySpace\Mslogs;
+use Exception;
 
 class MNS_Payment_Gateway extends WC_Payment_Gateway
 {
@@ -19,7 +20,7 @@ class MNS_Payment_Gateway extends WC_Payment_Gateway
         $this->id = MNS_ID;
         $this->title = __($this->get_option('title'), $this->domain);
         $this->icon = apply_filters('woocommerce_custom_gateway_icon', MNS_LOGO, '');
-        $this->method_title = __(MNS_METHOD_TITLE, $this->domain);
+        $this->method_title = _x(MNS_METHOD_TITLE, $this->domain);
         $this->method_description = __(MNS_DESCRIPTION, $this->domain);
         $this->has_fields = true;
 
@@ -178,7 +179,6 @@ class MNS_Payment_Gateway extends WC_Payment_Gateway
 
     public function init_form_fields()
     {
-
         $this->form_fields = array(
             'header_setting' => array(
                 'title' => __(set_title_html(MNS_FORM_FIELD_HEADER_SETTING), $this->domain),
@@ -319,14 +319,11 @@ class MNS_Payment_Gateway extends WC_Payment_Gateway
                 'label' => __(MNS_FORM_FIELD_MS_LABEL, $this->domain),
                 'default' => 'yes'
             ),
-            // 'header_setting_check_connection' => array(
-            //     'title' => __(set_title_html(MNS_FORM_FIELD_HEADER_SETTING_CHECK_CONNECTION), $this->domain),
-            //     'type' => 'title'
-            // ),
+            'header_setting_check_connection' => array(
+                'title' => __(set_title_html(MNS_FORM_FIELD_HEADER_SETTING_CHECK_CONNECTION), $this->domain),
+                'type' => 'title'
+            ),
         );
-
-        
-        
     }
 
     public function thankyou_page()
@@ -352,9 +349,7 @@ class MNS_Payment_Gateway extends WC_Payment_Gateway
 
             require_once MNS_ROOT . '/templates/credit-cards/mns-cc-tpl-1.php';
         }
-        ?>
-       
-        <?php
+
     }
     
 
@@ -389,12 +384,12 @@ class MNS_Payment_Gateway extends WC_Payment_Gateway
                 return $this->_process_external_payment($order);
             } else {
                 wc_add_notice(__(MNS_NOTICE_CURRENCY, $this->domain), 'error');
-                return;
+                throw new Exception( __(MNS_NOTICE_CURRENCY, $this->domain) );
             }
         } else {
             wc_add_notice(__("Error : Message to the store (150 characters maximum)", $this->domain), 'error');
             // wc_add_notice(__("Error : Enter special instructions to merchant again", $this->domain), 'error');
-            return;
+            throw new Exception( __("Error : Message to the store (150 characters maximum)", $this->domain) );
         }
     } // End Process
 
@@ -471,80 +466,80 @@ class MNS_Payment_Gateway extends WC_Payment_Gateway
         // Redirect to payment page, where payment form will be printed
         return array(
             'result' => 'success',
-            'redirect' => $order->get_checkout_payment_url(true)
+            'redirect' => $order->get_checkout_payment_url(true) // $this->get_return_url( $order ) // 
         );
     }
 }
 
-add_filter('woocommerce_thankyou_order_received_text', 'avia_thank_you');
+// add_filter('woocommerce_thankyou_order_received_text', 'avia_thank_you');
 
-function avia_thank_you()
-{
-    $gateways = WC()->payment_gateways->get_available_payment_gateways();
-    $added_text = '';
-    return $added_text;
-}
+// function avia_thank_you()
+// {
+//     $gateways = WC()->payment_gateways->get_available_payment_gateways();
+//     $added_text = '';
+//     return $added_text;
+// }
 
-add_filter( 'woocommerce_payment_complete_reduce_order_stock', 'filter_woocommerce_payment_complete_reduce_order_stock', 10, 2 ); 
+// add_filter( 'woocommerce_payment_complete_reduce_order_stock', 'filter_woocommerce_payment_complete_reduce_order_stock', 10, 2 ); 
 
-function filter_woocommerce_payment_complete_reduce_order_stock( $order_order_get_data_store_get_stock_reduced_order_id, $order_id ) { 
+// function filter_woocommerce_payment_complete_reduce_order_stock( $order_order_get_data_store_get_stock_reduced_order_id, $order_id ) { 
 
-    $order = new WC_Order( $order_id );
+//     $order = new WC_Order( $order_id );
 
 
-    if ($order->get_payment_method() == MNS_ID || $order->get_payment_method() == MNS_ID_QRPROM || $order->get_payment_method() == MNS_ID_INSTALLMENT){
+//     if ($order->get_payment_method() == MNS_ID || $order->get_payment_method() == MNS_ID_QRPROM || $order->get_payment_method() == MNS_ID_INSTALLMENT){
 
-        $order_order_get_data_store_get_stock_reduced_order_id = false;
+//         $order_order_get_data_store_get_stock_reduced_order_id = false;
 
-    }else if ($order->get_payment_method() != MNS_ID || $order->get_payment_method() != MNS_ID_QRPROM || $order->get_payment_method() != MNS_ID_INSTALLMENT){
+//     }else if ($order->get_payment_method() != MNS_ID || $order->get_payment_method() != MNS_ID_QRPROM || $order->get_payment_method() != MNS_ID_INSTALLMENT){
        
-        $order_order_get_data_store_get_stock_reduced_order_id = true;
+//         $order_order_get_data_store_get_stock_reduced_order_id = true;
  
-    }else if ( $order->has_status( 'on-hold' ) && $order->get_payment_method() == 'bacs' ) {
+//     }else if ( $order->has_status( 'on-hold' ) && $order->get_payment_method() == 'bacs' ) {
 
-        $order_order_get_data_store_get_stock_reduced_order_id = true;
+//         $order_order_get_data_store_get_stock_reduced_order_id = true;
 
-    }
+//     }
 
-    return $order_order_get_data_store_get_stock_reduced_order_id; 
+//     return $order_order_get_data_store_get_stock_reduced_order_id; 
 
-}; 
+// }; 
 
-add_action('woocommerce_order_details_before_order_table', 'custom_order_details_after_order_table', 10, 1);
+// add_action('woocommerce_order_details_before_order_table', 'custom_order_details_after_order_table', 10, 1);
 
-function custom_order_details_after_order_table($order)
-{
-    //TODO
-}
+// function custom_order_details_after_order_table($order)
+// {
+//     //TODO
+// }
 
-add_action('woocommerce_order_details_after_order_table', 'ms_order_detail_display', 10, 1);
+// add_action('woocommerce_order_details_after_order_table', 'ms_order_detail_display', 10, 1);
 
-function set_h6_html($msg) {
-    return '<h6 style="margin:0; font-size: 1em;"><strong>' . $msg . '</strong></h6>';
-}
+// function set_h6_html($msg) {
+//     return '<h6 style="margin:0; font-size: 1em;"><strong>' . $msg . '</strong></h6>';
+// }
 
-function set_p_html($msg) {
-    return "<p style='color:#a7a6a6; margin:0; font-size: 1em;'>" . $msg . " )</p>";
-}
+// function set_p_html($msg) {
+//     return "<p style='color:#a7a6a6; margin:0; font-size: 1em;'>" . $msg . " )</p>";
+// }
 
-function ms_order_detail_display($order)
-{
-    $MNS_PAYMENT_TYPE = get_post_meta($order->id, 'MNS_PAYMENT_TYPE', true);
-    $MNS_transaction = get_post_meta($order->id, 'MNS_transaction', true);
-    $MNS_transaction_orderid = get_post_meta($order->id, 'MNS_transaction_orderid', true);
-    $MNS_PAYMENT_PAID = get_post_meta($order->id, 'MNS_PAYMENT_PAID', true);
-    $MNS_PAYMENT_STATUS = get_post_meta($order->id, 'MNS_PAYMENT_STATUS', true);
+// function ms_order_detail_display($order)
+// {
+//     $MNS_PAYMENT_TYPE = get_post_meta($order->id, 'MNS_PAYMENT_TYPE', true);
+//     $MNS_transaction = get_post_meta($order->id, 'MNS_transaction', true);
+//     $MNS_transaction_orderid = get_post_meta($order->id, 'MNS_transaction_orderid', true);
+//     $MNS_PAYMENT_PAID = get_post_meta($order->id, 'MNS_PAYMENT_PAID', true);
+//     $MNS_PAYMENT_STATUS = get_post_meta($order->id, 'MNS_PAYMENT_STATUS', true);
 
-    $new_line = "<br>";
-    if ($MNS_PAYMENT_STATUS == "Pay Success") {
-        if ($MNS_PAYMENT_TYPE == "Qrnone" || $MNS_PAYMENT_TYPE == "Card") {
-            _e(set_h6_html(MNS_THANK_PAYMENT_ORDER_1));
-            _e(set_h6_html(MNS_THANK_PAYMENT_ORDER_2).$new_line);
-            _e(set_p_html(wc_price($MNS_PAYMENT_PAID) . " ( Transaction ID : " . $MNS_transaction . " )"));
-        } else if ($MNS_PAYMENT_TYPE == "Installment") {
-            _e(set_h6_html(MNS_THANK_PAYMENT_ORDER_1));
-            _e(set_h6_html(MNS_THANK_PAYMENT_ORDER_2). $new_line);
-            _e(set_p_html(wc_price($MNS_PAYMENT_PAID) . " ( Transaction ID : " . $MNS_transaction . " [" . $MNS_transaction_orderid . "])" ));
-        }
-    }
-}
+//     $new_line = "<br>";
+//     if ($MNS_PAYMENT_STATUS == "Pay Success") {
+//         if ($MNS_PAYMENT_TYPE == "Qrnone" || $MNS_PAYMENT_TYPE == "Card") {
+//             _e(set_h6_html(MNS_THANK_PAYMENT_ORDER_1));
+//             _e(set_h6_html(MNS_THANK_PAYMENT_ORDER_2).$new_line);
+//             _e(set_p_html(wc_price($MNS_PAYMENT_PAID) . " ( Transaction ID : " . $MNS_transaction . " )"));
+//         } else if ($MNS_PAYMENT_TYPE == "Installment") {
+//             _e(set_h6_html(MNS_THANK_PAYMENT_ORDER_1));
+//             _e(set_h6_html(MNS_THANK_PAYMENT_ORDER_2). $new_line);
+//             _e(set_p_html(wc_price($MNS_PAYMENT_PAID) . " ( Transaction ID : " . $MNS_transaction . " [" . $MNS_transaction_orderid . "])" ));
+//         }
+//     }
+// }

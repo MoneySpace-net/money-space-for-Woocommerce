@@ -2,34 +2,35 @@
 
 namespace MoneySpace\Payments;
 
-use MoneySpace\MoneySpacePayment;
 use Automattic\WooCommerce\Blocks\Payments\Integrations\AbstractPaymentMethodType;
-use Automattic\WooCommerce\Blocks\Assets\Api;
+use MoneySpace\MoneySpacePayment;
 
 /**
- * Class MoneySpace_QRCode
+ * Dummy Payments Blocks integration
  *
- * @package MoneySpace\Payments
+ * @since 1.0.3
  */
-class MoneySpace_QRCode extends AbstractPaymentMethodType {
-
-	public $name = MNS_ID_QRPROM;
+final class MNS_Payment_Gateway_Test_Block extends AbstractPaymentMethodType {
 
 	/**
 	 * The gateway instance.
 	 *
-	 * @var MNS_Payment_Gateway_QR
+	 * @var MNS_Payment_Gateway_Test
 	 */
 	private $gateway;
-	
-	public function __construct( ) {
-	}
+
+	/**
+	 * Payment method name/id/slug.
+	 *
+	 * @var string
+	 */
+	protected $name = 'moneyspace_test';
 
 	/**
 	 * Initializes the payment method type.
 	 */
 	public function initialize() {
-		$this->settings = get_option( 'woocommerce_'.$this->name.'_settings', [] );
+		$this->settings = get_option( 'woocommerce_moneyspace_test_settings', [] );
 		$gateways       = WC()->payment_gateways->payment_gateways();
 		$this->gateway  = $gateways[ $this->name ];
 		
@@ -41,18 +42,8 @@ class MoneySpace_QRCode extends AbstractPaymentMethodType {
 	 * @return boolean
 	 */
 	public function is_active() {
-		return filter_var( $this->get_setting( 'enabled', false ), FILTER_VALIDATE_BOOLEAN );
+		return $this->gateway->is_available();
 	}
-
-	// /**
-	//  * Returns if this payment method should be active. If false, the scripts will not be enqueued.
-	//  *
-	//  * @return boolean
-	//  */
-	// public function is_active() {
-	// 	return $this->gateway->is_available();
-	// }
-
 
 	/**
 	 * Returns an array of scripts/handles to be registered for this payment method.
@@ -60,8 +51,8 @@ class MoneySpace_QRCode extends AbstractPaymentMethodType {
 	 * @return array
 	 */
 	public function get_payment_method_script_handles() {
-		$script_path       = '/assets/js/frontend/blocks-ms-qr.js';
-		$script_asset_path = MoneySpacePayment::plugin_abspath() . 'assets/js/frontend/blocks-ms-qr.asset.php';
+		$script_path       = '/assets/js/frontend/blocks-ms-test-payment.js';
+		$script_asset_path = MoneySpacePayment::plugin_abspath() . 'assets/js/frontend/blocks-ms-test-payment.asset.php';
 		$script_asset      = file_exists( $script_asset_path )
 			? require( $script_asset_path )
 			: array(
@@ -71,14 +62,14 @@ class MoneySpace_QRCode extends AbstractPaymentMethodType {
 		$script_url        = MoneySpacePayment::plugin_url() . $script_path;
 
 		wp_register_script(
-			'wc-moneyspace-qr',
+			'wc-moneyspace_test-payments-blocks',
 			$script_url,
 			$script_asset[ 'dependencies' ],
 			$script_asset[ 'version' ],
 			true
 		);
 
-		return [ 'wc-moneyspace-qr' ];
+		return [ 'wc-moneyspace_test-payments-blocks' ];
 	}
 
 	/**
