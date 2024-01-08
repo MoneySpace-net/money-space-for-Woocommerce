@@ -15,13 +15,19 @@ const Content = () => {
 	return decodeEntities( settings.description || '' );
 };
 
+const CreditCardPaymentForm = () => {
+	return (<div>
+		<h1>hello world</h1>
+	</div>);
+}
+
 const options = {
 	name: id,
 	label: <PaymentMethodLabel
 			id={id}
 			title={label}
 			icons={settings.icons}/>,
-	content: <Content />,
+	content: <CreditCardPaymentForm />,
 	edit:  <Content />,
 	ariaLabel: label,
 	paymentMethodId: id,
