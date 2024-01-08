@@ -300,7 +300,11 @@ class MoneySpacePayment {
 	 */
 	public static function woocommerce_gateway_moneyspace_woocommerce_block_support() {
 		if ( class_exists( 'Automattic\WooCommerce\Blocks\Payments\Integrations\AbstractPaymentMethodType' ) ) {
-			MoneySpacePayment::Import('includes/blocks/moneyspace-creditcard-blocks.php');
+            
+            wp_register_style( 'moneyspace-block-style', plugin_dir_url( __FILE__ )."assets/js/frontend/blocks-ms-creditcard.css", array(), "1.0.0", "");
+            wp_enqueue_style('moneyspace-block-style');
+
+			MoneySpacePayment::Import('includes/blocks/moneyspace-creditcard.php');
             MoneySpacePayment::Import('includes/blocks/moneyspace-qrcode.php');
             MoneySpacePayment::Import('includes/blocks/moneyspace-creditcard-installment.php');
             MoneySpacePayment::Import('includes/blocks/moneyspace-payment-gateway-test-blocks.php');

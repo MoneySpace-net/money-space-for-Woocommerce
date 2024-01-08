@@ -1,18 +1,12 @@
 import { getSetting } from '@woocommerce/settings';
 import { decodeEntities } from '@wordpress/html-entities';
 import { registerPaymentMethod  } from '@woocommerce/blocks-registry';
+import PaymentMethodLabel from './../components/PaymentMethodLabel';
+import './styles.scss';
 
-const settings = getSetting( 'moneyspace_data', {} );
+const id = 'moneyspace';
+const settings = getSetting( `${id}_data`, {} );
 const label = decodeEntities( settings.title );
-/**
- * Label component
- *
- * @param {*} props Props from payment API.
- */
-const Label = ( props ) => {
-	const { PaymentMethodLabel } = props.components;
-	return <PaymentMethodLabel text={ label } />;
-};
 
 /**
  * Content component
@@ -22,12 +16,15 @@ const Content = () => {
 };
 
 const options = {
-	name: 'moneyspace',
-	label: <Label />,
+	name: id,
+	label: <PaymentMethodLabel
+			id={id}
+			title={label}
+			icons={settings.icons}/>,
 	content: <Content />,
 	edit:  <Content />,
 	ariaLabel: label,
-	paymentMethodId: 'moneyspace',
+	paymentMethodId: id,
 	canMakePayment: () => true,
 	supports: {
 		features: settings.supports,

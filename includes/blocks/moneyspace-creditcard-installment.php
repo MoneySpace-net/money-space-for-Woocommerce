@@ -32,8 +32,6 @@ class MoneySpace_CreditCard_Installment extends AbstractPaymentMethodType {
 		$this->settings = get_option( 'woocommerce_'.$this->name.'_settings', [] );
 		$gateways       = WC()->payment_gateways->payment_gateways();
 		$this->gateway  = $gateways[ $this->name ];
-		// var_dump(json_encode($this->gateway));
-		// exit();
 	}
 
 	/**
@@ -44,16 +42,6 @@ class MoneySpace_CreditCard_Installment extends AbstractPaymentMethodType {
 	public function is_active() {
 		return filter_var( $this->get_setting( 'enabled', false ), FILTER_VALIDATE_BOOLEAN );
 	}
-
-	// /**
-	//  * Returns if this payment method should be active. If false, the scripts will not be enqueued.
-	//  *
-	//  * @return boolean
-	//  */
-	// public function is_active() {
-	// 	return $this->gateway->is_available();
-	// }
-
 
 	/**
 	 * Returns an array of scripts/handles to be registered for this payment method.
@@ -78,8 +66,6 @@ class MoneySpace_CreditCard_Installment extends AbstractPaymentMethodType {
 			true
 		);
 
-		// wp_enqueue_script('wc-moneyspace-creditcard-installment');
-
 		return [ 'wc-moneyspace-creditcard-installment' ];
 	}
 
@@ -93,7 +79,16 @@ class MoneySpace_CreditCard_Installment extends AbstractPaymentMethodType {
 		return [
 			'title'       => $this->get_setting( 'title' ),
 			'description' => $this->get_setting( 'description' ),
+			'icons'		  => [$this->get_payment_method_icons()],
 			'supports'    => array_filter( $this->gateway->supports, [ $this->gateway, 'supports' ] )
+		];
+	}
+
+	public function get_payment_method_icons() {
+		return [
+			'id'  => 'moneyspace',
+			'src' => $this->gateway->icon,
+			'alt' => 'moneyspace'
 		];
 	}
 }

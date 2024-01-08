@@ -44,16 +44,6 @@ class MoneySpace_QRCode extends AbstractPaymentMethodType {
 		return filter_var( $this->get_setting( 'enabled', false ), FILTER_VALIDATE_BOOLEAN );
 	}
 
-	// /**
-	//  * Returns if this payment method should be active. If false, the scripts will not be enqueued.
-	//  *
-	//  * @return boolean
-	//  */
-	// public function is_active() {
-	// 	return $this->gateway->is_available();
-	// }
-
-
 	/**
 	 * Returns an array of scripts/handles to be registered for this payment method.
 	 *
@@ -90,7 +80,16 @@ class MoneySpace_QRCode extends AbstractPaymentMethodType {
 		return [
 			'title'       => $this->get_setting( 'title' ),
 			'description' => $this->get_setting( 'description' ),
+			'icons'		  => [$this->get_payment_method_icons()],
 			'supports'    => array_filter( $this->gateway->supports, [ $this->gateway, 'supports' ] )
+		];
+	}
+
+	public function get_payment_method_icons() {
+		return [
+			'id'  => 'moneyspace',
+			'src' => $this->gateway->icon,
+			'alt' => 'moneyspace'
 		];
 	}
 }

@@ -31,7 +31,8 @@ class MoneySpace_CreditCard extends AbstractPaymentMethodType {
 		$this->settings = get_option( 'woocommerce_moneyspace_settings', [] ); // '.MNS_ID.'_settings
 		$gateways       = WC()->payment_gateways->payment_gateways();
 		$this->gateway  = $gateways[ $this->name ];
-		
+		// var_dump($this->gateway->icon);
+		// exit();
 	}
 
 	/**
@@ -80,7 +81,16 @@ class MoneySpace_CreditCard extends AbstractPaymentMethodType {
 		return [
 			'title'       => $this->get_setting( 'title' ),
 			'description' => $this->get_setting( 'description' ),
+			'icons'		  => [$this->get_payment_method_icons()],
 			'supports'    => array_filter( $this->gateway->supports, [ $this->gateway, 'supports' ] )
+		];
+	}
+
+	public function get_payment_method_icons() {
+		return [
+			'id'  => 'moneyspace',
+			'src' => $this->gateway->icon,
+			'alt' => 'moneyspace'
 		];
 	}
 }

@@ -1,20 +1,12 @@
 import { getSetting } from '@woocommerce/settings';
 import { decodeEntities } from '@wordpress/html-entities';
 import { registerPaymentMethod  } from '@woocommerce/blocks-registry';
+import PaymentMethodLabel from './../components/PaymentMethodLabel';
+import './styles.scss';
 
-const settings = getSetting( 'moneyspace_qrprom_data', {} );
-console.log('settings mns : ', settings);
+const id = "moneyspace_qrprom";
+const settings = getSetting( `${id}_data`, {} );
 const label = decodeEntities( settings.title );
-console.log('settings mns label : ', label);
-/**
- * Label component
- *
- * @param {*} props Props from payment API.
- */
-const Label = ( props ) => {
-	const { PaymentMethodLabel } = props.components;
-	return <PaymentMethodLabel text={ label } />;
-};
 
 /**
  * Content component
@@ -24,8 +16,11 @@ const Content = () => {
 };
 
 const options = {
-	name: 'moneyspace_qrprom',
-	label: <Label />,
+	name: id,
+	label: <PaymentMethodLabel
+			id={id}
+			title={label}
+			icons={settings.icons}/>,
 	content: <Content />,
 	edit:  <Content />,
 	ariaLabel: label,
