@@ -2,6 +2,7 @@ import { getSetting } from '@woocommerce/settings';
 import { decodeEntities } from '@wordpress/html-entities';
 import { registerPaymentMethod  } from '@woocommerce/blocks-registry';
 import PaymentMethodLabel from './../components/PaymentMethodLabel';
+import CreditCardForm from './../components/CreditCardForm';
 import './styles.scss';
 
 const id = 'moneyspace';
@@ -15,19 +16,13 @@ const Content = () => {
 	return decodeEntities( settings.description || '' );
 };
 
-const CreditCardPaymentForm = () => {
-	return (<div>
-		<h1>hello world</h1>
-	</div>);
-}
-
 const options = {
 	name: id,
 	label: <PaymentMethodLabel
 			id={id}
 			title={label}
 			icons={settings.icons}/>,
-	content: <CreditCardPaymentForm />,
+	content: <CreditCardForm />,
 	edit:  <Content />,
 	ariaLabel: label,
 	paymentMethodId: id,
