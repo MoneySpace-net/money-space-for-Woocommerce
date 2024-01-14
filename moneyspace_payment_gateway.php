@@ -191,9 +191,7 @@ class MoneySpacePayment {
         MoneySpacePayment::Import('payment-gateway/class-woocommerce-moneyspace-payment-gateway_QrProm.php');
         MoneySpacePayment::Import('payment-gateway/class-woocommerce-moneyspace-payment-gateway_installment.php');
         MoneySpacePayment::Import('payment-gateway/class-woocommerce-moneyspace-payment-gateway-test.php');
-
-        // MoneySpacePayment::Import('includes/blocks/moneyspace-creditcard.php');
-
+        
         // load the base class
         MoneySpacePayment::Import('includes/MNS_Router_Utility.class.php');
         MoneySpacePayment::Import('includes/updater.php');
@@ -307,7 +305,6 @@ class MoneySpacePayment {
 			MoneySpacePayment::Import('includes/blocks/moneyspace-creditcard.php');
             MoneySpacePayment::Import('includes/blocks/moneyspace-qrcode.php');
             MoneySpacePayment::Import('includes/blocks/moneyspace-creditcard-installment.php');
-            MoneySpacePayment::Import('includes/blocks/moneyspace-payment-gateway-test-blocks.php');
             
 			add_action(
 				'woocommerce_blocks_payment_method_type_registration',
@@ -315,7 +312,6 @@ class MoneySpacePayment {
 					$payment_method_registry->register( new MoneySpace_CreditCard() );
                     $payment_method_registry->register( new MoneySpace_QRCode() );
                     $payment_method_registry->register( new MoneySpace_CreditCard_Installment() );
-                    $payment_method_registry->register( new MNS_Payment_Gateway_Test_Block() );
 				}
 			);
 		}
