@@ -190,7 +190,6 @@ class MoneySpacePayment {
         MoneySpacePayment::Import('payment-gateway/class-woocommerce-moneyspace-payment-gateway.php');
         MoneySpacePayment::Import('payment-gateway/class-woocommerce-moneyspace-payment-gateway_QrProm.php');
         MoneySpacePayment::Import('payment-gateway/class-woocommerce-moneyspace-payment-gateway_installment.php');
-        MoneySpacePayment::Import('payment-gateway/class-woocommerce-moneyspace-payment-gateway-test.php');
         
         // load the base class
         MoneySpacePayment::Import('includes/MNS_Router_Utility.class.php');

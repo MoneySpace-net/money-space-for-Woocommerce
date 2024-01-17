@@ -12,6 +12,11 @@ const CreditCardForm = (props) => {
         minCardYear: new Date().getFullYear()
     };
 
+    var checkPaymentMethodCC = false;
+    if (document.getElementById('radio-control-wc-payment-method-options-moneyspace') !== null) {
+        checkPaymentMethodCC = document.getElementById('radio-control-wc-payment-method-options-moneyspace').checked;
+    }
+
     const [formData, setFormData] = useState(model);
 
     const minCardMonth = () => {
@@ -20,11 +25,79 @@ const CreditCardForm = (props) => {
 
         return 1;
     };
+
     const listNumber = [1,2,3,4,5,6,7,8,9,10,11,12];
+
+    useEffect(() => {
+        var ccFormat = cc_format();
+        console.log('cc_format', ccFormat);
+        // formData.ccNo = cc_format();
+
+        // setFormData({ ...formData, ccNo: cc_format() });
+        // setFormData({formData});
+        // console.log('formData', formData);
+    });
+
+    const cc_format = () => {
+        var value = formData.ccNo;
+        var v = value.replace(/\s+/g, '').replace(/[^0-9]/gi, '')
+        var matches = v.match(/\d{4,16}/g);
+        var match = matches && matches[0] || ''
+        var parts = []
+    
+        for (var i=0, len=match.length; i<len; i+=4) {
+            parts.push(match.substring(i, i+4))
+        }
+    
+        if (parts.length) {
+            return parts.join(' ')
+        } else {
+            return value
+        }
+    }
+
+    const checkCVV = (event) => {
+        
+        if (!/^[0-9]*$/.test(event.key) && event.keyCode != 8) {
+            return event.preventDefault();
+        }
+    }
+
+    const checkCardNumber = (event) => {
+        if (!/^[0-9]*$/.test(event.key) && event.keyCode != 8) {
+            return event.preventDefault();
+        }
+
+        // if (formData.ccNo.replaceAll(" ", "").length > 16 && event.keyCode != 8) {
+        //     return event.preventDefault();
+        // }
+    }
+
+    
 
     const handleChange = (field) => (event) => {
         setFormData({ ...formData, [field]: event.target.value });
     };
+
+    const validateCardNumber = () => {
+        return this.formData.cardNumber.trim().length == 0 && checkPaymentMethodCC ? true: false;
+    }
+
+    const validateCardHolder = () => {
+        return this.formData.cardHolder.trim().length == 0 && checkPaymentMethodCC ? true: false;
+    }
+
+    const validateCardExpDate = () => {
+        return this.formData.expDate.length == 0 && checkPaymentMethodCC ? true: false;
+    }
+
+    const validateCardExpYear = () => {
+        return this.formData.expDateYear.length == 0 && checkPaymentMethodCC ? true: false;
+    }
+
+    const validateCardCVV = () => {
+        return formData.ccCVV.length == 0 && checkPaymentMethodCC ? true: false;
+    }
 
     return (
     <div class="container ms-box" id="credit-card-form">
@@ -34,7 +107,7 @@ const CreditCardForm = (props) => {
                     <input type="hidden" id="mspay" name="mspay" />
                     <div class="form-group">
                         <label for="txtCardNumber">MNS_CC_NO <abbr class="required" title="required">*</abbr></label>
-                        <input type="text" class="form-control" value={formData.ccNo} onChange={handleChange('ccNo')} id="txtCardNumber" name="cardNumber" required="validateCardNumber()"  keypress="checkCardNumber" placeholder="0000 0000 0000 0000" />
+                        <input type="text" class="form-control" value={formData.ccNo} onChange={handleChange('ccNo')} id="txtCardNumber" name="cardNumber" required="validateCardNumber()" onKeyDown={checkCardNumber} placeholder="0000 0000 0000 0000" />
                     </div>
                     <div class="form-group">
                         <label for="txtHolder">MNS_CC_NAME <abbr class="required" title="required">*</abbr></label>
@@ -72,7 +145,7 @@ const CreditCardForm = (props) => {
                         <div class="col-md-6">
                             <div class="form-group">
                                 <label for="txtCVV">MNS_CC_CVV <abbr class="required" title="required">*</abbr></label>
-                                <input type="text" class="form-control" value={formData.ccCVV} onChange={handleChange('ccCVV')} id="txtCVV" name="cardCVV" keypress="checkCVV" placeholder="000" required="validateCardCVV()" />
+                                <input type="password" class="form-control" value={formData.ccCVV} onChange={handleChange('ccCVV')} id="txtCVV" name="cardCVV" maxLength={3} onKeyDown={checkCVV} placeholder="000" required={validateCardCVV()} />
                             </div>
                         </div>
                     </div>
