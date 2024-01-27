@@ -1,4 +1,3 @@
-import { forEach } from '@woocommerce/dependency-extraction-webpack-plugin/assets/packages';
 import {useState, useEffect, useRef, useCallback} from '@wordpress/element';
 
 const CreditCardForm = (props) => {
@@ -29,17 +28,20 @@ const CreditCardForm = (props) => {
     const listNumber = [1,2,3,4,5,6,7,8,9,10,11,12];
 
     useEffect(() => {
-        var ccFormat = cc_format();
-        console.log('cc_format', ccFormat);
-        // formData.ccNo = cc_format();
-
+        // var ccFormat = cc_format();
+        // console.log('cc_format', ccFormat);
+        
+        // formData.ccNo = ccFormat;
+        // setFormData(formData);
+        // setFormData(formData => ({ ...formData, ccNo: ccFormat }));
         // setFormData({ ...formData, ccNo: cc_format() });
         // setFormData({formData});
-        // console.log('formData', formData);
-    });
+        console.log('formData', formData);
+        console.log('props', props);
+    },[formData]);
 
-    const cc_format = () => {
-        var value = formData.ccNo;
+    const cc_format = (value) => {
+        // var value = formData.ccNo;
         var v = value.replace(/\s+/g, '').replace(/[^0-9]/gi, '')
         var matches = v.match(/\d{4,16}/g);
         var match = matches && matches[0] || ''
@@ -68,15 +70,21 @@ const CreditCardForm = (props) => {
             return event.preventDefault();
         }
 
-        // if (formData.ccNo.replaceAll(" ", "").length > 16 && event.keyCode != 8) {
-        //     return event.preventDefault();
-        // }
+        if (formData.ccNo.replaceAll(" ", "").length >= 16 && event.keyCode != 8) {
+            return event.preventDefault();
+        }
     }
 
     
 
     const handleChange = (field) => (event) => {
-        setFormData({ ...formData, [field]: event.target.value });
+        if (field == "ccNo") {
+            setFormData({ ...formData, [field]: cc_format(event.target.value) });
+        } else if (field == "ccName") {
+            setFormData({ ...formData, [field]: event.target.value.toUpperCase() });
+        } else {
+            setFormData({ ...formData, [field]: event.target.value });
+        }
     };
 
     const validateCardNumber = () => {
