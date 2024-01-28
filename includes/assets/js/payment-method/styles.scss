@@ -14,24 +14,26 @@
         max-height: 50px !important;
       }
     }
-
-    .msbox > div.card > div.card-body > div.form-group > label {
-      max-width: 100%;
-      display: block;
-      font-weight: bold;
-      text-align: left;
-    }
 }
+
+// .wc-block-components-radio-control-accordion-content > .msbox > div.card > div.card-body > div.form-group > label {
+//   max-width: 100%;
+//   display: block;
+//   font-weight: bold;
+//   text-align: left;
+// }
+
+// .form-group {
+//   margin-bottom: 1rem;
+// }
 
 .form-group {
-  margin-bottom: 1rem;
-}
-
-.msbox > div.card > div.card-body > div.form-group > label {
-  max-width: 100%;
-  display: block;
-  font-weight: bold;
-  text-align: left;
+    label {
+    max-width: 100% !important;
+    display: block !important;
+    font-weight: bold !important;
+    text-align: left !important;
+  }
 }
 
 .form-control {

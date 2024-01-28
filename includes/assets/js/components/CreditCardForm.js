@@ -1,4 +1,5 @@
 import {useState, useEffect, useRef, useCallback} from '@wordpress/element';
+import '../payment-method/styles.scss';///styles.scss';
 
 const CreditCardForm = (props) => {
     const model = {
