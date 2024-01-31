@@ -1,4 +1,6 @@
+// import { usePaymentEventsContext, useCheckoutContext  } from '@woocommerce/base-contexts';
 import {useState, useEffect, useRef, useCallback} from '@wordpress/element';
+import {useValidateCheckout} from "./../payment-method/hooks";
 import '../payment-method/styles.scss';///styles.scss';
 
 const CreditCardForm = (props) => {
@@ -11,6 +13,11 @@ const CreditCardForm = (props) => {
         cardYear: '',
         minCardYear: new Date().getFullYear()
     };
+
+    console.log('props', props);
+    // const { onPaymentSetup } = usePaymentEventsContext();
+    const { isComplete } = props.checkoutStatus;
+    const { onCheckoutValidationBeforeProcessing } = props.eventRegistration;
 
     var checkPaymentMethodCC = false;
     if (document.getElementById('radio-control-wc-payment-method-options-moneyspace') !== null) {
@@ -28,19 +35,11 @@ const CreditCardForm = (props) => {
 
     const listNumber = [1,2,3,4,5,6,7,8,9,10,11,12];
 
-    useEffect(() => {
-        // var ccFormat = cc_format();
-        // console.log('cc_format', ccFormat);
-        
-        // formData.ccNo = ccFormat;
-        // setFormData(formData);
-        // setFormData(formData => ({ ...formData, ccNo: ccFormat }));
-        // setFormData({ ...formData, ccNo: cc_format() });
-        // setFormData({formData});
-        console.log('formData', formData);
-        console.log('props', props);
-    },[formData]);
-
+    useValidateCheckout({
+        formData, 
+        onCheckoutValidationBeforeProcessing
+    });
+    
     const cc_format = (value) => {
         // var value = formData.ccNo;
         var v = value.replace(/\s+/g, '').replace(/[^0-9]/gi, '')
@@ -88,44 +87,44 @@ const CreditCardForm = (props) => {
         }
     };
 
-    const validateCardNumber = () => {
-        return this.formData.cardNumber.trim().length == 0 && checkPaymentMethodCC ? true: false;
-    }
+    // const validateCardNumber = () => {
+    //     return this.formData.cardNumber.trim().length == 0 && checkPaymentMethodCC ? true: false;
+    // }
 
-    const validateCardHolder = () => {
-        return this.formData.cardHolder.trim().length == 0 && checkPaymentMethodCC ? true: false;
-    }
+    // const validateCardHolder = () => {
+    //     return this.formData.cardHolder.trim().length == 0 && checkPaymentMethodCC ? true: false;
+    // }
 
-    const validateCardExpDate = () => {
-        return this.formData.expDate.length == 0 && checkPaymentMethodCC ? true: false;
-    }
+    // const validateCardExpDate = () => {
+    //     return this.formData.expDate.length == 0 && checkPaymentMethodCC ? true: false;
+    // }
 
-    const validateCardExpYear = () => {
-        return this.formData.expDateYear.length == 0 && checkPaymentMethodCC ? true: false;
-    }
+    // const validateCardExpYear = () => {
+    //     return this.formData.expDateYear.length == 0 && checkPaymentMethodCC ? true: false;
+    // }
 
     const validateCardCVV = () => {
         return formData.ccCVV.length == 0 && checkPaymentMethodCC ? true: false;
     }
 
-    return (
+    return !isComplete ? (
     <div class="container ms-box" id="credit-card-form">
         <div class="card">
             <div class="card-body">
                 <div>
                     <input type="hidden" id="mspay" name="mspay" />
                     <div class="form-group">
-                        <label for="txtCardNumber">MNS_CC_NO <abbr class="required" title="required">*</abbr></label>
+                        <label for="txtCardNumber">Card Number <abbr class="required" title="required">*</abbr></label>
                         <input type="text" class="form-control" value={formData.ccNo} onChange={handleChange('ccNo')} id="txtCardNumber" name="cardNumber" required="validateCardNumber()" onKeyDown={checkCardNumber} placeholder="0000 0000 0000 0000" />
                     </div>
                     <div class="form-group">
-                        <label for="txtHolder">MNS_CC_NAME <abbr class="required" title="required">*</abbr></label>
+                        <label for="txtHolder">Card Holder <abbr class="required" title="required">*</abbr></label>
                         <input type="text" class="form-control"  value={formData.ccName} onChange={handleChange('ccName')} id="txtHolder" name="cardHolder" required="validateCardHolder()" keypress="checkCardName" placeholder="TONY ELSDEN" />
                     </div>
                     <div class="row">
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label for="txtExpDate">MNS_CC_EXP <abbr class="required" title="required">*</abbr></label>
+                                <label for="txtExpDate">Exp Date <abbr class="required" title="required">*</abbr></label>
                                 <div class="input-group">
                                     <select value={formData.ccExpMonth} onChange={handleChange('ccExpMonth')} id="txtExpDate" name="cardExpDate" class="form-control" required="validateCardExpDate()">
                                         <option value="" disabled selected>Month</option>
@@ -153,7 +152,7 @@ const CreditCardForm = (props) => {
                         </div>
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label for="txtCVV">MNS_CC_CVV <abbr class="required" title="required">*</abbr></label>
+                                <label for="txtCVV">CVV <abbr class="required" title="required">*</abbr></label>
                                 <input type="password" class="form-control" value={formData.ccCVV} onChange={handleChange('ccCVV')} id="txtCVV" name="cardCVV" maxLength={3} onKeyDown={checkCVV} placeholder="000" required={validateCardCVV()} />
                             </div>
                         </div>
@@ -161,7 +160,7 @@ const CreditCardForm = (props) => {
                 </div>
             </div>
         </div>
-    </div>);
+    </div>) : null;
 }
  
 export default CreditCardForm;
