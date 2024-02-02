@@ -11,6 +11,7 @@ export const useValidateCheckout = (
             console.log('!formData?.ccNo', formData, !formData?.ccNo);
             var isError = false;
             var arrMessage = [];
+            console.log('arrMessage', arrMessage);
             // validate that the order has been created.
             if (!formData?.ccNo) {
                 arrMessage = [__('Please fill in Card Number before placing your order.', 'moneyspace-woocommerce'), "<br/>", ...arrMessage];
