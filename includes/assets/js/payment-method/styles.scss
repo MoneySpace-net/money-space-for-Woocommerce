@@ -1,49 +1,85 @@
 .wc-moneyspace-blocks-payment-method__label {
+  display: flex;
+  align-items: center;
+  width: 100%;
+
+  .wc-block-components-payment-method-icons {
+    flex: 1 0 auto;
     display: flex;
-    align-items: center;
-    width: 100%;
-  
-    .wc-block-components-payment-method-icons {
-      flex: 1 0 auto;
-      display: flex;
-      justify-content: flex-end;
-      padding-right: 16px;
-  
-      .wc-block-components-payment-method-icon {
-        max-width: 150px !important;
-        max-height: 50px !important;
-      }
+    justify-content: flex-end;
+    padding-right: 16px;
+
+    .wc-block-components-payment-method-icon {
+      max-width: 150px !important;
+      max-height: 50px !important;
     }
+  }
 }
 
-// .wc-block-components-radio-control-accordion-content > .msbox > div.card > div.card-body > div.form-group > label {
-//   max-width: 100%;
-//   display: block;
-//   font-weight: bold;
-//   text-align: left;
-// }
+.is-large .wc-block-components-credit-card-form,
+.is-medium .wc-block-components-credit-card-form,
+.is-small .wc-block-components-credit-card-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 16px;
+  justify-content: space-between;
+}
 
-// .form-group {
-//   margin-bottom: 1rem;
-// }
-.wc-block-components-credit-card-form .wc-block-components-state-input
-, .wc-block-components-credit-card-form .wc-block-components-text-input
-, .wc-block-components-credit-card-form .wc-block-components-state-input
-, .wc-block-components-credit-card-form .wc-block-components-text-input
-, .wc-block-components-credit-card-form .wc-block-components-state-input
-, .wc-block-components-credit-card-form .wc-block-components-text-input
-, .wc-block-components-credit-card-form .wc-block-components-state-input
-, .wc-block-components-credit-card-form .wc-block-components-text-input
-, .wc-block-components-credit-card-form .wc-block-components-state-input
-, .wc-block-components-credit-card-form .wc-block-components-text-input
-, .wc-block-components-credit-card-form .wc-block-components-state-input
-, .wc-block-components-credit-card-form .wc-block-components-text-input 
-{
+.is-large .wc-block-components-credit-card-form .wc-block-components-credit-form,
+.is-medium .wc-block-components-credit-card-form .wc-block-components-credit-form,
+.is-small .wc-block-components-credit-card-form .wc-block-components-credit-form {
+  flex: 0 0 100%;
+}
+
+
+.wc-block-components-credit-card-form .wc-block-components-state-input,
+.wc-block-components-credit-card-form .wc-block-components-text-input,
+.wc-block-components-credit-card-form .wc-block-components-state-input,
+.wc-block-components-credit-card-form .wc-block-components-text-input,
+.wc-block-components-credit-card-form .wc-block-components-state-input,
+.wc-block-components-credit-card-form .wc-block-components-text-input,
+.wc-block-components-credit-card-form .wc-block-components-state-input,
+.wc-block-components-credit-card-form .wc-block-components-text-input,
+.wc-block-components-credit-card-form .wc-block-components-state-input,
+.wc-block-components-credit-card-form .wc-block-components-text-input,
+.wc-block-components-credit-card-form .wc-block-components-state-input,
+.wc-block-components-credit-card-form .wc-block-components-text-input {
   box-sizing: border-box;
   flex: 1 0 calc(50% - 8px);
 }
 
-.wc-block-components-form .wc-block-components-text-input input[type=email],.wc-block-components-form .wc-block-components-text-input input[type=number],.wc-block-components-form .wc-block-components-text-input input[type=tel],.wc-block-components-form .wc-block-components-text-input input[type=text],.wc-block-components-form .wc-block-components-text-input input[type=url],.wc-block-components-text-input input[type=email],.wc-block-components-text-input input[type=number],.wc-block-components-text-input input[type=tel],.wc-block-components-text-input input[type=text],.wc-block-components-text-input input[type=url],.wc-block-components-text-input input[type=password] {
+.wc-block-components-form .wc-block-components-text-input input:-webkit-autofill,
+.wc-block-components-form .wc-block-components-text-input.is-active input[type=email],
+.wc-block-components-form .wc-block-components-text-input.is-active input[type=number],
+.wc-block-components-form .wc-block-components-text-input.is-active input[type=tel],
+.wc-block-components-form .wc-block-components-text-input.is-active input[type=text],
+.wc-block-components-form .wc-block-components-text-input.is-active input[type=url],
+.wc-block-components-form .wc-block-components-text-input.is-active input[type=password],
+.wc-block-components-text-input input:-webkit-autofill,
+.wc-block-components-text-input.is-active input[type=email],
+.wc-block-components-text-input.is-active input[type=number],
+.wc-block-components-text-input.is-active input[type=tel],
+.wc-block-components-text-input.is-active input[type=text],
+.wc-block-components-text-input.is-active input[type=url],
+.wc-block-components-text-input.is-active input[type=password],
+.wc-block-components-text-input select {
+  padding: 1.5em .5em .5em !important
+}
+
+
+.wc-block-components-form .wc-block-components-text-input input[type=email],
+.wc-block-components-form .wc-block-components-text-input input[type=number],
+.wc-block-components-form .wc-block-components-text-input input[type=tel],
+.wc-block-components-form .wc-block-components-text-input input[type=text],
+.wc-block-components-form .wc-block-components-text-input input[type=url],
+.wc-block-components-form .wc-block-components-text-input input[type=password],
+.wc-block-components-text-input input[type=email],
+.wc-block-components-text-input input[type=number],
+.wc-block-components-text-input input[type=tel],
+.wc-block-components-text-input input[type=text],
+.wc-block-components-text-input input[type=url],
+.wc-block-components-text-input input[type=password],
+.wc-block-components-text-input select {
   background-color: #fff;
   border: 1px solid #50575e;
   border-radius: 4px;
@@ -56,4 +92,18 @@
   min-height: 0;
   padding: 1em;
   width: 100%
+}
+
+
+.wc-block-components-form .wc-block-components-text-input.has-error input,
+.wc-block-components-form .wc-block-components-text-input.has-error input:active,
+.wc-block-components-form .wc-block-components-text-input.has-error input:focus,
+.wc-block-components-form .wc-block-components-text-input.has-error input:hover,
+.wc-block-components-form .wc-block-components-text-input.has-error select,
+.wc-block-components-text-input.has-error input,
+.wc-block-components-text-input.has-error input:active,
+.wc-block-components-text-input.has-error input:focus,
+.wc-block-components-text-input.has-error input:hover,
+.wc-block-components-text-input.has-error select {
+  border-color: #cc1818;
 }

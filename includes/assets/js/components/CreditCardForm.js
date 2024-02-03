@@ -11,7 +11,8 @@ const CreditCardForm = (props) => {
         ccExpYear: '',
         ccCVV: '',
         cardYear: '',
-        minCardYear: new Date().getFullYear()
+        minCardYear: new Date().getFullYear(),
+        dirty: false
     };
 
     console.log('props', props);
@@ -26,12 +27,13 @@ const CreditCardForm = (props) => {
     }
 
     const FieldValidatorClass = (fieldName) => {
-        console.log('formData[fieldName]', typeof(formData[fieldName]));
-        return formData[fieldName] != "" ? 'is-active': 'has-error';
+        console.log('formData[fieldName]', typeof(formData[fieldName]), formData.dirty);
+        return formData[fieldName] == "" && formData.dirty == true ? 'has-error' : '';
     }
 
     const FieldError = (fieldName, errorMsg) => {
-        return formData[fieldName] == "" ? (
+        console.log('formData.dirty', formData);
+        return formData[fieldName] == "" && formData.dirty == true ? (
         <div class="wc-block-components-validation-error" role="alert">
             <p>{errorMsg}</p></div>
         ) : "";
@@ -94,11 +96,11 @@ const CreditCardForm = (props) => {
 
     const handleChange = (field) => (event) => {
         if (field == "ccNo") {
-            setFormData({ ...formData, [field]: cc_format(event.target.value) });
+            setFormData({ ...formData, [field]: cc_format(event.target.value), ["dirty"]: true  });
         } else if (field == "ccName") {
-            setFormData({ ...formData, [field]: event.target.value.toUpperCase() });
+            setFormData({ ...formData, [field]: event.target.value.toUpperCase(), ["dirty"]: true });
         } else {
-            setFormData({ ...formData, [field]: event.target.value });
+            setFormData({ ...formData, [field]: event.target.value, ["dirty"]: true });
         }
     };
 
@@ -123,17 +125,17 @@ const CreditCardForm = (props) => {
     }
 
     return (<div className='wc-block-components-credit-card-form'>
-        <div className={ `wc-block-components-text-input ${ FieldValidatorClass('ccNo') }` }>
+        <div className={ `wc-block-components-text-input wc-block-components-credit-form is-active ${ FieldValidatorClass('ccNo') }` }>
             <input type="text" value={formData.ccNo} onChange={handleChange('ccNo')} id="txtCardNumber" name="cardNumber" required="validateCardNumber()" onKeyDown={checkCardNumber} placeholder="0000 0000 0000 0000" />
             <label for="creditCard">Card Number *</label>
-            {FieldError('ccNo', 'Please fill in Card Number before placing your order.')}
+            {FieldError('ccNo', 'Please fill in Card Number')}
         </div>
-        <div className={ `wc-block-components-text-input ${ FieldValidatorClass('ccName') }` }>
+        <div className={ `wc-block-components-text-input wc-block-components-credit-form is-active ${ FieldValidatorClass('ccName') }` }>
             <input type="text" value={formData.ccName} onChange={handleChange('ccName')} id="txtHolder" name="cardHolder" required="validateCardHolder()" keypress="checkCardName" placeholder="TONY ELSDEN"/>
             <label for="cardHolder">Card Holder *</label>
-            {FieldError('ccName', 'Please fill in Card Holder before placing your order.')}
+            {FieldError('ccName', 'Please fill in Card Holder')}
         </div>
-        <div className={ `wc-block-components-text-input ${ FieldValidatorClass('ccExpMonth') }` }>
+        <div className={ `wc-block-components-text-input is-active ${ FieldValidatorClass('ccExpMonth') }` }>
             <select value={formData.ccExpMonth} onChange={handleChange('ccExpMonth')} id="txtExpDate" name="cardExpDate" required="validateCardExpDate()">
                 <option value="" disabled selected>Month</option>
                 {
@@ -145,9 +147,9 @@ const CreditCardForm = (props) => {
                 }
             </select>
             <label for="ccExpMonth">Exp Month *</label>
-            {FieldError('ccExpMonth', 'Please fill in Exp Month before placing your order.')}
+            {FieldError('ccExpMonth', 'Please fill in Exp Month')}
         </div>
-        <div className={ `wc-block-components-text-input ${ FieldValidatorClass('ccExpYear') }` }>
+        <div className={ `wc-block-components-text-input is-active ${ FieldValidatorClass('ccExpYear') }` }>
             <select value={formData.ccExpYear} onChange={handleChange('ccExpYear')} id="ccExpYear" name="ccExpYear" required="validateCardExpYear()">
                 <option value="" disabled selected>Month</option>
                 {
@@ -159,12 +161,12 @@ const CreditCardForm = (props) => {
                 }
             </select>
             <label for="ccExpYear">Exp Year *</label>
-            {FieldError('ccExpYear', 'Please fill in Card Exp Year before placing your order.')}
+            {FieldError('ccExpYear', 'Please fill in Card Exp Year')}
         </div>
-        <div className={ `wc-block-components-text-input ${ FieldValidatorClass('ccCVV') }` }>
+        <div className={ `wc-block-components-text-input wc-block-components-credit-form is-active ${ FieldValidatorClass('ccCVV') }` }>
             <input type="password" value={formData.ccCVV} onChange={handleChange('ccCVV')} id="txtCVV" name="cardCVV" maxLength={3} onKeyDown={checkCVV} placeholder="000" required={validateCardCVV()} />
             <label for="cardCVV">CVV *</label>
-            {FieldError('ccCVV', 'Please fill in CVV before placing your order.')}
+            {FieldError('ccCVV', 'Please fill in CVV')}
         </div>
     </div>);
 
