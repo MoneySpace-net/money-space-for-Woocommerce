@@ -1,7 +1,7 @@
-// import { usePaymentEventsContext, useCheckoutContext  } from '@woocommerce/base-contexts';
 import {useState, useEffect, useRef, useCallback} from '@wordpress/element';
-import {useValidateCheckout} from "./../payment-method/hooks";
+// import {useValidateCheckout} from "./../payment-method/hooks";
 import '../payment-method/styles.scss';///styles.scss';
+import {__} from '@wordpress/i18n';
 
 const CreditCardForm = (props) => {
     const model = {
@@ -14,35 +14,123 @@ const CreditCardForm = (props) => {
         minCardYear: new Date().getFullYear(),
         dirty: false,
     };
-
-    const [formData, setFormData] = useState(model);
-    var errorFields = [];
-
-    console.log('props', props);
-    const { isComplete } = props.checkoutStatus;
-    const { ValidationInputError } = props.components;
-    const { onCheckoutValidationBeforeProcessing } = props.eventRegistration;
-
     var checkPaymentMethodCC = false;
+    var errorFields = [];
+    const listNumber = [1,2,3,4,5,6,7,8,9,10,11,12];
+    console.log('props', props);
+    const [formData, setFormData] = useState(model);
+    const { onPaymentSetup, onPaymentProcessing, onCheckoutValidationBeforeProcessing } = props.eventRegistration;
+    
     if (document.getElementById('radio-control-wc-payment-method-options-moneyspace') !== null) {
         checkPaymentMethodCC = document.getElementById('radio-control-wc-payment-method-options-moneyspace').checked;
     }
 
+    const useValidateCheckout = (
+        {
+            formData,
+            onCheckoutValidationBeforeProcessing
+        }, errorFields) => {
+        useEffect(() => {
+            const unsubscribe = onCheckoutValidationBeforeProcessing(() => {
+                if (formData.dirty == false) {
+                    setFormData({ ...formData, ["dirty"]: true });
+                    return {
+                        errorMessage: "Please fill in Pay by Card 3D secured section before placing your order."
+                    }
+                }
+
+                if (Object.keys(errorFields).length > 0){
+                    return {
+                        errorMessage: "Please check Pay by Card 3D secured section before placing your order."
+                    }
+                }
+                return true;
+            });
+            return unsubscribe;
+        }, [formData]); //formData, errorFields
+    }
+
+    const usePaymentSetup = ({formData, onPaymentSetup}) => {
+        useEffect(() => {
+            const unsubscribe = onPaymentSetup(() => {
+                return formData;
+            });
+
+            return unsubscribe;
+        }, [formData]);
+    }
+    usePaymentSetup({formData, onPaymentSetup});
+
+    const useProcessPayment = ({formData, onPaymentProcessing}) => {
+        useEffect(() => {
+            const unsubscribe = onPaymentProcessing(() => {
+                const response = {
+                    meta: {
+                        paymentMethodData: {
+                            'cardNumber': formData.ccNo.replaceAll(" ", ""),
+                            'cardHolder': formData.ccName,
+                            'cardExpDate': formData.ccExpMonth,
+                            'cardExpDateYear': formData.ccExpYear,
+                            'cardCVV': formData.ccCVV,
+                            'message_card': ''
+                        }
+                    }
+                }
+                return {type: "success", ...response};
+            });
+
+            return unsubscribe;
+        }, [formData]);
+    }
+    useProcessPayment({formData, onPaymentProcessing});
+
+    useValidateCheckout({
+        formData,
+        onCheckoutValidationBeforeProcessing
+    }, errorFields);
+
     const FieldValidatorClass = (fieldName) => {
-        return formData[fieldName] == "" && formData.dirty == true ? 'has-error' : '';
+        if (fieldName == "ccNo" && formData[fieldName].replaceAll(" ", "").length < 16 && formData.dirty == true) {
+            return 'has-error';
+        } else if (fieldName == "ccCVV" && formData[fieldName].length < 3 && formData.dirty == true) {
+            return 'has-error';
+        } else {
+            return formData[fieldName] == "" && formData.dirty == true ? 'has-error' : '';
+        }
+    }
+
+    const FieldCreditCardError = (fieldName, errorMsg) => {
+        if (formData[fieldName].replaceAll(" ", "").length < 16 && formData[fieldName].replaceAll(" ", "").length > 0 && formData.dirty == true) {
+            errorFields[fieldName] = errorMsg;
+            return ErrorTemplate(errorMsg);
+        } else {
+            return "";
+        }
+    }
+
+    const FieldCVVError = (fieldName, errorMsg) => {
+        if (formData[fieldName].length < 3 && formData[fieldName].length > 0 && formData.dirty == true) {
+            errorFields[fieldName] = errorMsg;
+            return ErrorTemplate(errorMsg);
+        } else {
+            return "";
+        }
     }
 
     const FieldError = (fieldName, errorMsg) => {
         if (formData[fieldName] == "" && formData.dirty == true) {
             errorFields[fieldName] = errorMsg;
-            console.log('errorFields', errorFields);
-            return (
-                <div class="wc-block-components-validation-error" role="alert">
-                    <p>{errorMsg}</p></div>
-                );
+            return ErrorTemplate(errorMsg);
         } else {
             return "";
         }
+    }
+
+    const ErrorTemplate = (errorMsg) => {
+        return  (
+            <div class="wc-block-components-validation-error" role="alert">
+                <p>{errorMsg}</p></div>
+            );
     }
     
     const minCardMonth = () => {
@@ -51,13 +139,6 @@ const CreditCardForm = (props) => {
 
         return 1;
     };
-
-    const listNumber = [1,2,3,4,5,6,7,8,9,10,11,12];
-
-    useValidateCheckout({
-        formData, 
-        onCheckoutValidationBeforeProcessing
-    });
     
     const cc_format = (value) => {
         // var value = formData.ccNo;
@@ -79,17 +160,17 @@ const CreditCardForm = (props) => {
 
     const checkCVV = (event) => {
         
-        if (!/^[0-9]*$/.test(event.key) && event.keyCode != 8) {
+        if (!/^[0-9]*$/.test(event.key) && ![8,67,86,88].includes(event.keyCode)) {
             return event.preventDefault();
         }
     }
 
     const checkCardNumber = (event) => {
-        if (!/^[0-9]*$/.test(event.key) && event.keyCode != 8) {
+        if (!/^[0-9]*$/.test(event.key) && ![8,67,86,88].includes(event.keyCode)) {
             return event.preventDefault();
         }
 
-        if (formData.ccNo.replaceAll(" ", "").length >= 16 && event.keyCode != 8) {
+        if (formData.ccNo.replaceAll(" ", "").length >= 16 && ![8,67,86,88].includes(event.keyCode)) {
             return event.preventDefault();
         }
     }
@@ -104,22 +185,6 @@ const CreditCardForm = (props) => {
         }
     };
 
-    // const validateCardNumber = () => {
-    //     return this.formData.cardNumber.trim().length == 0 && checkPaymentMethodCC ? true: false;
-    // }
-
-    // const validateCardHolder = () => {
-    //     return this.formData.cardHolder.trim().length == 0 && checkPaymentMethodCC ? true: false;
-    // }
-
-    // const validateCardExpDate = () => {
-    //     return this.formData.expDate.length == 0 && checkPaymentMethodCC ? true: false;
-    // }
-
-    // const validateCardExpYear = () => {
-    //     return this.formData.expDateYear.length == 0 && checkPaymentMethodCC ? true: false;
-    // }
-
     const validateCardCVV = () => {
         return formData.ccCVV.length == 0 && checkPaymentMethodCC ? true: false;
     }
@@ -129,6 +194,7 @@ const CreditCardForm = (props) => {
             <input type="text" value={formData.ccNo} onChange={handleChange('ccNo')} id="txtCardNumber" name="cardNumber" required="validateCardNumber()" onKeyDown={checkCardNumber} placeholder="0000 0000 0000 0000" />
             <label for="creditCard">Card Number *</label>
             {FieldError('ccNo', 'Please fill in Card Number')}
+            {FieldCreditCardError('ccNo', 'Please check your Card Number')}
         </div>
         <div className={ `wc-block-components-text-input wc-block-components-credit-form is-active ${ FieldValidatorClass('ccName') }` }>
             <input type="text" value={formData.ccName} onChange={handleChange('ccName')} id="txtHolder" name="cardHolder" required="validateCardHolder()" keypress="checkCardName" placeholder="TONY ELSDEN"/>
@@ -150,7 +216,7 @@ const CreditCardForm = (props) => {
             {FieldError('ccExpMonth', 'Please fill in Exp Month')}
         </div>
         <div className={ `wc-block-components-text-input is-active ${ FieldValidatorClass('ccExpYear') }` }>
-            <select value={formData.ccExpYear} onChange={handleChange('ccExpYear')} id="ccExpYear" name="ccExpYear" required="validateCardExpYear()">
+            <select value={formData.ccExpYear} onChange={handleChange('ccExpYear')} id="ccExpYear" name="cardExpDateYear" required="validateCardExpYear()">
                 <option value="" disabled selected>Month</option>
                 {
                     listNumber.map((x, index)=>(
@@ -167,6 +233,7 @@ const CreditCardForm = (props) => {
             <input type="password" value={formData.ccCVV} onChange={handleChange('ccCVV')} id="txtCVV" name="cardCVV" maxLength={3} onKeyDown={checkCVV} placeholder="000" required={validateCardCVV()} />
             <label for="cardCVV">CVV *</label>
             {FieldError('ccCVV', 'Please fill in CVV')}
+            {FieldCVVError('ccCVV', 'Please check CVV')}
         </div>
     </div>);
 

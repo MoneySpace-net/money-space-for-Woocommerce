@@ -361,6 +361,10 @@ class MNS_Payment_Gateway extends WC_Payment_Gateway
      */
     public function process_payment($order_id)
     {
+        // var_dump($order_id." : ".json_encode($_POST) );
+        // echo "<br />";
+        // var_dump($_POST["cardnumber"]);
+        // exit();
         $MNS_special_instructions_to_merchant = get_post_meta($order_id, 'MNS_special_instructions_to_merchant', true);
         $message_card = sanitize_text_field($_POST["message_card"]);
         if (strlen($MNS_special_instructions_to_merchant) <= 150) {
