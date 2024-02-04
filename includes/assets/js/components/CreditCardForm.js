@@ -12,11 +12,13 @@ const CreditCardForm = (props) => {
         ccCVV: '',
         cardYear: '',
         minCardYear: new Date().getFullYear(),
-        dirty: false
+        dirty: false,
     };
 
+    const [formData, setFormData] = useState(model);
+    var errorFields = [];
+
     console.log('props', props);
-    // const { onPaymentSetup } = usePaymentEventsContext();
     const { isComplete } = props.checkoutStatus;
     const { ValidationInputError } = props.components;
     const { onCheckoutValidationBeforeProcessing } = props.eventRegistration;
@@ -27,22 +29,22 @@ const CreditCardForm = (props) => {
     }
 
     const FieldValidatorClass = (fieldName) => {
-        console.log('formData[fieldName]', typeof(formData[fieldName]), formData.dirty);
         return formData[fieldName] == "" && formData.dirty == true ? 'has-error' : '';
     }
 
     const FieldError = (fieldName, errorMsg) => {
-        console.log('formData.dirty', formData);
-        return formData[fieldName] == "" && formData.dirty == true ? (
-        <div class="wc-block-components-validation-error" role="alert">
-            <p>{errorMsg}</p></div>
-        ) : "";
+        if (formData[fieldName] == "" && formData.dirty == true) {
+            errorFields[fieldName] = errorMsg;
+            console.log('errorFields', errorFields);
+            return (
+                <div class="wc-block-components-validation-error" role="alert">
+                    <p>{errorMsg}</p></div>
+                );
+        } else {
+            return "";
+        }
     }
-
-    console.log('ValidationInputError', ValidationInputError);
-
-    const [formData, setFormData] = useState(model);
-
+    
     const minCardMonth = () => {
         if (model.cardYear === model.minCardYear) 
             return new Date().getMonth() + 1;
@@ -91,8 +93,6 @@ const CreditCardForm = (props) => {
             return event.preventDefault();
         }
     }
-
-    
 
     const handleChange = (field) => (event) => {
         if (field == "ccNo") {
