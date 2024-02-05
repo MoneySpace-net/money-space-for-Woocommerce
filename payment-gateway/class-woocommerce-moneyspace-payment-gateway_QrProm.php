@@ -34,6 +34,8 @@ class MNS_Payment_Gateway_QR extends WC_Payment_Gateway
         add_action('woocommerce_update_options_payment_gateways_' . $this->id, array($this, 'process_admin_options'));
         add_action('woocommerce_thankyou_custom', array($this, 'thankyou_page'));
         add_action('woocommerce_receipt_' . $this->id, array($this, 'paymentgateway_form'), 10, 1);
+        add_filter('woocommerce_thankyou_order_received_text', array($this, 'avia_thank_you_qr'));
+
     }
 
     public function create_payment_transaction($order_id, $ms_body, $ms_template_payment, $gateways, $payment_gateway_qr) {
@@ -249,13 +251,14 @@ class MNS_Payment_Gateway_QR extends WC_Payment_Gateway
             'redirect' => $order->get_checkout_payment_url(true)
         );
     }
+
+    public function avia_thank_you_qr()
+    {
+        $gateways = WC()->payment_gateways->get_available_payment_gateways();
+        $added_text = '';
+        return $added_text;
+    }
 }
 
-add_filter('woocommerce_thankyou_order_received_text', 'avia_thank_you_qr');
 
-function avia_thank_you_qr()
-{
-    $gateways = WC()->payment_gateways->get_available_payment_gateways();
-    $added_text = '';
-    return $added_text;
-}
+

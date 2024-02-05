@@ -33,9 +33,12 @@ class MNS_Payment_Gateway extends WC_Payment_Gateway
         add_action('woocommerce_receipt_' . $this->id, array($this, 'paymentgateway_form'), 10, 1);
         add_action('woocommerce_update_options_payment_gateways_' . $this->id, array($this, 'process_admin_options'));
         add_action('woocommerce_thankyou_custom', array($this, 'thankyou_page'));
+        add_filter('woocommerce_thankyou_order_received_text', array($this, 'avia_thank_you'), 10, 2 );
+
     }
 
     public function create_payment_transaction($order_id, $ms_body, $ms_template_payment, $gateways) {
+        
         $response = wp_remote_post(MNS_API_URL_CREATE, array(
             'method' => 'POST',
             'timeout' => 120,
@@ -60,10 +63,11 @@ class MNS_Payment_Gateway extends WC_Payment_Gateway
 
         $tranId = $data_status[0]->transaction_ID;
         $mskey = $data_status[0]->mskey;
-
+        
         update_post_meta($order_id, 'MNS_transaction_orderid', $ms_body['order_id']);
         update_post_meta($order_id, 'MNS_transaction', $tranId);
         update_post_meta($order_id, 'MNS_PAYMENT_KEY', $mskey);
+        
         if ($ms_template_payment == "1") {
             wp_redirect(get_site_url() . "/mspaylink/" . $order_id);
         }
@@ -361,12 +365,9 @@ class MNS_Payment_Gateway extends WC_Payment_Gateway
      */
     public function process_payment($order_id)
     {
-        // var_dump($order_id." : ".json_encode($_POST) );
-        // echo "<br />";
-        // var_dump($_POST["cardnumber"]);
-        // exit();
         $MNS_special_instructions_to_merchant = get_post_meta($order_id, 'MNS_special_instructions_to_merchant', true);
         $message_card = sanitize_text_field($_POST["message_card"]);
+        
         if (strlen($MNS_special_instructions_to_merchant) <= 150) {
             if (get_woocommerce_currency() == "THB") {
                 update_post_meta($order_id, 'MNS_special_instructions_to_merchant', $message_card);
@@ -374,14 +375,15 @@ class MNS_Payment_Gateway extends WC_Payment_Gateway
                 delete_post_meta($order_id, 'MNS_transaction');
 
                 //CC Info
-                $cardNumber = sanitize_text_field($_POST["cardNumber"]);
-                $cardHolder = sanitize_text_field($_POST["cardHolder"]);
-                $cardExpDate = sanitize_text_field($_POST["cardExpDate"]);
-                $cardExpDateYear = sanitize_text_field($_POST["cardExpDateYear"]);
-                $cardCVV = sanitize_text_field($_POST["cardCVV"]);
+                $cardNumber = sanitize_text_field($_POST["cardNumber"] ?? $_POST["cardnumber"]);
+                $cardHolder = sanitize_text_field($_POST["cardHolder"]?? $_POST["cardholder"]);
+                $cardExpDate = sanitize_text_field($_POST["cardExpDate"]?? $_POST["cardexpdate"]);
+                $cardExpDateYear = sanitize_text_field($_POST["cardExpDateYear"]?? $_POST["cardexpdateyear"]);
+                $cardCVV = sanitize_text_field($_POST["cardCVV"]?? $_POST["cardcvv"]);
                 $MNS_CARD = $cardNumber."|".$cardHolder."|".$cardExpDate."|".$cardExpDateYear."|".$cardCVV;
                 update_post_meta($order_id, 'MNS_CARD', base64_encode($MNS_CARD));
-
+                // var_dump(base64_encode($MNS_CARD));
+                // exit();
                 $mspay = sanitize_text_field($_POST["mspay"]);
                 update_post_meta($order_id, 'MNS_PAYMENT_PAY', $mspay);
                 $order = wc_get_order($order_id);
@@ -473,16 +475,33 @@ class MNS_Payment_Gateway extends WC_Payment_Gateway
             'redirect' => $order->get_checkout_payment_url(true) // $this->get_return_url( $order ) // 
         );
     }
+
+    
+    public function avia_thank_you($msg,$order)
+    {
+        // $gateways = WC()->payment_gateways->get_available_payment_gateways();
+        $added_text = '';
+        return $added_text;
+    }
+
 }
 
-// add_filter('woocommerce_thankyou_order_received_text', 'avia_thank_you');
-
-// function avia_thank_you()
-// {
-//     $gateways = WC()->payment_gateways->get_available_payment_gateways();
-//     $added_text = '';
-//     return $added_text;
+// add_filter( 'woocommerce_thankyou_order_received_text', 'change_received_order_text', 10, 2 );
+// function change_received_order_text( $text, $order ) {
+//   $shipping = $order->get_shipping_method();
+//   $message  = "Thank you. Your order has been received. Please check your email for your receipt and instructions regarding ";
+  
+//   if ( "Local pickup" == $shipping ) {
+//     $message .= "picking up";
+//   } else {
+//     $message .= "the delivery of";
+//   }
+  
+//   $message .= " your order. If you do not see an email from client@website.com within 30 minutes, please check your spam or junk folder.";
+  
+//   return esc_html__( $message, 'woocommerce' );  
 // }
+
 
 // add_filter( 'woocommerce_payment_complete_reduce_order_stock', 'filter_woocommerce_payment_complete_reduce_order_stock', 10, 2 ); 
 

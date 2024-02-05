@@ -67,12 +67,11 @@ const CreditCardForm = (props) => {
                 const response = {
                     meta: {
                         paymentMethodData: {
-                            'cardNumber': formData.ccNo.replaceAll(" ", ""),
-                            'cardHolder': formData.ccName,
-                            'cardExpDate': formData.ccExpMonth,
-                            'cardExpDateYear': formData.ccExpYear,
-                            'cardCVV': formData.ccCVV,
-                            'message_card': ''
+                            cardNumber: formData.ccNo.replaceAll(" ", ""),
+                            cardHolder: formData.ccName,
+                            cardExpDate: formData.ccExpMonth,
+                            cardExpDateYear: formData.ccExpYear,
+                            cardCVV: formData.ccCVV
                         }
                     }
                 }
