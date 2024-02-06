@@ -3,7 +3,7 @@ Contributors: moneyspace
 Tags: credit card, moneyspace, payment request, thaibank, woocommerce, automattic, bay, ktc, fcy, installment
 Requires at least: 4.9
 Tested up to: 6.3.1
-Stable tag: 2.8.1
+Stable tag: 2.9.0
 Requires PHP: 7.0
 Requires WordPress: 4.9
 License: GPLv3
@@ -63,6 +63,7 @@ Yes! In Live Mode, an SSL certificate must be installed on your site to use Mone
 == Changelog ==
 = 1.0.0 - 2024-01-11 =
 
+* 2024-02-06 : enhance support woocommerce 8.x blocks-based feature
 * 2024-01-11 : qr promptpay new option for auto check result
 * 2023-10-12 : tested up with 6.3.1
 * 2023-06-19 : add option to disable auto check qrnone
