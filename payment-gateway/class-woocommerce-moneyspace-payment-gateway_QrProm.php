@@ -1,8 +1,18 @@
 <?php
+
+namespace MoneySpace\Payments;
+
+use WC_Payment_Gateway;
+use WC_Payment_Gateways;
+use WC_Order;
+use MoneySpace\Mslogs;
+
 date_default_timezone_set("Asia/Bangkok");
 
 class MNS_Payment_Gateway_QR extends WC_Payment_Gateway
 {
+    public $domain;
+    public $instructions;
 
     public function __construct()
     {
@@ -24,6 +34,8 @@ class MNS_Payment_Gateway_QR extends WC_Payment_Gateway
         add_action('woocommerce_update_options_payment_gateways_' . $this->id, array($this, 'process_admin_options'));
         add_action('woocommerce_thankyou_custom', array($this, 'thankyou_page'));
         add_action('woocommerce_receipt_' . $this->id, array($this, 'paymentgateway_form'), 10, 1);
+        add_filter('woocommerce_thankyou_order_received_text', array($this, 'avia_thank_you_qr'));
+
     }
 
     public function create_payment_transaction($order_id, $ms_body, $ms_template_payment, $gateways, $payment_gateway_qr) {
@@ -37,7 +49,6 @@ class MNS_Payment_Gateway_QR extends WC_Payment_Gateway
             wc_add_notice(__(MNS_NOTICE_ERROR_SETUP, $this->domain), 'error');
             return;
         }
-
         $data_status = json_decode($response["body"]);
         if (empty($data_status) || $data_status[0]->status != "success") {
             wc_add_notice(__("Error ms102 : " . MNS_NOTICE_CHECK_TRANSACTION, $this->domain), 'error');
@@ -61,6 +72,7 @@ class MNS_Payment_Gateway_QR extends WC_Payment_Gateway
 
         $template = $payment_gateway_qr->settings['template'] ?? 'template_1';
         $chooseTemplate = $template == 'template_1' ? 'mns_tpl_qrnone_1': 'mns_tpl_qrnone_2';
+        
         load_template( plugin_dir_path( __DIR__ ).'templates/qrnone/'.$chooseTemplate.'.php', false, array(
             'order_id' => $order_id,
             'payment_gateway_qr' => $payment_gateway_qr,
@@ -72,7 +84,7 @@ class MNS_Payment_Gateway_QR extends WC_Payment_Gateway
     {
         $this->form_fields = array(
             'header_setting' => array(
-                'title' => __('<h1><b> ' . MNS_FORM_FIELD_HEADER_SETTING . ' </b></h1>', $this->domain),
+                'title' => __(MNS_FORM_FIELD_HEADER_SETTING, $this->domain), // '<h1><b> ' . MNS_FORM_FIELD_HEADER_SETTING . ' </b></h1>'
                 'type' => 'title'
             ),
             'enabled' => array(
@@ -239,13 +251,14 @@ class MNS_Payment_Gateway_QR extends WC_Payment_Gateway
             'redirect' => $order->get_checkout_payment_url(true)
         );
     }
+
+    public function avia_thank_you_qr()
+    {
+        $gateways = WC()->payment_gateways->get_available_payment_gateways();
+        $added_text = '';
+        return $added_text;
+    }
 }
 
-add_filter('woocommerce_thankyou_order_received_text', 'avia_thank_you_qr');
 
-function avia_thank_you_qr()
-{
-    $gateways = WC()->payment_gateways->get_available_payment_gateways();
-    $added_text = '';
-    return $added_text;
-}
+

@@ -1,9 +1,21 @@
 <?php
+
+namespace MoneySpace\Payments;
+
+use WC_Payment_Gateway;
+use WC_Order;
+use MoneySpace\Mslogs;
+use WC_Payment_Gateways;
+
 /**
  * WC wcCpg3 Gateway Class.
  * Built the wcCpg3 method.
  */
 class MNS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
+
+    public $domain;
+    public $instructions;
+
     /**
      * Constructor for the gateway.
      *
@@ -59,7 +71,7 @@ class MNS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
     {
         $this->form_fields = array(
             'header_setting' => array(
-                'title' => __('<h1><b> ' . MNS_FORM_FIELD_HEADER_SETTING . ' </b></h1>', $this->domain),
+                'title' => __(MNS_FORM_FIELD_HEADER_SETTING, $this->domain), // '<h1><b> ' . MNS_FORM_FIELD_HEADER_SETTING . ' </b></h1>'
                 'type' => 'title'
             ),
             'enabled' => array(

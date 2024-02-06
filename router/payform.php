@@ -1,5 +1,7 @@
 <?php
 
+namespace MoneySpace;
+
 class MNS_Payform
 {
 

@@ -1,5 +1,6 @@
 <?php
 
+namespace MoneySpace;
 
 class MNS_Router_Utility
 {

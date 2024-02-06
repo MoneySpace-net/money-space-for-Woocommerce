@@ -1,5 +1,8 @@
 <?php
 
+namespace MoneySpace;
+use WP_Query;
+
 class MNS_Router_Page extends MNS_Router_Utility
 {
     const POST_TYPE = 'MNS_Router_page';
