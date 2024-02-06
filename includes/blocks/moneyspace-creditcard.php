@@ -4,6 +4,7 @@ namespace MoneySpace\Payments;
 
 use MoneySpace\MoneySpacePayment;
 use Automattic\WooCommerce\Blocks\Payments\Integrations\AbstractPaymentMethodType;
+use WC_Payment_Gateways;
 
 class MoneySpace_CreditCard extends AbstractPaymentMethodType {
 
@@ -31,8 +32,6 @@ class MoneySpace_CreditCard extends AbstractPaymentMethodType {
 		$this->settings = get_option( 'woocommerce_moneyspace_settings', [] ); // '.MNS_ID.'_settings
 		$gateways       = WC()->payment_gateways->payment_gateways();
 		$this->gateway  = $gateways[ $this->name ];
-		// var_dump($this->gateway->icon);
-		// exit();
 	}
 
 	/**
@@ -41,8 +40,8 @@ class MoneySpace_CreditCard extends AbstractPaymentMethodType {
 	 * @return boolean
 	 */
 	public function is_active() {
-		// return filter_var( $this->get_setting( 'enabled', false ), FILTER_VALIDATE_BOOLEAN );
-		return true; // $this->gateway->is_available();
+		return filter_var( $this->get_setting( 'enabled', false ), FILTER_VALIDATE_BOOLEAN );
+		// return true; // $this->gateway->is_available();
 	}
 
 	/**
@@ -78,10 +77,14 @@ class MoneySpace_CreditCard extends AbstractPaymentMethodType {
 	 * @return array
 	 */
 	public function get_payment_method_data() {
+		$payment_gateway_id = MNS_ID;
+		$gateways = WC()->payment_gateways->get_available_payment_gateways();
+		$ms_template_payment = $gateways[$payment_gateway_id]->settings['ms_template_payment'];
 		return [
 			'title'       => $this->get_setting( 'title' ),
 			'description' => $this->get_setting( 'description' ),
 			'icons'		  => [$this->get_payment_method_icons()],
+			'ms_template_payment' => $ms_template_payment,
 			'supports'    => array_filter( $this->gateway->supports, [ $this->gateway, 'supports' ] )
 		];
 	}

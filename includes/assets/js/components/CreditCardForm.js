@@ -158,7 +158,6 @@ const CreditCardForm = (props) => {
     }
 
     const checkCVV = (event) => {
-        
         if (!/^[0-9]*$/.test(event.key) && ![8,67,86,88].includes(event.keyCode)) {
             return event.preventDefault();
         }
@@ -176,7 +175,9 @@ const CreditCardForm = (props) => {
 
     const handleChange = (field) => (event) => {
         if (field == "ccNo") {
-            setFormData({ ...formData, [field]: cc_format(event.target.value), ["dirty"]: true  });
+            if (/^[0-9]*$/.test(event.target.value)) {
+                setFormData({ ...formData, [field]: cc_format(event.target.value), ["dirty"]: true  });
+            }
         } else if (field == "ccName") {
             setFormData({ ...formData, [field]: event.target.value.toUpperCase(), ["dirty"]: true });
         } else {
@@ -235,61 +236,6 @@ const CreditCardForm = (props) => {
             {FieldCVVError('ccCVV', 'Please check CVV')}
         </div>
     </div>);
-
-    // return !isComplete ? (
-    // <div class="container ms-box" id="credit-card-form">
-    //     <div class="card">
-    //         <div class="card-body">
-    //             <div>
-    //                 <input type="hidden" id="mspay" name="mspay" />
-    //                 <div class="form-group">
-    //                     <label for="txtCardNumber">Card Number <abbr class="required" title="required">*</abbr></label>
-    //                     <input type="text" class="form-control" value={formData.ccNo} onChange={handleChange('ccNo')} id="txtCardNumber" name="cardNumber" required="validateCardNumber()" onKeyDown={checkCardNumber} placeholder="0000 0000 0000 0000" />
-    //                 </div>
-    //                 <div class="form-group">
-    //                     <label for="txtHolder">Card Holder <abbr class="required" title="required">*</abbr></label>
-    //                     <input type="text" class="form-control"  value={formData.ccName} onChange={handleChange('ccName')} id="txtHolder" name="cardHolder" required="validateCardHolder()" keypress="checkCardName" placeholder="TONY ELSDEN" />
-    //                 </div>
-    //                 <div class="row">
-    //                     <div class="col-md-6">
-    //                         <div class="form-group">
-    //                             <label for="txtExpDate">Exp Date <abbr class="required" title="required">*</abbr></label>
-    //                             <div class="input-group">
-    //                                 <select value={formData.ccExpMonth} onChange={handleChange('ccExpMonth')} id="txtExpDate" name="cardExpDate" class="form-control" required="validateCardExpDate()">
-    //                                     <option value="" disabled selected>Month</option>
-    //                                     {
-    //                                         listNumber.map((x)=>(
-    //                                             <option value={x} disabled={x < minCardMonth()}>
-    //                                                 {x < 10 ? '0'+x : x}
-    //                                             </option>
-    //                                         ))
-    //                                     }
-                                        
-    //                                 </select>
-    //                                 <select value={formData.ccExpYear} onChange={handleChange('ccExpYear')} id="txtExpDateYear" name="cardExpDateYear" class="form-control" required="validateCardExpYear()">
-    //                                     <option value="" disabled selected>Year</option>
-    //                                     {
-    //                                         listNumber.map((x, index)=>(
-    //                                             <option value={index + formData.minCardYear}>
-    //                                                 {index + formData.minCardYear}
-    //                                             </option>
-    //                                         ))
-    //                                     }
-    //                                 </select>
-    //                             </div>
-    //                         </div>
-    //                     </div>
-    //                     <div class="col-md-6">
-    //                         <div class="form-group">
-    //                             <label for="txtCVV">CVV <abbr class="required" title="required">*</abbr></label>
-    //                             <input type="password" class="form-control" value={formData.ccCVV} onChange={handleChange('ccCVV')} id="txtCVV" name="cardCVV" maxLength={3} onKeyDown={checkCVV} placeholder="000" required={validateCardCVV()} />
-    //                         </div>
-    //                     </div>
-    //                 </div>
-    //             </div>
-    //         </div>
-    //     </div>
-    // </div>) : null;
 }
  
 export default CreditCardForm;

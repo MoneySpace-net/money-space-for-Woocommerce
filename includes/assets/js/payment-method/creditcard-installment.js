@@ -26,7 +26,7 @@ const options = {
 	content: <Content />,
 	edit:  <Content />,
 	ariaLabel: label,
-	canMakePayment: () => true,
+	canMakePayment: () => false,
 	supports: {
 		features: settings.supports,
 	},

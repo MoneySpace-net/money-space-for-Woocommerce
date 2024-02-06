@@ -8,13 +8,12 @@ $order = wc_get_order($pid);
 $payment_gateway_id = MNS_ID;
 $payment_gateways = WC_Payment_Gateways::instance();
 
-$payment_gateway = $payment_gateways->payment_gateways()[$payment_gateway_id];
-
-$ms_secret_id = $payment_gateway->settings['secret_id'];
-$ms_secret_key = $payment_gateway->settings['secret_key'];
+$gateways = WC()->payment_gateways->get_available_payment_gateways();
+$ms_secret_id = $gateways[$payment_gateway_id]->settings['secret_id'];
+$ms_secret_key = $gateways[$payment_gateway_id]->settings['secret_key'];
 
 $ms_body = array(
-    "transaction_ID" => $order->get_meta("MNS_transaction"),
+    "transaction_ID" => get_post_meta($pid, 'MNS_transaction', true),
     "secret_id" => $ms_secret_id,
     "secret_key" => $ms_secret_key
 );
@@ -31,7 +30,7 @@ $data_status = json_decode($response["body"]);
 $transaction_ID = "transaction id";
 $result = new stdClass();
 $result->order_id = $order->get_id();
-$result->transaction_id = $order->get_meta("MNS_transaction");
+$result->transaction_id = get_post_meta($pid, 'MNS_transaction', true);
 $result->status = $data_status[0]->$transaction_ID->status;
 
 if ($result->status == "Pay Success")

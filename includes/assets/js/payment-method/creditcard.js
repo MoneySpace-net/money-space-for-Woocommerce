@@ -8,6 +8,7 @@ import './styles.scss';
 const id = 'moneyspace';
 const settings = getSetting( `${id}_data`, {} );
 const label = decodeEntities( settings.title );
+const template_payment = settings.ms_template_payment;
 
 /**
  * Content component
@@ -22,7 +23,7 @@ const options = {
 			id={id}
 			title={label}
 			icons={settings.icons}/>,
-	content: <CreditCardForm />,
+	content: template_payment == 1 ? <CreditCardForm /> : <Content />,
 	edit:  <Content />,
 	ariaLabel: label,
 	paymentMethodId: id,
