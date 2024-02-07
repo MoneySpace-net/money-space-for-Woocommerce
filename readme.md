@@ -433,6 +433,10 @@
 
 # Changelog
 
+- 2024-02-06 : enhance support woocommerce 8.x blocks-based feature
+
+- 2024-01-11 : qr promptpay new option for auto check result
+
 - 2023-10-12 : tested up with 6.3.1
 
 - 2023-06-19 : add option to disable auto check qrnone
