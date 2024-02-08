@@ -1,6 +1,5 @@
 import {useState, useEffect, useRef, useCallback} from '@wordpress/element';
-// import {useValidateCheckout} from "./../payment-method/hooks";
-import '../payment-method/styles.scss';///styles.scss';
+import '../payment-method/styles.scss';
 import {__} from '@wordpress/i18n';
 
 const CreditCardForm = (props) => {

@@ -2,6 +2,7 @@ import { getSetting } from '@woocommerce/settings';
 import { decodeEntities } from '@wordpress/html-entities';
 import { registerPaymentMethod  } from '@woocommerce/blocks-registry';
 import PaymentMethodLabel from './../components/PaymentMethodLabel';
+import CreditCardInstallmentForm from './../components/CreditCardInstallmentForm';
 import './styles.scss';
 
 const id = "moneyspace_installment";
@@ -23,10 +24,11 @@ const options = {
             id={id}
             title={label}
             icons={settings.icons}/>,
-	content: <Content />,
+	content: <CreditCardInstallmentForm />,
 	edit:  <Content />,
 	ariaLabel: label,
-	canMakePayment: () => false,
+	paymentMethodId: id,
+	canMakePayment: () => true,
 	supports: {
 		features: settings.supports,
 	},
