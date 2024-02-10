@@ -416,8 +416,8 @@ class MNS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
         $order_amount = $order->get_total();
         $is_error = false;
         $items = $order->get_items();
-        $items_msg = set_item_message($items);
-        $return_url = get_site_url() . "/process/payment/" . $order_id;
+        // $items_msg = set_item_message($items);
+        // $return_url = get_site_url() . "/process/payment/" . $order_id;
 
         update_post_meta($order_id, 'MNS_special_instructions_to_merchant', sanitize_text_field($_POST["message_card"]));
 
