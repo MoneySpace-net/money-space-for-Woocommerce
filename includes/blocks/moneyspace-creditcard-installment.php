@@ -75,11 +75,44 @@ class MoneySpace_CreditCard_Installment extends AbstractPaymentMethodType {
 	 * @return array
 	 */
 	public function get_payment_method_data() {
-		
+		$gateways = WC()->payment_gateways->get_available_payment_gateways();
+		$id = "moneyspace_installment";
+		$ktc_enabled = $gateways[$id]->settings['ktc_enabled'] ?? "yes";
+        $bay_enabled = $gateways[$id]->settings['bay_enabled'] ?? "yes";
+        $fcy_enabled = $gateways[$id]->settings['fcy_enabled'] ?? "yes";
+		$ktc_max_months_setting = $gateways[$id]->settings['ktc_max_months_setting']; 
+        $bay_max_months_setting = $gateways[$id]->settings['bay_max_months_setting']; 
+        $fcy_max_months_setting = $gateways[$id]->settings['fcy_max_months_setting']; 
+		$msfee = $gateways[$id]->settings['fee_setting'] ?? "include";
+
 		return [
 			'title'       => $this->get_setting( 'title' ),
 			'description' => $this->get_setting( 'description' ),
 			'icons'		  => [$this->get_payment_method_icons()],
+			'msfee' => $msfee,
+			'ccIns' => [
+				array(
+					"code" => "ktc",
+					"isEnabled" => $ktc_enabled,
+					"label" => "เคทีซี (KTC)",
+					"maxMonth" => $ktc_max_months_setting,
+					"icon" => MNS_ROOT_URL . 'includes/images/installment/ktc-logo.png'
+				),
+				array(
+					"code" => "bay",
+					"isEnabled" => $bay_enabled,
+					"label" => "กรุงศรีฯ วีซ่า , เซ็นทรัล , เทสโก้โลตัส",
+					"maxMonth" => $bay_max_months_setting,
+					"icon" => MNS_ROOT_URL . 'includes/images/installment/bay_central_lotus.png'
+				),
+				array(
+					"code" => "fcy",
+					"isEnabled" => $fcy_enabled,
+					"label" => "กรุงศรีเฟิร์สช้อยส์ , โฮมโปร , เมกาโฮม",
+					"maxMonth" => $fcy_max_months_setting,
+					"icon" => MNS_ROOT_URL . 'includes/images/installment/fcy-logo.png'
+				),
+			],
 			'supports'    => array_filter( $this->gateway->supports, [ $this->gateway, 'supports' ] )
 		];
 	}

@@ -10,9 +10,10 @@ const CreditCardInstallmentForm = (props) => {
         BAY_permonths: "",
         FCY_permonths: ""
     };
+    const { ccIns } = props;
     const { cartTotal, currency } = props.billing;
     const { onPaymentSetup, onPaymentProcessing, onCheckoutValidationBeforeProcessing } = props.eventRegistration;
-
+    console.log('ccInsIcons', ccIns, ccIns.filter(x => x.code == "ktc")[0].icon);
     const checkPrice = () => {
         cartTotal.value
         var total = cartTotal.value / Math.pow(10, currency.minorUnit);
@@ -55,9 +56,9 @@ const CreditCardInstallmentForm = (props) => {
                             <div class="wc-block-components-radio-control__label-group">
                                 <span id="radio-control-wc-payment-method-options-moneyspace__label" class="wc-block-components-radio-control__label">
                                     <div class="wc-moneyspace-blocks-payment-method__label moneyspace">
-                                        <span class="wc-block-components-payment-method-label">เคทีซี (KTC)</span>
+                                        <span class="wc-block-components-payment-method-label">{ccIns.filter(x => x.code == "ktc")[0].label}</span>
                                         <div class="wc-block-components-payment-method-icons">
-                                            <img class="wc-block-components-payment-method-icon wc-block-components-payment-method-icon--moneyspace" src="https://a.moneyspace.net/static/img/type/Master_VISA_JCB_UNION_180.png" alt="moneyspace" />
+                                            <img class="wc-block-components-payment-method-icon wc-block-components-payment-method-icon--moneyspace" src={ccIns.filter(x => x.code == "ktc")[0].icon} alt="moneyspace" />
                                         </div>
                                     </div>
                                 </span>
@@ -72,9 +73,9 @@ const CreditCardInstallmentForm = (props) => {
                             <div class="wc-block-components-radio-control__label-group">
                                 <span id="radio-control-wc-payment-method-options-moneyspace__label" class="wc-block-components-radio-control__label">
                                     <div class="wc-moneyspace-blocks-payment-method__label moneyspace">
-                                        <span class="wc-block-components-payment-method-label">กรุงศรีฯ วีซ่า , เซ็นทรัล , เทสโก้โลตัส</span>
+                                        <span class="wc-block-components-payment-method-label">{ccIns.filter(x => x.code == "bay")[0].label}</span>
                                         <div class="wc-block-components-payment-method-icons">
-                                            <img class="wc-block-components-payment-method-icon wc-block-components-payment-method-icon--moneyspace" src="https://a.moneyspace.net/static/img/type/Master_VISA_JCB_UNION_180.png" alt="moneyspace" />
+                                            <img class="wc-block-components-payment-method-icon wc-block-components-payment-method-icon--moneyspace" src={ccIns.filter(x => x.code == "bay")[0].icon} alt="moneyspace" />
                                         </div>
                                     </div>
                                 </span>
@@ -89,9 +90,9 @@ const CreditCardInstallmentForm = (props) => {
                             <div class="wc-block-components-radio-control__label-group">
                                 <span id="radio-control-wc-payment-method-options-moneyspace__label" class="wc-block-components-radio-control__label">
                                     <div class="wc-moneyspace-blocks-payment-method__label moneyspace">
-                                        <span class="wc-block-components-payment-method-label">กรุงศรีเฟิร์สช้อยส์ , โฮมโปร , เมกาโฮม</span>
+                                        <span class="wc-block-components-payment-method-label">{ccIns.filter(x => x.code == "fcy")[0].label}</span>
                                         <div class="wc-block-components-payment-method-icons">
-                                            <img class="wc-block-components-payment-method-icon wc-block-components-payment-method-icon--moneyspace" src="https://a.moneyspace.net/static/img/type/Master_VISA_JCB_UNION_180.png" alt="moneyspace" />
+                                            <img class="wc-block-components-payment-method-icon wc-block-components-payment-method-icon--moneyspace" src={ccIns.filter(x => x.code == "fcy")[0].icon} alt="moneyspace" />
                                         </div>
                                     </div>
                                 </span>

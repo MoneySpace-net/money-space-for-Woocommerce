@@ -10,7 +10,7 @@ const id = "moneyspace_installment";
 
 const settings = getSetting( `${id}_data`, {} );
 const label = decodeEntities( settings.title );
-
+console.log('settings', settings);
 /**
  * Content component
  */
@@ -24,7 +24,7 @@ const options = {
             id={id}
             title={label}
             icons={settings.icons}/>,
-	content: <CreditCardInstallmentForm />,
+	content: <CreditCardInstallmentForm ccIns={settings.ccIns} />,
 	edit:  <Content />,
 	ariaLabel: label,
 	paymentMethodId: id,
