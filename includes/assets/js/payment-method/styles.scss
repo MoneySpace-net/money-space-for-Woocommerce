@@ -55,6 +55,7 @@
 .wc-block-components-form .wc-block-components-text-input.is-active input[type=text],
 .wc-block-components-form .wc-block-components-text-input.is-active input[type=url],
 .wc-block-components-form .wc-block-components-text-input.is-active input[type=password],
+.wc-block-components-form .wc-block-components-text-input.is-active select,
 .wc-block-components-text-input input:-webkit-autofill,
 .wc-block-components-text-input.is-active input[type=email],
 .wc-block-components-text-input.is-active input[type=number],
@@ -62,7 +63,7 @@
 .wc-block-components-text-input.is-active input[type=text],
 .wc-block-components-text-input.is-active input[type=url],
 .wc-block-components-text-input.is-active input[type=password],
-.wc-block-components-text-input select {
+.wc-block-components-text-input.is-active select {
   padding: 1.5em .5em .5em !important
 }
 
@@ -73,6 +74,7 @@
 .wc-block-components-form .wc-block-components-text-input input[type=text],
 .wc-block-components-form .wc-block-components-text-input input[type=url],
 .wc-block-components-form .wc-block-components-text-input input[type=password],
+.wc-block-components-form .wc-block-components-text-input select,
 .wc-block-components-text-input input[type=email],
 .wc-block-components-text-input input[type=number],
 .wc-block-components-text-input input[type=tel],
@@ -93,7 +95,6 @@
   padding: 1em;
   width: 100%
 }
-
 
 .wc-block-components-form .wc-block-components-text-input.has-error input,
 .wc-block-components-form .wc-block-components-text-input.has-error input:active,

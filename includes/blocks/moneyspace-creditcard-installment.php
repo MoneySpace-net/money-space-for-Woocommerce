@@ -107,6 +107,7 @@ class MoneySpace_CreditCard_Installment extends AbstractPaymentMethodType {
 					"maxMonth" => $ktc_max_months_setting,
 					"icon" => MNS_ROOT_URL . 'includes/images/installment/ktc-logo.png',
 					"months" => $KTC,
+					"rate" => 0.8
 
 				),
 				array(
@@ -116,6 +117,7 @@ class MoneySpace_CreditCard_Installment extends AbstractPaymentMethodType {
 					"maxMonth" => $bay_max_months_setting,
 					"icon" => MNS_ROOT_URL . 'includes/images/installment/bay_central_lotus.png',
 					"months" => $BAY,
+					"rate" => 0.8
 				),
 				array(
 					"code" => "fcy",
@@ -124,6 +126,7 @@ class MoneySpace_CreditCard_Installment extends AbstractPaymentMethodType {
 					"maxMonth" => $fcy_max_months_setting,
 					"icon" => MNS_ROOT_URL . 'includes/images/installment/fcy-logo.png',
 					"months" => $FCY,
+					"rate" => 1
 				),
 			],
 			'supports'    => array_filter( $this->gateway->supports, [ $this->gateway, 'supports' ] )
