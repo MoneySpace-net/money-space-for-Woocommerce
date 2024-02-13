@@ -13,7 +13,7 @@ const CreditCardInstallmentForm = (props) => {
         dirty: false
     };
     const [paymentData, setPaymentData] = useState(model);
-    const { ccIns } = props;
+    const { ccIns, msfee } = props;
     const { cartTotal, currency } = props.billing;
     const { onPaymentSetup, onPaymentProcessing, onCheckoutValidationBeforeProcessing } = props.eventRegistration;
     
@@ -35,13 +35,18 @@ const CreditCardInstallmentForm = (props) => {
         return amount_total > 3000;
     }
 
+    const formatNum = (val) => {
+        var number = parseFloat(val).toFixed(2);
+        return number.toString().replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1,");
+    }
+
     const warningPriceLessThanMinimum = () => {
         return (<div>
             <span style={{ color: "red" }} >The amount of balance must be 3,000.01 baht or more in order to make the installment payment.</span>
         </div>);
     }
 
-    const useValidateCheckout = ({ onCheckoutValidationBeforeProcessing }) => {
+    const useValidateCheckout = ({ paymentData, onCheckoutValidationBeforeProcessing }) => {
         useEffect(() => {
             const unsubscribe = onCheckoutValidationBeforeProcessing(() => {
                 if (!checkPrice()) {
@@ -50,14 +55,48 @@ const CreditCardInstallmentForm = (props) => {
                     }
                 }
 
+                if (paymentData.selectbank == "") {
+                    return {
+                        errorMessage: "Please choose bank type for installment."
+                    }
+                }
+
+                if (paymentData.selectbank != "") {
+                    console.log('paymentData', paymentData);
+                    return {
+                        errorMessage: "Please choose bank type for installment. ffff"
+                    }
+                }
+
                 return true;
             });
 
             return unsubscribe;
-        }, []);
+        }, [paymentData]);
     }
 
-    useValidateCheckout({ onCheckoutValidationBeforeProcessing });
+    useValidateCheckout({ paymentData, onCheckoutValidationBeforeProcessing });
+
+    const useProcessPayment = ({paymentData, onPaymentProcessing}) => {
+        useEffect(() => {
+            const unsubscribe = onPaymentProcessing(() => {
+                const response = {
+                    meta: {
+                        paymentMethodData: {
+                            selectbank: paymentData.selectbank,
+                            KTC_permonths: paymentData.KTC_permonths,
+                            BAY_permonths: paymentData.BAY_permonths,
+                            FCY_permonths: paymentData.FCY_permonths
+                        }
+                    }
+                }
+                return {type: "success", ...response};
+            });
+
+            return unsubscribe;
+        }, [paymentData]);
+    }
+    useProcessPayment({paymentData, onPaymentProcessing});
 
     const renderView = () => {
         return (<div className='wc-block-components-credit-card-installment-form'>
@@ -79,14 +118,19 @@ const CreditCardInstallmentForm = (props) => {
                             </div>
                         </div>
                     </label>
-                    <div className='wc-block-components-radio-control-accordion-content'>
+                    <div className={ `wc-block-components-radio-control-accordion-content ${ paymentData.selectbank == "moneyspace-ins-ktc" ? "": "hide" }`}>
                         <div id="KTC" class="installment wc-block-components-text-input is-active">
                             <label>จำนวนเดือนผ่อนชำระ</label>
-                            <select name="KTC_permonths" id="permonths">
+                            <select name="KTC_permonths" id="permonths" onChange={handleChange('KTC_permonths')}>
                                 {
                                     _.map(ktcObj.months, function(month) {
-                                        if ( Math.round(amount_total/month) >= 300 && month <=  ktcObj.maxMonth) {
-                                            return (<option value={month}>ผ่อน {month} เดือน ( {amount_total/month} บาท / เดือน )</option>)
+                                        if (msfee == 'include') {
+                                            return Math.round(amount_total/month) >= 300 && month <=  ktcObj.maxMonth ? 
+                                                (<option value={month}>ผ่อน {month} เดือน ( { formatNum(amount_total/month) } บาท / เดือน )</option>) : (<></>)
+                                        } else if (msfee == 'exclude') {
+                                            var ex_ktc = amount_total / 100 * ktcObj.rate * month + amount_total;
+                                            return Math.round(amount_total/month) >= 300 && month <=  ktcObj.maxMonth ? 
+                                                (<option value={month}>ผ่อน {month} เดือน ( { formatNum(ex_ktc/month) } บาท / เดือน )</option>) : (<></>)
                                         }
                                     })
                                 }
@@ -110,14 +154,19 @@ const CreditCardInstallmentForm = (props) => {
                             </div>
                         </div>
                     </label>
-                    <div className='wc-block-components-radio-control-accordion-content'>
+                    <div className={ `wc-block-components-radio-control-accordion-content ${ paymentData.selectbank == "moneyspace-ins-bay" ? "": "hide" }`}>
                         <div id="BAY" class="installment wc-block-components-text-input is-active">
                             <label>จำนวนเดือนผ่อนชำระ</label>
-                            <select name="BAY_permonths" id="permonths" >
+                            <select name="BAY_permonths" id="permonths" onChange={handleChange('BAY_permonths')} >
                                 {
                                     _.map(bayObj.months, function(month) {
-                                        if ( Math.round(amount_total/month) >= 300 && month <=  bayObj.maxMonth) {
-                                            return (<option value={month}>ผ่อน {month} เดือน ( {amount_total/month} บาท / เดือน )</option>)
+                                        if (msfee == 'include') {
+                                            return Math.round(amount_total/month) >= 500 && month <=  bayObj.maxMonth ? 
+                                                (<option value={month}>ผ่อน {month} เดือน ( { formatNum(amount_total/month) } บาท / เดือน )</option>) : (<></>)
+                                        } else if (msfee == 'exclude') {
+                                            var ex_bay = amount_total / 100 * bayObj.rate * month + amount_total;
+                                            return Math.round(amount_total/month) >= 500 && month <=  bayObj.maxMonth ? 
+                                                (<option value={month}>ผ่อน {month} เดือน ( { formatNum(ex_bay/month) } บาท / เดือน )</option>) : (<></>)
                                         }
                                     })
                                 }
@@ -141,14 +190,19 @@ const CreditCardInstallmentForm = (props) => {
                             </div>
                         </div>
                     </label>
-                    <div className='wc-block-components-radio-control-accordion-content'>
+                    <div className={ `wc-block-components-radio-control-accordion-content ${ paymentData.selectbank == "moneyspace-ins-fcy" ? "": "hide" }`}>
                         <div id="FCY" class="installment wc-block-components-text-input is-active">
                             <label>จำนวนเดือนผ่อนชำระ</label>
-                            <select name="FCY_permonths" id="permonths">
+                            <select name="FCY_permonths" id="permonths" onChange={handleChange('FCY_permonths')} >
                                 {
                                     _.map(fcyObj.months, function(month) {
-                                        if ( Math.round(amount_total/month) >= 300 && month <=  fcyObj.maxMonth) {
-                                            return (<option value={month}>ผ่อน {month} เดือน ( {amount_total/month} บาท / เดือน )</option>)
+                                        if (msfee == 'include') {
+                                            return Math.round(amount_total/month) >= 300 && month <=  bayObj.maxMonth ? 
+                                                (<option value={month}>ผ่อน {month} เดือน ( { formatNum(amount_total/month) } บาท / เดือน )</option>) : (<></>)
+                                        } else if (msfee == 'exclude') {
+                                            var ex_fcy = amount_total / 100 * fcyObj.rate * month + amount_total;
+                                            return Math.round(amount_total/month) >= 300 && month <=  bayObj.maxMonth ? 
+                                                (<option value={month}>ผ่อน {month} เดือน ( { formatNum(ex_fcy/month) } บาท / เดือน )</option>) : (<></>)
                                         }
                                     })
                                 }

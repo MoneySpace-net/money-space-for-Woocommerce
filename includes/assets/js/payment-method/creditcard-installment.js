@@ -24,7 +24,7 @@ const options = {
             id={id}
             title={label}
             icons={settings.icons}/>,
-	content: <CreditCardInstallmentForm ccIns={settings.ccIns} />,
+	content: <CreditCardInstallmentForm msfee={settings.msfee} ccIns={settings.ccIns} />,
 	edit:  <Content />,
 	ariaLabel: label,
 	paymentMethodId: id,

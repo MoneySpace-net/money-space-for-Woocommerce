@@ -31,6 +31,10 @@
   flex: 0 0 100%;
 }
 
+.wc-block-components-form .wc-block-components-text-input:only-child, .wc-block-components-text-input:only-child {
+  margin-top: 0 !important;
+}
+
 
 .wc-block-components-credit-card-form .wc-block-components-state-input,
 .wc-block-components-credit-card-form .wc-block-components-text-input,
