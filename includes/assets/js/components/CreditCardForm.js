@@ -16,7 +16,6 @@ const CreditCardForm = (props) => {
     var checkPaymentMethodCC = false;
     var errorFields = [];
     const listNumber = [1,2,3,4,5,6,7,8,9,10,11,12];
-    console.log('props', props);
     const [formData, setFormData] = useState(model);
     const { onPaymentSetup, onPaymentProcessing, onCheckoutValidationBeforeProcessing } = props.eventRegistration;
     

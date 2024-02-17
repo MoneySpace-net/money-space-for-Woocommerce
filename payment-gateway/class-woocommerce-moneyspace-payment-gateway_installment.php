@@ -6,6 +6,7 @@ use WC_Payment_Gateway;
 use WC_Order;
 use MoneySpace\Mslogs;
 use WC_Payment_Gateways;
+use Exception;
 
 /**
  * WC wcCpg3 Gateway Class.
@@ -183,6 +184,8 @@ class MNS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
 
     public function payment_fields()
     {
+        wc_add_notice(__("payment_fields", $this->domain), 'error');
+        exit();
         $payment_gateway_id = MNS_ID_INSTALLMENT;
         $payment_gateways = WC_Payment_Gateways::instance();
         $payment_gateway = $payment_gateways->payment_gateways()[$payment_gateway_id];
@@ -411,11 +414,21 @@ class MNS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
 
     }
 
+    /**
+     * Process the payment and return the result.
+     *
+     * @param int $order_id
+     * @return array
+     */
     public function process_payment($order_id) {
+        
         $order = wc_get_order($order_id);
         $order_amount = $order->get_total();
         $is_error = false;
         $items = $order->get_items();
+        // wc_add_notice(__(json_encode($_POST), $this->domain), 'error');
+        // exit();
+        
         // $items_msg = set_item_message($items);
         // $return_url = get_site_url() . "/process/payment/" . $order_id;
 
@@ -456,21 +469,25 @@ class MNS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
             $bankType = sanitize_text_field($_POST["selectbank"]);
 
             if ($bankType == "KTC"){
-                $endterm = sanitize_text_field($_POST["KTC_permonths"]);
+                $endterm = sanitize_text_field($_POST["KTC_permonths"] ?? $_POST["ktc_permonths"]);
             }
 
             if ($bankType == "BAY"){
-                $endterm = sanitize_text_field($_POST["BAY_permonths"]);
+                $endterm = sanitize_text_field($_POST["BAY_permonths"] ?? $_POST["pay_permonths"]);
             }
 
             if ($bankType == "FCY"){
-                $endterm = sanitize_text_field($_POST["FCY_permonths"]);
+                $endterm = sanitize_text_field($_POST["FCY_permonths"] ?? $_POST["fcy_permonths"]);
             }
 
             update_post_meta($order_id, 'MNS_INSTALLMENT_BANK_TYPE', $bankType);
             update_post_meta($order_id, 'MNS_INSTALLMENT_MONTHS', $endterm);
 
             return $this->_process_external_payment($order); // go to paymentgateway_form
+        } else {
+            wc_add_notice(__("Error : Message to the store (150 characters maximum)", $this->domain), 'error');
+            // wc_add_notice(__("Error : Enter special instructions to merchant again", $this->domain), 'error');
+            throw new Exception( __("Error : Message to the store (150 characters maximum)", $this->domain) );
         }
     }
 
