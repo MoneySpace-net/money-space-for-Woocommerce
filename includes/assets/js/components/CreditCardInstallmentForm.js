@@ -16,6 +16,7 @@ const CreditCardInstallmentForm = (props) => {
     const { ccIns, msfee } = props;
     const { cartTotal, currency } = props.billing;
     const { onPaymentSetup, onPaymentProcessing, onCheckoutValidationBeforeProcessing } = props.eventRegistration;
+    const { i18n } = props;
     
     const handleChange = (field) => (event) => {
         if (field == "selectbank" && event.target.value == "KTC")
@@ -115,7 +116,7 @@ const CreditCardInstallmentForm = (props) => {
 
     const renderView = () => {
         return (<div className='wc-block-components-credit-card-installment-form'>
-            <h2>เลือกการผ่อนชำระ</h2>
+            <h2>{i18n.MNS_CC_INS_TITLE}</h2>
             <div className={`wc-block-components-radio-control`}>
                 <div class="wc-block-components-radio-control-accordion-option">
                     <label class="wc-block-components-radio-control__option" for="radio-control-wc-payment-method-options-moneyspace-ins-ktc">
@@ -135,17 +136,17 @@ const CreditCardInstallmentForm = (props) => {
                     </label>
                     <div className={ `wc-block-components-radio-control-accordion-content ${ paymentData.selectbank == "KTC" ? "": "hide" }`}>
                         <div id="KTC" class="installment wc-block-components-text-input is-active">
-                            <label>จำนวนเดือนผ่อนชำระ</label>
+                            <label>{i18n.MNS_CC_INS_MONTH}</label>
                             <select name="KTC_permonths" id="permonths" value={paymentData.KTC_permonths} onChange={handleChange('KTC_permonths')}>
                                 {
                                     _.map(ktcObj.months, function(month, index) {
                                         if (msfee == 'include') {
                                             return Math.round(amount_total/month) >= 300 && month <=  ktcObj.maxMonth ? 
-                                                (<option value={month} selected={ index==0 }>ผ่อน {month} เดือน ( { formatNum(amount_total/month) } บาท / เดือน )</option>) : (<></>)
+                                                (<option value={month} selected={ index==0 }>{i18n.MNS_INS} {month} {i18n.MNS_MONTH} ( { formatNum(amount_total/month) } {i18n.MNS_BAHT} / {i18n.MNS_MONTH} )</option>) : (<></>)
                                         } else if (msfee == 'exclude') {
                                             var ex_ktc = amount_total / 100 * ktcObj.rate * month + amount_total;
                                             return Math.round(amount_total/month) >= 300 && month <=  ktcObj.maxMonth ? 
-                                                (<option value={month} selected={ index==0 }>ผ่อน {month} เดือน ( { formatNum(ex_ktc/month) } บาท / เดือน )</option>) : (<></>)
+                                                (<option value={month} selected={ index==0 }>{i18n.MNS_INS} {month} {i18n.MNS_MONTH} ( { formatNum(ex_ktc/month) } {i18n.MNS_BAHT} / {i18n.MNS_MONTH} )</option>) : (<></>)
                                         }
                                     })
                                 }
@@ -171,17 +172,17 @@ const CreditCardInstallmentForm = (props) => {
                     </label>
                     <div className={ `wc-block-components-radio-control-accordion-content ${ paymentData.selectbank == "BAY" ? "": "hide" }`}>
                         <div id="BAY" class="installment wc-block-components-text-input is-active">
-                            <label>จำนวนเดือนผ่อนชำระ</label>
+                            <label>{i18n.MNS_CC_INS_MONTH}</label>
                             <select name="BAY_permonths" id="permonths" value={paymentData.BAY_permonths} onChange={handleChange('BAY_permonths')} >
                                 {
                                     _.map(bayObj.months, function(month, index) {
                                         if (msfee == 'include') {
                                             return Math.round(amount_total/month) >= 500 && month <=  bayObj.maxMonth ? 
-                                                (<option value={month} selected={ index==0 }>ผ่อน {month} เดือน ( { formatNum(amount_total/month) } บาท / เดือน )</option>) : (<></>)
+                                                (<option value={month} selected={ index==0 }>{i18n.MNS_INS} {month} {i18n.MNS_MONTH} ( { formatNum(amount_total/month) } {i18n.MNS_BAHT} / {i18n.MNS_MONTH} )</option>) : (<></>)
                                         } else if (msfee == 'exclude') {
                                             var ex_bay = amount_total / 100 * bayObj.rate * month + amount_total;
                                             return Math.round(amount_total/month) >= 500 && month <=  bayObj.maxMonth ? 
-                                                (<option value={month} selected={ index==0 }>ผ่อน {month} เดือน ( { formatNum(ex_bay/month) } บาท / เดือน )</option>) : (<></>)
+                                                (<option value={month} selected={ index==0 }>{i18n.MNS_INS} {month} {i18n.MNS_MONTH} ( { formatNum(ex_bay/month) } {i18n.MNS_BAHT} / {i18n.MNS_MONTH} )</option>) : (<></>)
                                         }
                                     })
                                 }
@@ -207,17 +208,17 @@ const CreditCardInstallmentForm = (props) => {
                     </label>
                     <div className={ `wc-block-components-radio-control-accordion-content ${ paymentData.selectbank == "FCY" ? "": "hide" }`}>
                         <div id="FCY" class="installment wc-block-components-text-input is-active">
-                            <label>จำนวนเดือนผ่อนชำระ</label>
+                            <label>{i18n.MNS_CC_INS_MONTH}</label>
                             <select name="FCY_permonths" id="permonths" value={paymentData.FCY_permonths} onChange={handleChange('FCY_permonths')} >
                                 {
                                     _.map(fcyObj.months, function(month, index) {
                                         if (msfee == 'include') {
                                             return Math.round(amount_total/month) >= 300 && month <=  bayObj.maxMonth ? 
-                                                (<option value={month} selected={ index==0 }>ผ่อน {month} เดือน ( { formatNum(amount_total/month) } บาท / เดือน )</option>) : (<></>)
+                                                (<option value={month} selected={ index==0 }>{i18n.MNS_INS} {month} {i18n.MNS_MONTH} ( { formatNum(amount_total/month) } {i18n.MNS_BAHT} / {i18n.MNS_MONTH} )</option>) : (<></>)
                                         } else if (msfee == 'exclude') {
                                             var ex_fcy = amount_total / 100 * fcyObj.rate * month + amount_total;
                                             return Math.round(amount_total/month) >= 300 && month <=  bayObj.maxMonth ? 
-                                                (<option value={month} selected={ index==0 }>ผ่อน {month} เดือน ( { formatNum(ex_fcy/month) } บาท / เดือน )</option>) : (<></>)
+                                                (<option value={month} selected={ index==0 }>{i18n.MNS_INS} {month} {i18n.MNS_MONTH} ( { formatNum(ex_fcy/month) } {i18n.MNS_BAHT} / {i18n.MNS_MONTH} )</option>) : (<></>)
                                         }
                                     })
                                 }

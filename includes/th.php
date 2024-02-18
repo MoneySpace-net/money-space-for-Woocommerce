@@ -98,8 +98,24 @@ define('MNS_CC_EXP_MONTH', 'เดือนหมดอายุ');
 define('MNS_CC_EXP_YEAR', 'ปีหมดอายุ');
 define('MNS_CC_CVV', 'รหัสป้องกัน');
 define('MNS_CC_REMEMBER', 'บันทึกข้อมูลบัตรสำหรับการสั่งซื้อรอบถัดไป');
+define('MNS_MONTH', 'เดือน');
+define('MNS_YEAR', 'ปี');
+define('MNS_BAHT', 'บาท');
+define('MNS_INS', 'ผ่อน');
 
 define('MNS_CC_WARN_CC_NO_1', 'กรุณากรอกหมายเลขบัตรเครดิต');
 define('MNS_CC_WARN_CC_NO_2', 'กรุณาตรวจสอบเลขบัตรเครดิต');
+define('MNS_CC_WARN_CC_NAME', 'กรุณากรอกชื่อผู้ถือบัตร');
+define('MNS_CC_WARN_CC_EXP_MONTH', 'กรุณากรอกเดือนหมดอายุ');
+define('MNS_CC_WARN_CC_EXP_YEAR', 'กรุณากรอกปีหมดอายุ');
+define('MNS_CC_WARN_CVV_1', 'กรุณากรอกรหัสป้องกัน');
+define('MNS_CC_WARN_CVV_2', 'กรุณาตรวจสอบรหัสป้องกัน');
+
+define('MNS_CC_INS_TITLE', 'เลือกการผ่อนชำระ');
+define('MNS_CC_INS_MONTH', 'จำนวนเดือนผ่อนชำระ');
+
+define('MNS_CC_INS_KTC', 'บัตรเคทีซี');
+define('MNS_CC_INS_BAY', 'บัตรกรุงศรีฯ วีซ่า , บัตรเซ็นทรัล , บัตรเทสโก้โลตัส');
+define('MNS_CC_INS_FCY', 'บัตรกรุงศรีเฟิร์สช้อยส์ , บัตรโฮมโปร , บัตรเมกาโฮม');
 
 define('MNS_ORDER_STATUS_COMPLETED', 'ชำระเงินเรียบร้อยแล้ว');

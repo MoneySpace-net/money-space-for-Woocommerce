@@ -86,8 +86,15 @@ class MoneySpace_CreditCard extends AbstractPaymentMethodType {
 			'MNS_CC_EXP_MONTH' => MNS_CC_EXP_MONTH,
 			'MNS_CC_EXP_YEAR' => MNS_CC_EXP_YEAR,
 			'MNS_CC_CVV' => MNS_CC_CVV,
+			'MNS_MONTH' => MNS_MONTH,
+			'MNS_YEAR' => MNS_YEAR,
 			'MNS_CC_WARN_CC_NO_1' => MNS_CC_WARN_CC_NO_1,
 			'MNS_CC_WARN_CC_NO_2' => MNS_CC_WARN_CC_NO_2,
+			'MNS_CC_WARN_CC_NAME' => MNS_CC_WARN_CC_NAME,
+			'MNS_CC_WARN_CC_EXP_MONTH' => MNS_CC_WARN_CC_EXP_MONTH,
+			'MNS_CC_WARN_CC_EXP_YEAR' => MNS_CC_WARN_CC_EXP_YEAR,
+			'MNS_CC_WARN_CVV_1' => MNS_CC_WARN_CVV_1,
+			'MNS_CC_WARN_CVV_2' => MNS_CC_WARN_CVV_2,
 		);
 		return [
 			'title'       => $this->get_setting( 'title' ),

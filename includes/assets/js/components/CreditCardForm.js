@@ -200,11 +200,11 @@ const CreditCardForm = (props) => {
         <div className={ `wc-block-components-text-input wc-block-components-credit-form is-active ${ FieldValidatorClass('ccName') }` }>
             <input type="text" value={formData.ccName} onChange={handleChange('ccName')} id="txtHolder" name="cardHolder" keypress="checkCardName" placeholder="TONY ELSDEN"/>
             <label for="cardHolder">{i18n.MNS_CC_NAME} *</label>
-            {FieldError('ccName', 'Please fill in Card Holder')}
+            {FieldError('ccName', i18n.MNS_CC_WARN_CC_NAME)}
         </div>
         <div className={ `wc-block-components-text-input is-active ${ FieldValidatorClass('ccExpMonth') }` }>
             <select value={formData.ccExpMonth} onChange={handleChange('ccExpMonth')} id="txtExpDate" name="cardExpDate" >
-                <option value="" disabled selected>Month</option>
+                <option value="" disabled selected>{i18n.MNS_MONTH}</option>
                 {
                     listNumber.map((x)=>(
                         <option value={x} disabled={x < minCardMonth()}>
@@ -214,11 +214,11 @@ const CreditCardForm = (props) => {
                 }
             </select>
             <label for="ccExpMonth">{i18n.MNS_CC_EXP_MONTH} *</label>
-            {FieldError('ccExpMonth', 'Please fill in Exp Month')}
+            {FieldError('ccExpMonth', i18n.MNS_CC_WARN_CC_EXP_MONTH)}
         </div>
         <div className={ `wc-block-components-text-input is-active ${ FieldValidatorClass('ccExpYear') }` }>
             <select value={formData.ccExpYear} onChange={handleChange('ccExpYear')} id="ccExpYear" name="cardExpDateYear" >
-                <option value="" disabled selected>Month</option>
+                <option value="" disabled selected>{i18n.MNS_YEAR}</option>
                 {
                     listNumber.map((x, index)=>(
                         <option value={index + formData.minCardYear}>
@@ -228,13 +228,13 @@ const CreditCardForm = (props) => {
                 }
             </select>
             <label for="ccExpYear">{i18n.MNS_CC_EXP_YEAR} *</label>
-            {FieldError('ccExpYear', 'Please fill in Card Exp Year')}
+            {FieldError('ccExpYear', i18n.MNS_CC_WARN_CC_EXP_YEAR)}
         </div>
         <div className={ `wc-block-components-text-input wc-block-components-credit-form is-active ${ FieldValidatorClass('ccCVV') }` }>
             <input type="password" value={formData.ccCVV} onChange={handleChange('ccCVV')} id="txtCVV" name="cardCVV" maxLength={3} onKeyDown={checkCVV} placeholder="000" required={validateCardCVV()} />
             <label for="cardCVV">{i18n.MNS_CC_CVV} *</label>
-            {FieldError('ccCVV', 'Please fill in CVV')}
-            {FieldCVVError('ccCVV', 'Please check CVV')}
+            {FieldError('ccCVV', i18n.MNS_CC_WARN_CVV_1)}
+            {FieldCVVError('ccCVV', i18n.MNS_CC_WARN_CVV_2)}
         </div>
     </div>);
 }

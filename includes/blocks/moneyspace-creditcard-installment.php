@@ -94,16 +94,29 @@ class MoneySpace_CreditCard_Installment extends AbstractPaymentMethodType {
             $FCY = [ 3, 4, 6, 9, 10, 12, 18, 24, 36];
         }
 
+		$cc_ins_i18n = array(
+			'MNS_CC_INS_TITLE' => MNS_CC_INS_TITLE,
+			'MNS_CC_INS_MONTH' => MNS_CC_INS_MONTH,
+			'MNS_MONTH' => MNS_MONTH,
+			'MNS_BAHT' => MNS_BAHT,
+			'MNS_INS' => MNS_INS,
+			'MNS_CC_INS_KTC' => MNS_CC_INS_KTC,
+			'MNS_CC_INS_BAY' => MNS_CC_INS_BAY,
+			'MNS_CC_INS_FCY' => MNS_CC_INS_FCY,
+			'MNS_PAY_INS' => MNS_PAY_INS,
+		);
+
 		return [
 			'title'       => $this->get_setting( 'title' ),
 			'description' => $this->get_setting( 'description' ),
 			'icons'		  => [$this->get_payment_method_icons()],
+			'i18n' => $cc_ins_i18n,
 			'msfee' => $msfee,
 			'ccIns' => [
 				array(
 					"code" => "ktc",
 					"isEnabled" => $ktc_enabled,
-					"label" => "เคทีซี (KTC)",
+					"label" => MNS_CC_INS_KTC,
 					"maxMonth" => $ktc_max_months_setting,
 					"icon" => MNS_ROOT_URL . 'includes/images/installment/ktc-logo.png',
 					"months" => $KTC,
@@ -113,7 +126,7 @@ class MoneySpace_CreditCard_Installment extends AbstractPaymentMethodType {
 				array(
 					"code" => "bay",
 					"isEnabled" => $bay_enabled,
-					"label" => "กรุงศรีฯ วีซ่า , เซ็นทรัล , เทสโก้โลตัส",
+					"label" => MNS_CC_INS_BAY,
 					"maxMonth" => $bay_max_months_setting,
 					"icon" => MNS_ROOT_URL . 'includes/images/installment/bay_central_lotus.png',
 					"months" => $BAY,
@@ -122,7 +135,7 @@ class MoneySpace_CreditCard_Installment extends AbstractPaymentMethodType {
 				array(
 					"code" => "fcy",
 					"isEnabled" => $fcy_enabled,
-					"label" => "กรุงศรีเฟิร์สช้อยส์ , โฮมโปร , เมกาโฮม",
+					"label" => MNS_CC_INS_FCY,
 					"maxMonth" => $fcy_max_months_setting,
 					"icon" => MNS_ROOT_URL . 'includes/images/installment/fcy-logo.png',
 					"months" => $FCY,

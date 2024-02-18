@@ -83,7 +83,7 @@ define('MNS_QR_SCANSUCCESS', 'Pay success please wait a sec.');
 define('MNS_QR_CONFIRM', ' Click here after payment completed');
 define('MNS_QR_NEWCREATE', 'Click here for new QR Code');
 
-define('MNS_PAY_INS', 'Monthly installments');
+define('MNS_PAY_INS', 'MoneySpace Monthly installments');
 define('MNS_PAY_QR', 'Pay bills with QR Code');
 
 define('MNS_INS_MESSAGE_WARNING', 'The amount of balance must be 3,000.01 baht or more in order to make the installment payment.');
@@ -99,7 +99,25 @@ define('MNS_CC_EXP_YEAR', 'Exp Year');
 define('MNS_CC_CVV', 'CVV');
 define('MNS_CC_REMEMBER', 'Save my card details securely for future payment');
 
-define('MNS_CC_WARN_CC_NO_1"', 'Please fill in Card Number');
-define('MNS_CC_WARN_CC_NO_2"', 'Please check your Card Number');
+define('MNS_MONTH', 'Month');
+define('MNS_YEAR', 'Year');
+define('MNS_BAHT', 'Baht');
+define('MNS_INS', 'Installments');
+
+
+define('MNS_CC_WARN_CC_NO_1', 'Please fill in Card Number');
+define('MNS_CC_WARN_CC_NO_2', 'Please check your Card Number');
+define('MNS_CC_WARN_CC_NAME', 'Please fill in Card Holder');
+define('MNS_CC_WARN_CC_EXP_MONTH', 'Please fill in Exp Month');
+define('MNS_CC_WARN_CC_EXP_YEAR', 'Please fill in Card Exp Year');
+define('MNS_CC_WARN_CVV_1', 'Please fill in CVV');
+define('MNS_CC_WARN_CVV_2', 'Please check CVV');
+
+define('MNS_CC_INS_TITLE', 'Credit Card Bank for installment');
+define('MNS_CC_INS_MONTH', 'Select month for installment');
+
+define('MNS_CC_INS_KTC', 'KTC Card');
+define('MNS_CC_INS_BAY', 'Krungsri Visa Card , Central Credit Card , Lotus Credit Card');
+define('MNS_CC_INS_FCY', 'First Choice Card , HomePro Credit Card , MegaHome Credit Card');
 
 define('MNS_ORDER_STATUS_COMPLETED', 'Completed');
