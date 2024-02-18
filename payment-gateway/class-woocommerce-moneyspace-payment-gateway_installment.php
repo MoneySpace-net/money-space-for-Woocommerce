@@ -184,8 +184,8 @@ class MNS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
 
     public function payment_fields()
     {
-        wc_add_notice(__("payment_fields", $this->domain), 'error');
-        exit();
+        // wc_add_notice(__("payment_fields", $this->domain), 'error');
+        // exit();
         $payment_gateway_id = MNS_ID_INSTALLMENT;
         $payment_gateways = WC_Payment_Gateways::instance();
         $payment_gateway = $payment_gateways->payment_gateways()[$payment_gateway_id];
@@ -426,6 +426,7 @@ class MNS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
         $order_amount = $order->get_total();
         $is_error = false;
         $items = $order->get_items();
+        
         // wc_add_notice(__(json_encode($_POST), $this->domain), 'error');
         // exit();
         
@@ -467,13 +468,13 @@ class MNS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
             update_post_meta($order_id, 'MNS_INSTALLMENT_BANK', sanitize_text_field($_POST["selectbank"]));
             $endterm = "";
             $bankType = sanitize_text_field($_POST["selectbank"]);
-
+            
             if ($bankType == "KTC"){
                 $endterm = sanitize_text_field($_POST["KTC_permonths"] ?? $_POST["ktc_permonths"]);
             }
 
             if ($bankType == "BAY"){
-                $endterm = sanitize_text_field($_POST["BAY_permonths"] ?? $_POST["pay_permonths"]);
+                $endterm = sanitize_text_field($_POST["BAY_permonths"] ?? $_POST["bay_permonths"]);
             }
 
             if ($bankType == "FCY"){
@@ -482,7 +483,6 @@ class MNS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
 
             update_post_meta($order_id, 'MNS_INSTALLMENT_BANK_TYPE', $bankType);
             update_post_meta($order_id, 'MNS_INSTALLMENT_MONTHS', $endterm);
-
             return $this->_process_external_payment($order); // go to paymentgateway_form
         } else {
             wc_add_notice(__("Error : Message to the store (150 characters maximum)", $this->domain), 'error');
@@ -492,9 +492,9 @@ class MNS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
     }
 
     public function paymentgateway_form($order_id) {
-       
+
         $payment_gateways = WC_Payment_Gateways::instance();
-        $gateways = WC()->payment_gateways->get_available_payment_gateways();
+        // $gateways = WC()->payment_gateways->get_available_payment_gateways();
         
         $payment_gateway = $payment_gateways->payment_gateways()[MNS_ID_INSTALLMENT];
         $ms_order_select = $payment_gateway->settings['order_status_if_success'];
@@ -504,7 +504,7 @@ class MNS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
         $moneyspace_gw = $payment_gateways->payment_gateways()[MNS_ID];
         $ms_secret_id = $moneyspace_gw->settings['secret_id'];
         $ms_secret_key = $moneyspace_gw->settings['secret_key'];
-        $ms_template_payment = $moneyspace_gw->settings['ms_template_payment'];
+        // $ms_template_payment = $moneyspace_gw->settings['ms_template_payment'];
         $ms_time = date("YmdHis");
         $order = wc_get_order($order_id);
         $items = $order->get_items();
@@ -542,7 +542,7 @@ class MNS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
         , "bankType" => $bankType
         , "startTerm" => $endTerm
         , "endTerm" => $endTerm);
-
+        
         $response = wp_remote_post(MNS_API_URL_CREATE_INSTALLMENT, 
         array(
             'headers' => array('Content-Type' => 'application/json; charset=utf-8'),
@@ -557,6 +557,8 @@ class MNS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
             wc_add_notice(__($response, $this->domain), 'error');
             return;
         }
+
+        
 
         $json_tranId_status = json_decode($response["body"]);
                                     

@@ -18,11 +18,11 @@ const CreditCardInstallmentForm = (props) => {
     const { onPaymentSetup, onPaymentProcessing, onCheckoutValidationBeforeProcessing } = props.eventRegistration;
     
     const handleChange = (field) => (event) => {
-        if (field == "selectbank" && event.target.value == "moneyspace-ins-ktc")
+        if (field == "selectbank" && event.target.value == "KTC")
             setPaymentData({ ...paymentData, [field]: event.target.value, ["dirty"]: true, ["KTC_permonths"]: "3", ["BAY_permonths"]: "", ["FCY_permonths"]: "" });
-        else if (field == "selectbank" && event.target.value == "moneyspace-ins-bay")
+        else if (field == "selectbank" && event.target.value == "BAY")
             setPaymentData({ ...paymentData, [field]: event.target.value, ["dirty"]: true, ["KTC_permonths"]: "", ["BAY_permonths"]: "3", ["FCY_permonths"]: "" });
-        else if (field == "selectbank" && event.target.value == "moneyspace-ins-fcy")
+        else if (field == "selectbank" && event.target.value == "FCY")
             setPaymentData({ ...paymentData, [field]: event.target.value, ["dirty"]: true, ["KTC_permonths"]: "", ["BAY_permonths"]: "0", ["FCY_permonths"]: "3" });
         else
             setPaymentData({ ...paymentData, [field]: event.target.value, ["dirty"]: true });
@@ -54,13 +54,13 @@ const CreditCardInstallmentForm = (props) => {
 
     const useValidateCheckout = ({ paymentData, onCheckoutValidationBeforeProcessing }) => {
         useEffect(() => {
-            if (paymentData.selectbank == "moneyspace-ins-ktc")
+            if (paymentData.selectbank == "KTC")
                 handleChange("KTC_permonths");
 
-            if (paymentData.selectbank == "moneyspace-ins-bay")
+            if (paymentData.selectbank == "BAY")
                 handleChange("BAY_permonths");
             
-            if (paymentData.selectbank == "moneyspace-ins-fcy")
+            if (paymentData.selectbank == "FCY")
                 handleChange("FCY_permonths");
             
             const unsubscribe = onCheckoutValidationBeforeProcessing(() => {
@@ -119,7 +119,7 @@ const CreditCardInstallmentForm = (props) => {
             <div className={`wc-block-components-radio-control`}>
                 <div class="wc-block-components-radio-control-accordion-option">
                     <label class="wc-block-components-radio-control__option" for="radio-control-wc-payment-method-options-moneyspace-ins-ktc">
-                        <input id="radio-control-wc-payment-method-options-moneyspace-ins-ktc" class="wc-block-components-radio-control__input" type="radio" name="mns_ins_payment" aria-describedby="radio-control-wc-payment-method-options-moneyspace__label" value="moneyspace-ins-ktc" onChange={handleChange('selectbank')} checked={ paymentData.selectbank == "moneyspace-ins-ktc" } />
+                        <input id="radio-control-wc-payment-method-options-moneyspace-ins-ktc" class="wc-block-components-radio-control__input" type="radio" name="mns_ins_payment" aria-describedby="radio-control-wc-payment-method-options-moneyspace__label" value="KTC" onChange={handleChange('selectbank')} checked={ paymentData.selectbank == "KTC" } />
                         <div class="wc-block-components-radio-control__option-layout">
                             <div class="wc-block-components-radio-control__label-group">
                                 <span id="radio-control-wc-payment-method-options-moneyspace__label" class="wc-block-components-radio-control__label">
@@ -133,7 +133,7 @@ const CreditCardInstallmentForm = (props) => {
                             </div>
                         </div>
                     </label>
-                    <div className={ `wc-block-components-radio-control-accordion-content ${ paymentData.selectbank == "moneyspace-ins-ktc" ? "": "hide" }`}>
+                    <div className={ `wc-block-components-radio-control-accordion-content ${ paymentData.selectbank == "KTC" ? "": "hide" }`}>
                         <div id="KTC" class="installment wc-block-components-text-input is-active">
                             <label>จำนวนเดือนผ่อนชำระ</label>
                             <select name="KTC_permonths" id="permonths" value={paymentData.KTC_permonths} onChange={handleChange('KTC_permonths')}>
@@ -155,7 +155,7 @@ const CreditCardInstallmentForm = (props) => {
                 </div>
                 <div class="wc-block-components-radio-control-accordion-option">
                     <label class="wc-block-components-radio-control__option" for="radio-control-wc-payment-method-options-moneyspace-ins-bay">
-                        <input id="radio-control-wc-payment-method-options-moneyspace-ins-bay" class="wc-block-components-radio-control__input" type="radio" name="mns_ins_payment" aria-describedby="radio-control-wc-payment-method-options-moneyspace__label" value="moneyspace-ins-bay" onChange={handleChange('selectbank')} checked={ paymentData.selectbank == "moneyspace-ins-bay" } />
+                        <input id="radio-control-wc-payment-method-options-moneyspace-ins-bay" class="wc-block-components-radio-control__input" type="radio" name="mns_ins_payment" aria-describedby="radio-control-wc-payment-method-options-moneyspace__label" value="BAY" onChange={handleChange('selectbank')} checked={ paymentData.selectbank == "BAY" } />
                         <div class="wc-block-components-radio-control__option-layout">
                             <div class="wc-block-components-radio-control__label-group">
                                 <span id="radio-control-wc-payment-method-options-moneyspace__label" class="wc-block-components-radio-control__label">
@@ -169,7 +169,7 @@ const CreditCardInstallmentForm = (props) => {
                             </div>
                         </div>
                     </label>
-                    <div className={ `wc-block-components-radio-control-accordion-content ${ paymentData.selectbank == "moneyspace-ins-bay" ? "": "hide" }`}>
+                    <div className={ `wc-block-components-radio-control-accordion-content ${ paymentData.selectbank == "BAY" ? "": "hide" }`}>
                         <div id="BAY" class="installment wc-block-components-text-input is-active">
                             <label>จำนวนเดือนผ่อนชำระ</label>
                             <select name="BAY_permonths" id="permonths" value={paymentData.BAY_permonths} onChange={handleChange('BAY_permonths')} >
@@ -191,7 +191,7 @@ const CreditCardInstallmentForm = (props) => {
                 </div>
                 <div class="wc-block-components-radio-control-accordion-option">
                     <label class="wc-block-components-radio-control__option" for="radio-control-wc-payment-method-options-moneyspace-ins-fcy">
-                        <input id="radio-control-wc-payment-method-options-moneyspace-ins-fcy" class="wc-block-components-radio-control__input" type="radio" name="mns_ins_payment" aria-describedby="radio-control-wc-payment-method-options-moneyspace__label" value="moneyspace-ins-fcy" onChange={handleChange('selectbank')} checked={ paymentData.selectbank == "moneyspace-ins-fcy" } />
+                        <input id="radio-control-wc-payment-method-options-moneyspace-ins-fcy" class="wc-block-components-radio-control__input" type="radio" name="mns_ins_payment" aria-describedby="radio-control-wc-payment-method-options-moneyspace__label" value="FCY" onChange={handleChange('selectbank')} checked={ paymentData.selectbank == "FCY" } />
                         <div class="wc-block-components-radio-control__option-layout">
                             <div class="wc-block-components-radio-control__label-group">
                                 <span id="radio-control-wc-payment-method-options-moneyspace__label" class="wc-block-components-radio-control__label">
@@ -205,7 +205,7 @@ const CreditCardInstallmentForm = (props) => {
                             </div>
                         </div>
                     </label>
-                    <div className={ `wc-block-components-radio-control-accordion-content ${ paymentData.selectbank == "moneyspace-ins-fcy" ? "": "hide" }`}>
+                    <div className={ `wc-block-components-radio-control-accordion-content ${ paymentData.selectbank == "FCY" ? "": "hide" }`}>
                         <div id="FCY" class="installment wc-block-components-text-input is-active">
                             <label>จำนวนเดือนผ่อนชำระ</label>
                             <select name="FCY_permonths" id="permonths" value={paymentData.FCY_permonths} onChange={handleChange('FCY_permonths')} >
