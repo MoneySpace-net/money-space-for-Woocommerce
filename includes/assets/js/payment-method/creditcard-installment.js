@@ -2,14 +2,15 @@ import { getSetting } from '@woocommerce/settings';
 import { decodeEntities } from '@wordpress/html-entities';
 import { registerPaymentMethod  } from '@woocommerce/blocks-registry';
 import PaymentMethodLabel from './../components/PaymentMethodLabel';
+import CreditCardInstallmentForm from './../components/CreditCardInstallmentForm';
 import './styles.scss';
 
 const id = "moneyspace_installment";
 
 
 const settings = getSetting( `${id}_data`, {} );
-const label = decodeEntities( settings.title );
-
+const label = decodeEntities( settings.i18n.MNS_PAY_INS );
+console.log('settings', settings);
 /**
  * Content component
  */
@@ -23,10 +24,11 @@ const options = {
             id={id}
             title={label}
             icons={settings.icons}/>,
-	content: <Content />,
+	content: <CreditCardInstallmentForm i18n={settings.i18n} msfee={settings.msfee} ccIns={settings.ccIns} />,
 	edit:  <Content />,
 	ariaLabel: label,
-	canMakePayment: () => false,
+	paymentMethodId: id,
+	canMakePayment: () => true,
 	supports: {
 		features: settings.supports,
 	},

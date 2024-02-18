@@ -9,6 +9,7 @@ const id = 'moneyspace';
 const settings = getSetting( `${id}_data`, {} );
 const label = decodeEntities( settings.title );
 const template_payment = settings.ms_template_payment;
+ console.log('settings cc', settings);
 
 /**
  * Content component
@@ -23,7 +24,7 @@ const options = {
 			id={id}
 			title={label}
 			icons={settings.icons}/>,
-	content: template_payment == 1 ? <CreditCardForm /> : <Content />,
+	content: template_payment == 1 ? <CreditCardForm i18n={settings.i18n} /> : <Content />,
 	edit:  <Content />,
 	ariaLabel: label,
 	paymentMethodId: id,

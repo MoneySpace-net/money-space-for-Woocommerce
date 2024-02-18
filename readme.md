@@ -433,6 +433,8 @@
 
 # Changelog
 
+- 2024-02-19 : release credit card installment for blocks-based feature and bug fixed credit card form not render exp month and year
+
 - 2024-02-06 : enhance support woocommerce 8.x blocks-based feature
 
 - 2024-01-11 : qr promptpay new option for auto check result

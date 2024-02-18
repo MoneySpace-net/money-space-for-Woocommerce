@@ -1,6 +1,5 @@
 import {useState, useEffect, useRef, useCallback} from '@wordpress/element';
-// import {useValidateCheckout} from "./../payment-method/hooks";
-import '../payment-method/styles.scss';///styles.scss';
+import '../payment-method/styles.scss';
 import {__} from '@wordpress/i18n';
 
 const CreditCardForm = (props) => {
@@ -17,13 +16,15 @@ const CreditCardForm = (props) => {
     var checkPaymentMethodCC = false;
     var errorFields = [];
     const listNumber = [1,2,3,4,5,6,7,8,9,10,11,12];
-    console.log('props', props);
     const [formData, setFormData] = useState(model);
     const { onPaymentSetup, onPaymentProcessing, onCheckoutValidationBeforeProcessing } = props.eventRegistration;
-    
+    const { i18n } = props;
+
     if (document.getElementById('radio-control-wc-payment-method-options-moneyspace') !== null) {
         checkPaymentMethodCC = document.getElementById('radio-control-wc-payment-method-options-moneyspace').checked;
     }
+
+    console.log('props', props);
 
     const useValidateCheckout = (
         {
@@ -175,7 +176,7 @@ const CreditCardForm = (props) => {
 
     const handleChange = (field) => (event) => {
         if (field == "ccNo") {
-            if (/^[0-9]*$/.test(event.target.value)) {
+            if (/^[0-9]*$/.test(event.target.value.toString().replaceAll(" ", ""))) {
                 setFormData({ ...formData, [field]: cc_format(event.target.value), ["dirty"]: true  });
             }
         } else if (field == "ccName") {
@@ -191,19 +192,19 @@ const CreditCardForm = (props) => {
 
     return (<div className='wc-block-components-credit-card-form'>
         <div className={ `wc-block-components-text-input wc-block-components-credit-form is-active ${ FieldValidatorClass('ccNo') }` }>
-            <input type="text" value={formData.ccNo} onChange={handleChange('ccNo')} id="txtCardNumber" name="cardNumber" required="validateCardNumber()" onKeyDown={checkCardNumber} placeholder="0000 0000 0000 0000" />
-            <label for="creditCard">Card Number *</label>
-            {FieldError('ccNo', 'Please fill in Card Number')}
-            {FieldCreditCardError('ccNo', 'Please check your Card Number')}
+            <input type="text" value={formData.ccNo} onChange={handleChange('ccNo')} id="txtCardNumber" name="cardNumber"  onKeyDown={checkCardNumber} placeholder="0000 0000 0000 0000" />
+            <label for="creditCard">{i18n.MNS_CC_NO} *</label>
+            {FieldError('ccNo', i18n.MNS_CC_WARN_CC_NO_1)}
+            {FieldCreditCardError('ccNo', i18n.MNS_CC_WARN_CC_NO_2)}
         </div>
         <div className={ `wc-block-components-text-input wc-block-components-credit-form is-active ${ FieldValidatorClass('ccName') }` }>
-            <input type="text" value={formData.ccName} onChange={handleChange('ccName')} id="txtHolder" name="cardHolder" required="validateCardHolder()" keypress="checkCardName" placeholder="TONY ELSDEN"/>
-            <label for="cardHolder">Card Holder *</label>
-            {FieldError('ccName', 'Please fill in Card Holder')}
+            <input type="text" value={formData.ccName} onChange={handleChange('ccName')} id="txtHolder" name="cardHolder" keypress="checkCardName" placeholder="TONY ELSDEN"/>
+            <label for="cardHolder">{i18n.MNS_CC_NAME} *</label>
+            {FieldError('ccName', i18n.MNS_CC_WARN_CC_NAME)}
         </div>
         <div className={ `wc-block-components-text-input is-active ${ FieldValidatorClass('ccExpMonth') }` }>
-            <select value={formData.ccExpMonth} onChange={handleChange('ccExpMonth')} id="txtExpDate" name="cardExpDate" required="validateCardExpDate()">
-                <option value="" disabled selected>Month</option>
+            <select value={formData.ccExpMonth} onChange={handleChange('ccExpMonth')} id="txtExpDate" name="cardExpDate" >
+                <option value="" disabled selected>{i18n.MNS_MONTH}</option>
                 {
                     listNumber.map((x)=>(
                         <option value={x} disabled={x < minCardMonth()}>
@@ -212,12 +213,12 @@ const CreditCardForm = (props) => {
                     ))
                 }
             </select>
-            <label for="ccExpMonth">Exp Month *</label>
-            {FieldError('ccExpMonth', 'Please fill in Exp Month')}
+            <label for="ccExpMonth">{i18n.MNS_CC_EXP_MONTH} *</label>
+            {FieldError('ccExpMonth', i18n.MNS_CC_WARN_CC_EXP_MONTH)}
         </div>
         <div className={ `wc-block-components-text-input is-active ${ FieldValidatorClass('ccExpYear') }` }>
-            <select value={formData.ccExpYear} onChange={handleChange('ccExpYear')} id="ccExpYear" name="cardExpDateYear" required="validateCardExpYear()">
-                <option value="" disabled selected>Month</option>
+            <select value={formData.ccExpYear} onChange={handleChange('ccExpYear')} id="ccExpYear" name="cardExpDateYear" >
+                <option value="" disabled selected>{i18n.MNS_YEAR}</option>
                 {
                     listNumber.map((x, index)=>(
                         <option value={index + formData.minCardYear}>
@@ -226,14 +227,14 @@ const CreditCardForm = (props) => {
                     ))
                 }
             </select>
-            <label for="ccExpYear">Exp Year *</label>
-            {FieldError('ccExpYear', 'Please fill in Card Exp Year')}
+            <label for="ccExpYear">{i18n.MNS_CC_EXP_YEAR} *</label>
+            {FieldError('ccExpYear', i18n.MNS_CC_WARN_CC_EXP_YEAR)}
         </div>
         <div className={ `wc-block-components-text-input wc-block-components-credit-form is-active ${ FieldValidatorClass('ccCVV') }` }>
             <input type="password" value={formData.ccCVV} onChange={handleChange('ccCVV')} id="txtCVV" name="cardCVV" maxLength={3} onKeyDown={checkCVV} placeholder="000" required={validateCardCVV()} />
-            <label for="cardCVV">CVV *</label>
-            {FieldError('ccCVV', 'Please fill in CVV')}
-            {FieldCVVError('ccCVV', 'Please check CVV')}
+            <label for="cardCVV">{i18n.MNS_CC_CVV} *</label>
+            {FieldError('ccCVV', i18n.MNS_CC_WARN_CVV_1)}
+            {FieldCVVError('ccCVV', i18n.MNS_CC_WARN_CVV_2)}
         </div>
     </div>);
 }
