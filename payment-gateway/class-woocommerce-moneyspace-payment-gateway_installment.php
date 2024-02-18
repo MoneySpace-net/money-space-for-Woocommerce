@@ -486,7 +486,6 @@ class MNS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
             return $this->_process_external_payment($order); // go to paymentgateway_form
         } else {
             wc_add_notice(__("Error : Message to the store (150 characters maximum)", $this->domain), 'error');
-            // wc_add_notice(__("Error : Enter special instructions to merchant again", $this->domain), 'error');
             throw new Exception( __("Error : Message to the store (150 characters maximum)", $this->domain) );
         }
     }
