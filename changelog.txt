@@ -1,6 +1,9 @@
 == Changelog ==
-= 1.0.0 - 2023-10-12 =
+= 1.0.0 - 2024-02-19 =
 
+* 2024-02-19 : release credit card installment for blocks-based feature and bug fixed credit card form not render exp month and year
+* 2024-02-06 : enhance support woocommerce 8.x blocks-based feature
+* 2024-01-11 : qr promptpay new option for auto check result
 * 2023-10-12 : tested up with 6.3.1
 * 2023-04-23 : fix bug qrcode can't update payment status
 * 2022-10-20 : fix bug qrcode not show on firefox

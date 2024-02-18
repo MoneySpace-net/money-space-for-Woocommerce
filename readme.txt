@@ -61,8 +61,9 @@ Yes! In Live Mode, an SSL certificate must be installed on your site to use Mone
 3. Pay with a saved payment method, a new card, and allow customers to save the payment card for future transactions.
 
 == Changelog ==
-= 1.0.0 - 2024-01-11 =
+= 1.0.0 - 2024-02-19 =
 
+* 2024-02-19 : release credit card installment for blocks-based feature and bug fixed credit card form not render exp month and year
 * 2024-02-06 : enhance support woocommerce 8.x blocks-based feature
 * 2024-01-11 : qr promptpay new option for auto check result
 * 2023-10-12 : tested up with 6.3.1
