@@ -94,7 +94,12 @@ define('MNS_ADMIN_SETTING_STATUS_AFTER_PAY', "Status After Pay <br> 'Pending pay
 define('MNS_CC_NAME', 'Card Holder');
 define('MNS_CC_NO', 'Card Number');
 define('MNS_CC_EXP', 'Exp Date');
+define('MNS_CC_EXP_MONTH', 'Exp Month');
+define('MNS_CC_EXP_YEAR', 'Exp Year');
 define('MNS_CC_CVV', 'CVV');
 define('MNS_CC_REMEMBER', 'Save my card details securely for future payment');
+
+define('MNS_CC_WARN_CC_NO_1"', 'Please fill in Card Number');
+define('MNS_CC_WARN_CC_NO_2"', 'Please check your Card Number');
 
 define('MNS_ORDER_STATUS_COMPLETED', 'Completed');

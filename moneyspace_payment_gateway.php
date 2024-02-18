@@ -28,6 +28,7 @@ use MoneySpace\Payments\MoneySpace_CreditCard;
 use MoneySpace\Payments\MoneySpace_QRCode;
 use MoneySpace\Payments\MoneySpace_CreditCard_Installment;
 use MoneySpace\Payments\MNS_Payment_Gateway_Test_Block;
+use WP_Scripts;
 
 use Automattic\WooCommerce\Blocks\Payments\PaymentMethodRegistry;
 use Automattic\WooCommerce\Blocks\Package;
