@@ -34,6 +34,7 @@ class MNS_Payment_Gateway extends WC_Payment_Gateway
         add_action('woocommerce_update_options_payment_gateways_' . $this->id, array($this, 'process_admin_options'));
         add_action('woocommerce_thankyou_custom', array($this, 'thankyou_page'));
         add_filter('woocommerce_thankyou_order_received_text', array($this, 'avia_thank_you'), 10, 2 );
+        add_action('woocommerce_after_checkout_validation', array($this, 'after_checkout_validation'), 10, 3 );
 
     }
 
@@ -476,8 +477,25 @@ class MNS_Payment_Gateway extends WC_Payment_Gateway
         );
     }
 
+    public function after_checkout_validation($data, $errors)
+    {
+        if($_POST["cardNumber"] == "" && $data["payment_method"] == "moneyspace")
+            $errors->add( 'validation', __( 'Please input Card Number.' ));
+
+        if($_POST["cardHolder"] == "" && $data["payment_method"] == "moneyspace")
+            $errors->add( 'validation', __( 'Please input Card Holder.' ));
+
+        if($_POST["cardExpDate"] == "" && $data["payment_method"] == "moneyspace")
+            $errors->add( 'validation', __( 'Please input Card Exp Date.' ));
+
+        if($_POST["cardExpDateYear"] == "" && $data["payment_method"] == "moneyspace")
+            $errors->add( 'validation', __( 'Please input Card Exp Year.' ));
+
+        if($_POST["cardCVV"] == "" && $data["payment_method"] == "moneyspace")
+            $errors->add( 'validation', __( 'Please input Card CVV.' ));
+    }
     
-    public function avia_thank_you($msg,$order)
+    public function avia_thank_you($msg, $order)
     {
         // $gateways = WC()->payment_gateways->get_available_payment_gateways();
         $added_text = '';
