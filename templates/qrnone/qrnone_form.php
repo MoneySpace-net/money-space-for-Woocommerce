@@ -1,6 +1,10 @@
 <?php
 
 $MNS_QR_TIME = get_post_meta($order_id, 'MNS_QR_TIME', true);
+$tz = 'Asia/Bangkok';
+$dt = new DateTime("now", new DateTimeZone($tz));
+
+
 $auto_cancel = $payment_gateway_qr->settings['auto_cancel'];
 $enable_auto_check_result = $payment_gateway_qr->settings['enable_auto_check_result'];
 
@@ -14,8 +18,12 @@ if(empty($auto_cancel)){
 }else{
     $limit_time = $auto_cancel;
 }
+$dt->setTimestamp($MNS_QR_TIME + $limit_time);
 
-wc_enqueue_js('function startTimer(duration) {
+wc_enqueue_js('
+let timeZone = "Asia/Bangkok";
+
+function startTimer(duration) {
     var countDownDate = new Date();
     countDownDate.setMinutes(countDownDate.getMinutes() + Math.round(duration/60000));
     var refreshId = setInterval(function () {
@@ -23,7 +31,7 @@ wc_enqueue_js('function startTimer(duration) {
         var distance = countDownDate - now;
 
         if (countDownDate.getTime() <=  now) {
-            window.location="'.(get_site_url() . "/ms/cancel/" . $order_id).'", true;
+            window.location="'.(get_site_url() . "/ms/cancel/" . $order_id).'", true; 
             clearInterval(refreshId);
         } else {
             // Time calculations for days, hours, minutes and seconds
@@ -62,7 +70,7 @@ function checkPayment(duration, pid) {
 }
 
 
-var endDate = new Date(Date.parse("'.date('Y/m/d H:i', $MNS_QR_TIME + $limit_time).'")).getTime();
+var endDate = new Date(Date.parse("'.$dt->format('Y/m/d H:i').'")).getTime();
 var startDate = new Date().getTime();
 var resultDiffInMinutes = Math.round(endDate - startDate);
 startTimer(resultDiffInMinutes); //display

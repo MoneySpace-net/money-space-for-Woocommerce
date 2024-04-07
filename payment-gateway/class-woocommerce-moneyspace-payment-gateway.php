@@ -34,7 +34,7 @@ class MNS_Payment_Gateway extends WC_Payment_Gateway
         add_action('woocommerce_update_options_payment_gateways_' . $this->id, array($this, 'process_admin_options'));
         add_action('woocommerce_thankyou_custom', array($this, 'thankyou_page'));
         add_filter('woocommerce_thankyou_order_received_text', array($this, 'avia_thank_you'), 10, 2 );
-
+        add_action('woocommerce_after_checkout_validation', array($this, 'after_checkout_validation'), 10, 3 );
     }
 
     public function create_payment_transaction($order_id, $ms_body, $ms_template_payment, $gateways) {
@@ -476,8 +476,25 @@ class MNS_Payment_Gateway extends WC_Payment_Gateway
         );
     }
 
+    public function after_checkout_validation($data, $errors)
+    {
+        if($_POST["cardNumber"] == "" && $data["payment_method"] == "moneyspace")
+            $errors->add( 'validation', __( 'Please input Card Number.' ));
+
+        if($_POST["cardHolder"] == "" && $data["payment_method"] == "moneyspace")
+            $errors->add( 'validation', __( 'Please input Card Holder.' ));
+
+        if($_POST["cardExpDate"] == "" && $data["payment_method"] == "moneyspace")
+            $errors->add( 'validation', __( 'Please input Card Exp Date.' ));
+
+        if($_POST["cardExpDateYear"] == "" && $data["payment_method"] == "moneyspace")
+            $errors->add( 'validation', __( 'Please input Card Exp Year.' ));
+
+        if($_POST["cardCVV"] == "" && $data["payment_method"] == "moneyspace")
+            $errors->add( 'validation', __( 'Please input Card CVV.' ));
+    }
     
-    public function avia_thank_you($msg,$order)
+    public function avia_thank_you($msg, $order)
     {
         // $gateways = WC()->payment_gateways->get_available_payment_gateways();
         $added_text = '';
@@ -485,84 +502,3 @@ class MNS_Payment_Gateway extends WC_Payment_Gateway
     }
 
 }
-
-// add_filter( 'woocommerce_thankyou_order_received_text', 'change_received_order_text', 10, 2 );
-// function change_received_order_text( $text, $order ) {
-//   $shipping = $order->get_shipping_method();
-//   $message  = "Thank you. Your order has been received. Please check your email for your receipt and instructions regarding ";
-  
-//   if ( "Local pickup" == $shipping ) {
-//     $message .= "picking up";
-//   } else {
-//     $message .= "the delivery of";
-//   }
-  
-//   $message .= " your order. If you do not see an email from client@website.com within 30 minutes, please check your spam or junk folder.";
-  
-//   return esc_html__( $message, 'woocommerce' );  
-// }
-
-
-// add_filter( 'woocommerce_payment_complete_reduce_order_stock', 'filter_woocommerce_payment_complete_reduce_order_stock', 10, 2 ); 
-
-// function filter_woocommerce_payment_complete_reduce_order_stock( $order_order_get_data_store_get_stock_reduced_order_id, $order_id ) { 
-
-//     $order = new WC_Order( $order_id );
-
-
-//     if ($order->get_payment_method() == MNS_ID || $order->get_payment_method() == MNS_ID_QRPROM || $order->get_payment_method() == MNS_ID_INSTALLMENT){
-
-//         $order_order_get_data_store_get_stock_reduced_order_id = false;
-
-//     }else if ($order->get_payment_method() != MNS_ID || $order->get_payment_method() != MNS_ID_QRPROM || $order->get_payment_method() != MNS_ID_INSTALLMENT){
-       
-//         $order_order_get_data_store_get_stock_reduced_order_id = true;
- 
-//     }else if ( $order->has_status( 'on-hold' ) && $order->get_payment_method() == 'bacs' ) {
-
-//         $order_order_get_data_store_get_stock_reduced_order_id = true;
-
-//     }
-
-//     return $order_order_get_data_store_get_stock_reduced_order_id; 
-
-// }; 
-
-// add_action('woocommerce_order_details_before_order_table', 'custom_order_details_after_order_table', 10, 1);
-
-// function custom_order_details_after_order_table($order)
-// {
-//     //TODO
-// }
-
-// add_action('woocommerce_order_details_after_order_table', 'ms_order_detail_display', 10, 1);
-
-// function set_h6_html($msg) {
-//     return '<h6 style="margin:0; font-size: 1em;"><strong>' . $msg . '</strong></h6>';
-// }
-
-// function set_p_html($msg) {
-//     return "<p style='color:#a7a6a6; margin:0; font-size: 1em;'>" . $msg . " )</p>";
-// }
-
-// function ms_order_detail_display($order)
-// {
-//     $MNS_PAYMENT_TYPE = get_post_meta($order->id, 'MNS_PAYMENT_TYPE', true);
-//     $MNS_transaction = get_post_meta($order->id, 'MNS_transaction', true);
-//     $MNS_transaction_orderid = get_post_meta($order->id, 'MNS_transaction_orderid', true);
-//     $MNS_PAYMENT_PAID = get_post_meta($order->id, 'MNS_PAYMENT_PAID', true);
-//     $MNS_PAYMENT_STATUS = get_post_meta($order->id, 'MNS_PAYMENT_STATUS', true);
-
-//     $new_line = "<br>";
-//     if ($MNS_PAYMENT_STATUS == "Pay Success") {
-//         if ($MNS_PAYMENT_TYPE == "Qrnone" || $MNS_PAYMENT_TYPE == "Card") {
-//             _e(set_h6_html(MNS_THANK_PAYMENT_ORDER_1));
-//             _e(set_h6_html(MNS_THANK_PAYMENT_ORDER_2).$new_line);
-//             _e(set_p_html(wc_price($MNS_PAYMENT_PAID) . " ( Transaction ID : " . $MNS_transaction . " )"));
-//         } else if ($MNS_PAYMENT_TYPE == "Installment") {
-//             _e(set_h6_html(MNS_THANK_PAYMENT_ORDER_1));
-//             _e(set_h6_html(MNS_THANK_PAYMENT_ORDER_2). $new_line);
-//             _e(set_p_html(wc_price($MNS_PAYMENT_PAID) . " ( Transaction ID : " . $MNS_transaction . " [" . $MNS_transaction_orderid . "])" ));
-//         }
-//     }
-// }
