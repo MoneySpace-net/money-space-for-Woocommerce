@@ -66,13 +66,6 @@ $text_align = is_rtl() ? 'right' : 'left';
 
 <?php
 
-// wc_get_template(
-//   'emails/email-order-details.php',
-//   array(
-//     'order' => $order
-//   )
-// );
-
 include_once 'qrnone_form.php';
 
 _e('<div style="text-align: center;">

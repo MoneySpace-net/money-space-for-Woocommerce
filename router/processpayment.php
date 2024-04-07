@@ -1,6 +1,7 @@
 <?php
 
 namespace MoneySpace;
+use MoneySpace\MNS_Router;
 
 class MNS_Processpayment
 {
