@@ -478,19 +478,19 @@ class MNS_Payment_Gateway extends WC_Payment_Gateway
 
     public function after_checkout_validation($data, $errors)
     {
-        if($_POST["cardNumber"] == "" && $data["payment_method"] == "moneyspace")
+        if($_POST["cardNumber"] == "" && $data["payment_method"] == "moneyspace" && $data["ms_template_payment"] == "1")
             $errors->add( 'validation', __( 'Please input Card Number.' ));
 
-        if($_POST["cardHolder"] == "" && $data["payment_method"] == "moneyspace")
+        if($_POST["cardHolder"] == "" && $data["payment_method"] == "moneyspace" && $data["ms_template_payment"] == "1")
             $errors->add( 'validation', __( 'Please input Card Holder.' ));
 
-        if($_POST["cardExpDate"] == "" && $data["payment_method"] == "moneyspace")
+        if($_POST["cardExpDate"] == "" && $data["payment_method"] == "moneyspace" && $data["ms_template_payment"] == "1")
             $errors->add( 'validation', __( 'Please input Card Exp Date.' ));
 
-        if($_POST["cardExpDateYear"] == "" && $data["payment_method"] == "moneyspace")
+        if($_POST["cardExpDateYear"] == "" && $data["payment_method"] == "moneyspace" && $data["ms_template_payment"] == "1")
             $errors->add( 'validation', __( 'Please input Card Exp Year.' ));
 
-        if($_POST["cardCVV"] == "" && $data["payment_method"] == "moneyspace")
+        if($_POST["cardCVV"] == "" && $data["payment_method"] == "moneyspace" && $data["ms_template_payment"] == "1")
             $errors->add( 'validation', __( 'Please input Card CVV.' ));
     }
     
