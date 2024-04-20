@@ -4,7 +4,6 @@ import { __ } from '@wordpress/i18n';
 import _, { map } from 'underscore';
 
 const CreditCardInstallmentForm = (props) => {
-    console.log('props', props);
     const model = {
         selectbank: "",
         KTC_permonths: "",
@@ -27,7 +26,6 @@ const CreditCardInstallmentForm = (props) => {
             setPaymentData({ ...paymentData, [field]: event.target.value, ["dirty"]: true, ["KTC_permonths"]: "", ["BAY_permonths"]: "0", ["FCY_permonths"]: "3" });
         else
             setPaymentData({ ...paymentData, [field]: event.target.value, ["dirty"]: true });
-        console.log('handleChange paymentData', paymentData);
     };
 
     const findObj = (key) => {
@@ -76,13 +74,6 @@ const CreditCardInstallmentForm = (props) => {
                         errorMessage: "Please choose bank type for installment."
                     }
                 }
-
-                // if (paymentData.selectbank != "") {
-                //     console.log('paymentData after submited', paymentData);
-                //     return {
-                //         errorMessage: "Please choose bank type for installment. ffff"
-                //     }
-                // }
 
                 return true;
             });

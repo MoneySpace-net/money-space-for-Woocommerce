@@ -9,7 +9,6 @@ const id = 'moneyspace';
 const settings = getSetting( `${id}_data`, {} );
 const label = decodeEntities( settings.title );
 const template_payment = settings.ms_template_payment;
- console.log('settings cc', settings);
 
 /**
  * Content component

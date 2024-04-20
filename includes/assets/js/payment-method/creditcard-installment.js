@@ -7,10 +7,9 @@ import './styles.scss';
 
 const id = "moneyspace_installment";
 
-
 const settings = getSetting( `${id}_data`, {} );
 const label = decodeEntities( settings.i18n.MNS_PAY_INS );
-console.log('settings', settings);
+
 /**
  * Content component
  */

@@ -23,9 +23,7 @@ const CreditCardForm = (props) => {
     if (document.getElementById('radio-control-wc-payment-method-options-moneyspace') !== null) {
         checkPaymentMethodCC = document.getElementById('radio-control-wc-payment-method-options-moneyspace').checked;
     }
-
-    console.log('props', props);
-
+    
     const useValidateCheckout = (
         {
             formData,

@@ -37,6 +37,72 @@ class MNS_Payment_Gateway extends WC_Payment_Gateway
         add_action('woocommerce_after_checkout_validation', array($this, 'after_checkout_validation'), 10, 3 );
     }
 
+
+    public function create_payment_transaction_v3($order_id, $ms_body, $ms_template_payment, $gateways) {
+        if ($ms_template_payment == 1) {
+            $response = wp_remote_post(MNS_API_URL_CREATE, array(
+                'method' => 'POST',
+                'timeout' => 120,
+                'body' => $ms_body
+            ));
+            
+            if (is_wp_error($response)) {
+                wc_add_notice(__("Error : " . MNS_NOTICE_ERROR_SETUP, $this->domain), 'error');
+                return;
+            }
+    
+            $data_status = json_decode($response["body"]);
+            if (empty($data_status) || $data_status[0]->status != "success") {
+                wc_add_notice(__("Error ms102 : " . MNS_NOTICE_CHECK_TRANSACTION, $this->domain), 'error');
+                return;
+            }
+    
+            if ($data_status[0]->status == "success" && strlen($data_status[0]->mskey) > 9999) {
+                wc_add_notice(__("Error ms100 : " . MNS_NOTICE_CHECK_TRANSACTION . $data_status[0]->status, $this->domain), 'error');
+                return;
+            }
+    
+            $tranId = $data_status[0]->transaction_ID;
+            $mskey = $data_status[0]->mskey;
+            
+            update_post_meta($order_id, 'MNS_transaction_orderid', $ms_body['order_id']);
+            update_post_meta($order_id, 'MNS_transaction', $tranId);
+            update_post_meta($order_id, 'MNS_PAYMENT_KEY', $mskey);
+
+            wp_redirect(get_site_url() . "/mspaylink/" . $order_id);
+
+        } else {
+            $response = wp_remote_post(MNS_API_URL_CREATE_LINK_PAYMENT, array(
+                'method' => 'POST',
+                'timeout' => 120,
+                'body' => $ms_body
+            ));
+
+            if (is_wp_error($response)) {
+                wc_add_notice(__("Error : " . MNS_NOTICE_ERROR_SETUP, $this->domain), 'error');
+                return;
+            }
+    
+            $data_status = json_decode($response["body"]);
+            if (empty($data_status) || $data_status[0]->status != "success") {
+                wc_add_notice(__("Error ms102 : " . MNS_NOTICE_CHECK_TRANSACTION, $this->domain), 'error');
+                return;
+            }
+    
+            if ($data_status[0]->status == "success" && strlen($data_status[0]->mskey) > 9999) {
+                wc_add_notice(__("Error ms100 : " . MNS_NOTICE_CHECK_TRANSACTION . $data_status[0]->status, $this->domain), 'error');
+                return;
+            }
+
+            $tranId = $data_status[0]->transaction_ID;
+            $linkPayment = $data_status[0]->link_payment;
+
+            update_post_meta($order_id, 'MNS_transaction_orderid', $ms_body['order_id']);
+            update_post_meta($order_id, 'MNS_transaction', $tranId);
+            wp_redirect($linkPayment); 
+        }
+    }
+
     public function create_payment_transaction($order_id, $ms_body, $ms_template_payment, $gateways) {
         
         $response = wp_remote_post(MNS_API_URL_CREATE, array(
@@ -435,7 +501,7 @@ class MNS_Payment_Gateway extends WC_Payment_Gateway
             
         if ($ms_fee == "include") {
             $ms_body = set_req_message($ms_secret_id, $ms_secret_key, $body_post, "card", $return_url);
-            return $this->create_payment_transaction($order_id, $ms_body, $ms_template_payment, $gateways);
+            return $this->create_payment_transaction_v3($order_id, $ms_body, $ms_template_payment, $gateways);
         }
 
         if ($ms_fee == "exclude") {
