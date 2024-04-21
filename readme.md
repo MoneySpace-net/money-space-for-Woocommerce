@@ -433,6 +433,8 @@
 
 # Changelog
 
+- 2024-04-21 : enhance cc template 2 to call payment link and fix bug installment option
+
 - 2024-04-10 : fix bug filter cc template
 
 - 2024-04-08 : fix bug router not found template, fix bug credit card not validate and remove force timezone when payment creation

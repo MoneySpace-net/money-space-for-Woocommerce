@@ -90,7 +90,7 @@ class MNS_Payment_Gateway_QR extends WC_Payment_Gateway
     {
         $this->form_fields = array(
             'header_setting' => array(
-                'title' => __(MNS_FORM_FIELD_HEADER_SETTING, $this->domain), // '<h1><b> ' . MNS_FORM_FIELD_HEADER_SETTING . ' </b></h1>'
+                'title' => __(MNS_FORM_FIELD_HEADER_SETTING, $this->domain), 
                 'type' => 'title'
             ),
             'enabled' => array(
@@ -162,12 +162,6 @@ class MNS_Payment_Gateway_QR extends WC_Payment_Gateway
 
     public function payment_fields()
     {
-        $payment_gateway_id = MNS_ID;
-        $payment_gateways = WC_Payment_Gateways::instance();
-        $payment_gateway = $payment_gateways->payment_gateways()[$payment_gateway_id];
-        $gateways = WC()->payment_gateways->get_available_payment_gateways();
-        $ms_message2store = $gateways['moneyspace']->settings['message2store_setting'];
-
         if ($description = $this->get_description()) {
             _e(wpautop(wptexturize($description)));
         }
@@ -221,11 +215,7 @@ class MNS_Payment_Gateway_QR extends WC_Payment_Gateway
         $ms_order_select = $payment_gateway->settings['order_status_if_success'];
         $ms_secret_id = $payment_gateway->settings['secret_id'];
         $ms_secret_key = $payment_gateway->settings['secret_key'];
-
-        $MNS_PAYMENT_TYPE = get_post_meta($order->id, 'MNS_PAYMENT_TYPE', true);
-
         $ms_template_payment = $payment_gateway->settings['ms_template_payment'];
-
         $MNS_special_instructions_to_merchant = get_post_meta($order_id, 'MNS_special_instructions_to_merchant', true);
 
         $ms_time = $dt->format("YmdHis"); // date("YmdHis");

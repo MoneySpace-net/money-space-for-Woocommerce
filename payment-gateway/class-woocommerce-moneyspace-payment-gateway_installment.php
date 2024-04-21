@@ -110,14 +110,6 @@ class MNS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
                 'desc_tip' => true,
                 'options' => ["include" => "ร้านค้ารับผิดชอบดอกเบี้ยรายเดือน" , "exclude" => " ผู้ถือบัตรรับผิดชอบดอกเบี้ยรายเดือน ( ดอกเบี้ย : 0.8% , 1% )"]
             ),
-            // 'message2store_setting' => array(
-            //     'title' => __(MNS_MESSAGE2STORE_HEADER, $this->domain),
-            //     'type' => 'select',
-            //     'class' => 'wc-enhanced-select',
-            //     'default' => 'Enable',
-            //     'desc_tip' => true,
-            //     'options' => ["Enable" => "Enable" , "Disable" => "Disable"]
-            // ),
             'ktc_max_months_setting' => array(
                 'title' => __("KTC ผ่อนสูงสุด", $this->domain),
                 'type' => 'select',
@@ -184,13 +176,7 @@ class MNS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
 
     public function payment_fields()
     {
-        // wc_add_notice(__("payment_fields", $this->domain), 'error');
-        // exit();
-        $payment_gateway_id = MNS_ID_INSTALLMENT;
-        $payment_gateways = WC_Payment_Gateways::instance();
-        $payment_gateway = $payment_gateways->payment_gateways()[$payment_gateway_id];
         $gateways = WC()->payment_gateways->get_available_payment_gateways();
-        $ms_message2store = $gateways['moneyspace_installment']->settings['message2store_setting'];
         $ms_fee = $gateways['moneyspace_installment']->settings['fee_setting'] ?? "include";
         $ktc_max_months_setting = $gateways['moneyspace_installment']->settings['ktc_max_months_setting']; 
         $bay_max_months_setting = $gateways['moneyspace_installment']->settings['bay_max_months_setting']; 
@@ -199,7 +185,6 @@ class MNS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
         $bay_enabled = $gateways['moneyspace_installment']->settings['bay_enabled'] ?? "yes";
         $fcy_enabled = $gateways['moneyspace_installment']->settings['fcy_enabled'] ?? "yes";
 
-        
         if(WC()->cart->total && WC()->cart->total != 0){
             $amount_total = WC()->cart->total;
         } else {
@@ -262,7 +247,6 @@ class MNS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
                     document.getElementById('BAY').style.display ='none';
                 if (document.getElementById('FCY'))
                     document.getElementById('FCY').style.display ='none';
-                // document.getElementById('btbpay').disabled = false;
 
                 bindOutline();
             }
@@ -273,7 +257,6 @@ class MNS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
                     document.getElementById('KTC').style.display ='none';
                 if (document.getElementById('FCY'))
                     document.getElementById('FCY').style.display ='none';
-                // document.getElementById('btbpay').disabled = false;
 
                 bindOutline();
             }
@@ -284,7 +267,6 @@ class MNS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
                     document.getElementById('KTC').style.display ='none';
                 if (document.getElementById('BAY'))
                     document.getElementById('BAY').style.display ='none';
-                // document.getElementById('btbpay').disabled = false;
 
                 bindOutline();
             }
@@ -425,13 +407,6 @@ class MNS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
         $order = wc_get_order($order_id);
         $order_amount = $order->get_total();
         $is_error = false;
-        $items = $order->get_items();
-        
-        // wc_add_notice(__(json_encode($_POST), $this->domain), 'error');
-        // exit();
-        
-        // $items_msg = set_item_message($items);
-        // $return_url = get_site_url() . "/process/payment/" . $order_id;
 
         update_post_meta($order_id, 'MNS_special_instructions_to_merchant', sanitize_text_field($_POST["message_card"]));
 
@@ -461,7 +436,6 @@ class MNS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
         }
 
         if(!$is_error) {
-            $MNS_PAYMENT_TYPE = get_post_meta($order_id, 'MNS_PAYMENT_TYPE', true);
             delete_post_meta($order_id, 'MNS_transaction');
             delete_post_meta($order_id, 'MNS_QR_URL');
             update_post_meta($order_id, 'MNS_PAYMENT_TYPE', "Installment");
@@ -493,7 +467,6 @@ class MNS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
     public function paymentgateway_form($order_id) {
 
         $payment_gateways = WC_Payment_Gateways::instance();
-        // $gateways = WC()->payment_gateways->get_available_payment_gateways();
         
         $payment_gateway = $payment_gateways->payment_gateways()[MNS_ID_INSTALLMENT];
         $ms_order_select = $payment_gateway->settings['order_status_if_success'];
@@ -503,12 +476,9 @@ class MNS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
         $moneyspace_gw = $payment_gateways->payment_gateways()[MNS_ID];
         $ms_secret_id = $moneyspace_gw->settings['secret_id'];
         $ms_secret_key = $moneyspace_gw->settings['secret_key'];
-        // $ms_template_payment = $moneyspace_gw->settings['ms_template_payment'];
         $ms_time = date("YmdHis");
         $order = wc_get_order($order_id);
         $items = $order->get_items();
-
-        
         $order_amount = $order->get_total();
 
         $items_msg = set_item_message($items);
@@ -531,7 +501,6 @@ class MNS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
         , "amount" => round($order_amount, 2)
         , "description" => preg_replace( "/<br>|\n/", "", $items_msg)
         , "address" => $order->get_billing_address_1() . " " . $order->get_billing_address_2() . " " . $order->get_billing_city() . " " . $order->get_billing_postcode()
-        // , "message" => $MNS_special_instructions_to_merchant
         , "feeType" => $ms_fee
         , "order_id" => $order_id . "MS" . $ms_time
         , "success_Url" => $return_url
@@ -553,11 +522,9 @@ class MNS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
         (new Mslogs())->insert($response["body"], 4, 'Create Transaction Installment', date("Y-m-d H:i:s"), json_encode($payment_data));
         
         if (is_wp_error($response)) {
-            wc_add_notice(__($response, $this->domain), 'error');
+            wc_add_notice(__(json_encode($response), $this->domain), 'error');
             return;
         }
-
-        
 
         $json_tranId_status = json_decode($response["body"]);
                                     
@@ -570,22 +537,11 @@ class MNS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
         }
         $json_tranId = json_decode($response["body"]);
         $tranId = $json_tranId[0]->transaction_ID;
-        $hash_link = hash_hmac('sha256', $tranId . $ms_time, $ms_secret_key);
-        $link = "https://www.moneyspace.net/merchantapi/makepayment/linkpaymentcard?transactionID=" . $tranId . "&timehash=" . $ms_time . "&secreteID=" . $ms_secret_id . "&hash=" . $hash_link;
 
         if ($payment_data['feeType'] == "include"){
-            $KTC = [ 3, 4, 5, 6, 7, 8, 9, 10];
-            $BAY = [ 3, 4, 6, 9, 10];
-            $FCY = [ 3, 4, 6, 9, 10];
-
             $ex_ktc_bay = $order_amount;
             $ex_fcy = $order_amount;
-
         } else if ($payment_data['feeType'] == "exclude"){
-            $KTC = [ 3, 4, 5, 6, 7, 8, 9, 10];
-            $BAY = [ 3, 4, 6, 9, 10];
-            $FCY = [ 3, 4, 6, 9, 10, 12, 18, 24, 36];
-
             $ex_ktc_bay = $order_amount / 100 * 0.8 * $endTerm + $order_amount;
             $ex_fcy = $order_amount / 100 * 1 * $endTerm + $order_amount;
         }

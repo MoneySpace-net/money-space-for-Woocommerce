@@ -57,32 +57,24 @@ if ($order && $pid) {
     
                     if($json_status[0]->status == "success" && $json_status[0]->message == $text_check){
                         $force_cancelling = true;
-                        // do_action( 'woocommerce_cancelled_order', $order->id ); 
-                        // // $order->update_status("wc-cancelled");
-                        // wp_redirect(wc_get_order($order->id)->get_cancel_order_url());
     
                     }else{
                         $force_cancelling = true;
-                        // wp_redirect(wc_get_order($order->id)->get_cancel_order_url());
                     }
                 }else{
                     $force_cancelling = true;
-                    // wp_redirect(wc_get_order($order->id)->get_cancel_order_url());
                 } 
             } else {
                 wp_redirect(wc_get_order($order->id)->get_checkout_order_received_url());
             }
         }else{
             $force_cancelling = true;
-            // wp_redirect(wc_get_order($order->id)->get_cancel_order_url());
         }
     }else{
         $force_cancelling = true;
-        // wp_redirect(wc_get_order($order->id)->get_cancel_order_url());
     }
 } else {
     $force_cancelling = true;
-    // wp_redirect(wc_get_order($order->id)->get_cancel_order_url());
 }
 
 if ($force_cancelling) {
