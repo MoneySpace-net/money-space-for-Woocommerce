@@ -204,11 +204,11 @@ const CreditCardInstallmentForm = (props) => {
                                 {
                                     _.map(fcyObj.months, function(month, index) {
                                         if (msfee == 'include') {
-                                            return Math.round(amount_total/month) >= 300 && month <=  bayObj.maxMonth ? 
+                                            return Math.round(amount_total/month) >= 300 && month <=  fcyObj.maxMonth ? 
                                                 (<option value={month} selected={ index==0 }>{i18n.MNS_INS} {month} {i18n.MNS_MONTH} ( { formatNum(amount_total/month) } {i18n.MNS_BAHT} / {i18n.MNS_MONTH} )</option>) : (<></>)
                                         } else if (msfee == 'exclude') {
                                             var ex_fcy = amount_total / 100 * fcyObj.rate * month + amount_total;
-                                            return Math.round(amount_total/month) >= 300 && month <=  bayObj.maxMonth ? 
+                                            return Math.round(amount_total/month) >= 300 && month <=  fcyObj.maxMonth ? 
                                                 (<option value={month} selected={ index==0 }>{i18n.MNS_INS} {month} {i18n.MNS_MONTH} ( { formatNum(ex_fcy/month) } {i18n.MNS_BAHT} / {i18n.MNS_MONTH} )</option>) : (<></>)
                                         }
                                     })

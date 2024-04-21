@@ -5,8 +5,6 @@ global $woocommerce;
 
 use MoneySpace\Mslogs;
 
-// $payment_gateways = WC_Payment_Gateways::instance();
-// $payment_gateway = $payment_gateways->payment_gateways()[$payment_gateway_id];
 $gateways = WC()->payment_gateways->get_available_payment_gateways();
 $ms_secret_id = $gateways['moneyspace']->settings['secret_id'];
 $ms_secret_key = $gateways['moneyspace']->settings['secret_key'];
@@ -35,10 +33,6 @@ if ($hash == $_GET['hash']) {
 
     $ms_log = new Mslogs();
     $logs = $ms_log->get();
-
-    // $ms_log->insert(1,2,3,4,5);
-
-    // print_r($ms_log->get());
 
 } else {
     $shop_page_url = get_permalink(wc_get_page_id('shop'));

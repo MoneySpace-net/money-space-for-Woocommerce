@@ -46,7 +46,7 @@ const CreditCardForm = (props) => {
                 return true;
             });
             return unsubscribe;
-        }, [formData]); //formData, errorFields
+        }, [formData]);
     }
 
     const usePaymentSetup = ({formData, onPaymentSetup}) => {

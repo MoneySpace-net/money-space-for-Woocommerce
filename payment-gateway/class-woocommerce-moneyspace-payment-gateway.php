@@ -189,7 +189,6 @@ class MNS_Payment_Gateway extends WC_Payment_Gateway
             wp_register_style( 'custom-css-handle', false );
             wp_enqueue_style( 'custom-css-handle' );
             wp_add_inline_style( 'custom-css-handle', $customStyle );
-            // add_action('after_woocommerce_pay', array($this, 'custom_order_pay'), 10, 1);
         } else {
             wp_redirect(get_site_url() . "/mspaylink/" . $order_id);
         }
@@ -413,13 +412,11 @@ class MNS_Payment_Gateway extends WC_Payment_Gateway
             _e(wpautop(wptexturize($description)));
         }
         if ($ms_template_payment == "1" && $ms_fees == "include") {
-            // wp_enqueue_style( "bootstrap-grid-style", MNS_ROOT_URL ."includes/libs/bootstrap-4.6.0-dist/css/bootstrap-grid.css", array(), "4.6.0", "all");
             wp_register_style( "moneyspace-style", MNS_PAYMENT_FORM_CSS, array(), "1.0.0", "");
             wp_enqueue_style( "moneyspace-style", MNS_PAYMENT_FORM_CSS, array(), "1.0.0", "");
 
             require_once MNS_ROOT . '/templates/credit-cards/mns-cc-tpl-1.php';
         }
-
     }
     
 
@@ -440,7 +437,6 @@ class MNS_Payment_Gateway extends WC_Payment_Gateway
                 update_post_meta($order_id, 'MNS_PAYMENT_TYPE', "Card");
                 delete_post_meta($order_id, 'MNS_transaction');
 
-                //CC Info
                 $cardNumber = sanitize_text_field($_POST["cardNumber"] ?? $_POST["cardnumber"]);
                 $cardHolder = sanitize_text_field($_POST["cardHolder"]?? $_POST["cardholder"]);
                 $cardExpDate = sanitize_text_field($_POST["cardExpDate"]?? $_POST["cardexpdate"]);
@@ -448,8 +444,7 @@ class MNS_Payment_Gateway extends WC_Payment_Gateway
                 $cardCVV = sanitize_text_field($_POST["cardCVV"]?? $_POST["cardcvv"]);
                 $MNS_CARD = $cardNumber."|".$cardHolder."|".$cardExpDate."|".$cardExpDateYear."|".$cardCVV;
                 update_post_meta($order_id, 'MNS_CARD', base64_encode($MNS_CARD));
-                // var_dump(base64_encode($MNS_CARD));
-                // exit();
+
                 $mspay = sanitize_text_field($_POST["mspay"]);
                 update_post_meta($order_id, 'MNS_PAYMENT_PAY', $mspay);
                 $order = wc_get_order($order_id);
@@ -460,7 +455,6 @@ class MNS_Payment_Gateway extends WC_Payment_Gateway
             }
         } else {
             wc_add_notice(__("Error : Message to the store (150 characters maximum)", $this->domain), 'error');
-            // wc_add_notice(__("Error : Enter special instructions to merchant again", $this->domain), 'error');
             throw new Exception( __("Error : Message to the store (150 characters maximum)", $this->domain) );
         }
     } // End Process
@@ -481,8 +475,6 @@ class MNS_Payment_Gateway extends WC_Payment_Gateway
 
         $MNS_special_instructions_to_merchant = get_post_meta($order_id, 'MNS_special_instructions_to_merchant', true);
         $ms_time = date("YmdHis");
-
-        $items_order = new WC_Order($order_id);
         $items = $order->get_items();
         $items_msg = set_item_message($items);
         $return_url = get_site_url() . "/process/payment/" . $order_id;
@@ -491,11 +483,6 @@ class MNS_Payment_Gateway extends WC_Payment_Gateway
         if (in_array($ms_order_select, $error_list)) {
             _e("Error : " . MNS_NOTICE_ERROR_CONTINUE);
         }
-
-        // if (strlen($message_ins) > 150) {
-        //     wc_add_notice(__("Message to the store (150 characters maximum)", $this->domain), 'error');
-        //     return;
-        // }
 
         $body_post = set_body($order_id, $order, $gateways, $order_amount, $items_msg, $MNS_special_instructions_to_merchant, $ms_fee, $ms_time);
             
@@ -515,7 +502,6 @@ class MNS_Payment_Gateway extends WC_Payment_Gateway
             . $body_post["gatewayType"] . $body_post["successUrl"] . $body_post["failUrl"] . $body_post["cancelUrl"];
             $hash_body = hash_hmac('sha256', $hash_data, $ms_secret_key);
             $ms_body = array('secreteID' => $ms_secret_id, 'firstname' => $body_post["firstname"], 'lastname' => $body_post["lastname"], 'email' => $body_post["email"], 'phone' => $body_post["phone"], 'amount' => $body_post["amount"], 'currency' => $body_post["currency"], 'description' => preg_replace( "/<br>|\n/", "", $body_post["description"] ), 'address' => $body_post["address"], 'message' => $body_post["message"], 'feeType' => $body_post["feeType"], 'customer_order_id' => $body_post["customer_order_id"], 'gatewayType' => $body_post["gatewayType"], 'timeHash' => $body_post["timeHash"], 'hash' => $hash_body, 'successUrl' => $body_post["successUrl"], 'failUrl' => $body_post["failUrl"], 'cancelUrl' => $body_post["cancelUrl"]);
-            // $ms_body = set_req_message($ms_secret_id, $ms_secret_key, $body_post, "", $return_url, $hash_body);
             return $this->create_payment_transaction_v2($order_id, $ms_secret_key, $ms_body, $ms_template_payment, $gateways);
         }
     }
@@ -538,7 +524,7 @@ class MNS_Payment_Gateway extends WC_Payment_Gateway
         // Redirect to payment page, where payment form will be printed
         return array(
             'result' => 'success',
-            'redirect' => $order->get_checkout_payment_url(true) // $this->get_return_url( $order ) // 
+            'redirect' => $order->get_checkout_payment_url(true)
         );
     }
 
@@ -562,7 +548,6 @@ class MNS_Payment_Gateway extends WC_Payment_Gateway
     
     public function avia_thank_you($msg, $order)
     {
-        // $gateways = WC()->payment_gateways->get_available_payment_gateways();
         $added_text = '';
         return $added_text;
     }

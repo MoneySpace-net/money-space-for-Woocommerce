@@ -91,10 +91,6 @@ if ($order && $pid) {
             margin-left: 10%;
             margin-right: 10%;
         }
-
-        /* .MuiGrid-root.MuiGrid-item.MuiGrid-grid-xs-12 > div > p[align="left"] {
-            display: none;
-        } */
     </style>
 </head>
 <body>
@@ -130,16 +126,14 @@ if ($order && $pid) {
                             var hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
                             var minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
                             var seconds = Math.floor((distance % (1000 * 60)) / 1000);
-                            // display.innerHTML = ("QR Code จะหมดอายุในอีก " + minutes + " นาที " + seconds + " วินาที ");
                         }
                     }, 1000);
                 }
                 
-                // display = document.querySelector("#time");
                 var endDate = new Date(Date.parse("<?php _e(date('Y/m/d H:i', $MNS_QR_TIME + $limit_time)); ?>")).getTime();
                 var startDate = new Date().getTime();
                 var resultDiffInMinutes = Math.round(endDate - startDate);
-                startTimer(resultDiffInMinutes); // display
+                startTimer(resultDiffInMinutes); 
             </script>
         <?php } else if (strtolower($MNS_PAYMENT_TYPE) == "card") { ?>
         <?php
