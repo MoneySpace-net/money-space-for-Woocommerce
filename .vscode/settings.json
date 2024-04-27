@@ -1,5 +1,6 @@
 {
     "intelephense.environment.includePaths": [
-        "./../woo-web/wordpress_data/"
+        "./../woo-web/_data/",
+        "./../woo-test/_data/"
     ]
 }
