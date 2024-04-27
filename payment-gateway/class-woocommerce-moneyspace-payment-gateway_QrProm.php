@@ -6,8 +6,10 @@ use WC_Payment_Gateway;
 use WC_Payment_Gateways;
 use WC_Order;
 use MoneySpace\Mslogs;
+use DateTimeZone;
+use DateTime;
 
-date_default_timezone_set("Asia/Bangkok");
+// date_default_timezone_set("Asia/Bangkok");
 
 class MNS_Payment_Gateway_QR extends WC_Payment_Gateway
 {
@@ -39,12 +41,16 @@ class MNS_Payment_Gateway_QR extends WC_Payment_Gateway
     }
 
     public function create_payment_transaction($order_id, $ms_body, $ms_template_payment, $gateways, $payment_gateway_qr) {
+
+        $tz = 'Asia/Bangkok';
+        $dt = new DateTime("now", new DateTimeZone($tz));
+
         $response = wp_remote_post(MNS_API_URL_CREATE_LINK_PAYMENT, array(
             'method' => 'POST',
             'timeout' => 120,
             'body' => $ms_body
         ));
-        (new Mslogs())->insert($response["body"], 3, 'Create Transaction QR', date("Y-m-d H:i:s"), json_encode($ms_body));
+        (new Mslogs())->insert($response["body"], 3, 'Create Transaction QR', $dt->format("Y-m-d H:i:s"), json_encode($ms_body));
         if (is_wp_error($response)) {
             wc_add_notice(__(MNS_NOTICE_ERROR_SETUP, $this->domain), 'error');
             return;
@@ -66,7 +72,7 @@ class MNS_Payment_Gateway_QR extends WC_Payment_Gateway
         update_post_meta($order_id, 'MNS_transaction_orderid', $ms_body["order_id"]);
         update_post_meta($order_id, 'MNS_transaction', $tranId);
         update_post_meta($order_id, 'MNS_PAYMENT_IMAGE_QRPROMT', $image_qrprom);
-        update_post_meta($order_id, 'MNS_QR_TIME', time());
+        update_post_meta($order_id, 'MNS_QR_TIME', $dt->getTimestamp());
         $order = wc_get_order($order_id);
         $items = $order->get_items();
 
@@ -84,7 +90,7 @@ class MNS_Payment_Gateway_QR extends WC_Payment_Gateway
     {
         $this->form_fields = array(
             'header_setting' => array(
-                'title' => __(MNS_FORM_FIELD_HEADER_SETTING, $this->domain), // '<h1><b> ' . MNS_FORM_FIELD_HEADER_SETTING . ' </b></h1>'
+                'title' => __(MNS_FORM_FIELD_HEADER_SETTING, $this->domain), 
                 'type' => 'title'
             ),
             'enabled' => array(
@@ -156,12 +162,6 @@ class MNS_Payment_Gateway_QR extends WC_Payment_Gateway
 
     public function payment_fields()
     {
-        $payment_gateway_id = MNS_ID;
-        $payment_gateways = WC_Payment_Gateways::instance();
-        $payment_gateway = $payment_gateways->payment_gateways()[$payment_gateway_id];
-        $gateways = WC()->payment_gateways->get_available_payment_gateways();
-        $ms_message2store = $gateways['moneyspace']->settings['message2store_setting'];
-
         if ($description = $this->get_description()) {
             _e(wpautop(wptexturize($description)));
         }
@@ -197,6 +197,9 @@ class MNS_Payment_Gateway_QR extends WC_Payment_Gateway
 
     public function paymentgateway_form($order_id)
     {
+        $tz = 'Asia/Bangkok';
+        $dt = new DateTime("now", new DateTimeZone($tz));
+
         $order = wc_get_order($order_id);
         $order_amount = $order->get_total();
 
@@ -212,14 +215,10 @@ class MNS_Payment_Gateway_QR extends WC_Payment_Gateway
         $ms_order_select = $payment_gateway->settings['order_status_if_success'];
         $ms_secret_id = $payment_gateway->settings['secret_id'];
         $ms_secret_key = $payment_gateway->settings['secret_key'];
-
-        $MNS_PAYMENT_TYPE = get_post_meta($order->id, 'MNS_PAYMENT_TYPE', true);
-
         $ms_template_payment = $payment_gateway->settings['ms_template_payment'];
-
         $MNS_special_instructions_to_merchant = get_post_meta($order_id, 'MNS_special_instructions_to_merchant', true);
 
-        $ms_time = date("YmdHis");
+        $ms_time = $dt->format("YmdHis"); // date("YmdHis");
 
         $items_order = new WC_Order($order_id);
         $items = $order->get_items();
@@ -231,11 +230,6 @@ class MNS_Payment_Gateway_QR extends WC_Payment_Gateway
         if (in_array($ms_order_select, $error_list)) {
             wc_add_notice(__(MNS_NOTICE_ERROR_CONTINUE, $this->domain), 'error');
         }
-
-        // if (strlen($message_ins) > 150) {
-        //     wc_add_notice(__("Message to the store (150 characters maximum)", $this->domain), 'error');
-        //     return;
-        // }
 
         $body_post = set_body($order_id, $order, $gateways, $order_amount, $items_msg, $MNS_special_instructions_to_merchant, $ms_fee, $ms_time);
         $ms_body = set_req_message($ms_secret_id, $ms_secret_key, $body_post, "qrnone", $return_url);

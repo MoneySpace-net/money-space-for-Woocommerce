@@ -12,12 +12,12 @@
   height: 2em !important;
 }
 
-input[type=text] {
+/* input[type=text] {
   box-sizing: border-box !important;
   font-size: inherit !important;
   width: 100% !important;
   margin: 0px !important;
-}
+} */
 
 select.form-control {
   font-size: inherit !important;

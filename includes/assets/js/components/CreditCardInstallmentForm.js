@@ -4,7 +4,6 @@ import { __ } from '@wordpress/i18n';
 import _, { map } from 'underscore';
 
 const CreditCardInstallmentForm = (props) => {
-    console.log('props', props);
     const model = {
         selectbank: "",
         KTC_permonths: "",
@@ -27,7 +26,6 @@ const CreditCardInstallmentForm = (props) => {
             setPaymentData({ ...paymentData, [field]: event.target.value, ["dirty"]: true, ["KTC_permonths"]: "", ["BAY_permonths"]: "0", ["FCY_permonths"]: "3" });
         else
             setPaymentData({ ...paymentData, [field]: event.target.value, ["dirty"]: true });
-        console.log('handleChange paymentData', paymentData);
     };
 
     const findObj = (key) => {
@@ -76,13 +74,6 @@ const CreditCardInstallmentForm = (props) => {
                         errorMessage: "Please choose bank type for installment."
                     }
                 }
-
-                // if (paymentData.selectbank != "") {
-                //     console.log('paymentData after submited', paymentData);
-                //     return {
-                //         errorMessage: "Please choose bank type for installment. ffff"
-                //     }
-                // }
 
                 return true;
             });
@@ -213,11 +204,11 @@ const CreditCardInstallmentForm = (props) => {
                                 {
                                     _.map(fcyObj.months, function(month, index) {
                                         if (msfee == 'include') {
-                                            return Math.round(amount_total/month) >= 300 && month <=  bayObj.maxMonth ? 
+                                            return Math.round(amount_total/month) >= 300 && month <=  fcyObj.maxMonth ? 
                                                 (<option value={month} selected={ index==0 }>{i18n.MNS_INS} {month} {i18n.MNS_MONTH} ( { formatNum(amount_total/month) } {i18n.MNS_BAHT} / {i18n.MNS_MONTH} )</option>) : (<></>)
                                         } else if (msfee == 'exclude') {
                                             var ex_fcy = amount_total / 100 * fcyObj.rate * month + amount_total;
-                                            return Math.round(amount_total/month) >= 300 && month <=  bayObj.maxMonth ? 
+                                            return Math.round(amount_total/month) >= 300 && month <=  fcyObj.maxMonth ? 
                                                 (<option value={month} selected={ index==0 }>{i18n.MNS_INS} {month} {i18n.MNS_MONTH} ( { formatNum(ex_fcy/month) } {i18n.MNS_BAHT} / {i18n.MNS_MONTH} )</option>) : (<></>)
                                         }
                                     })

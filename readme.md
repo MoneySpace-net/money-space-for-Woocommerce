@@ -433,6 +433,12 @@
 
 # Changelog
 
+- 2024-04-21 : enhance cc template 2 to call payment link and fix bug installment option
+
+- 2024-04-10 : fix bug filter cc template
+
+- 2024-04-08 : fix bug router not found template, fix bug credit card not validate and remove force timezone when payment creation
+
 - 2024-02-19 : release credit card installment for blocks-based feature and bug fixed credit card form not render exp month and year
 
 - 2024-02-06 : enhance support woocommerce 8.x blocks-based feature

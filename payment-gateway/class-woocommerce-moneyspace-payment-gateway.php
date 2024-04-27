@@ -35,7 +35,72 @@ class MNS_Payment_Gateway extends WC_Payment_Gateway
         add_action('woocommerce_thankyou_custom', array($this, 'thankyou_page'));
         add_filter('woocommerce_thankyou_order_received_text', array($this, 'avia_thank_you'), 10, 2 );
         add_action('woocommerce_after_checkout_validation', array($this, 'after_checkout_validation'), 10, 3 );
+    }
 
+
+    public function create_payment_transaction_v3($order_id, $ms_body, $ms_template_payment, $gateways) {
+        if ($ms_template_payment == 1) {
+            $response = wp_remote_post(MNS_API_URL_CREATE, array(
+                'method' => 'POST',
+                'timeout' => 120,
+                'body' => $ms_body
+            ));
+            
+            if (is_wp_error($response)) {
+                wc_add_notice(__("Error : " . MNS_NOTICE_ERROR_SETUP, $this->domain), 'error');
+                return;
+            }
+    
+            $data_status = json_decode($response["body"]);
+            if (empty($data_status) || $data_status[0]->status != "success") {
+                wc_add_notice(__("Error ms102 : " . MNS_NOTICE_CHECK_TRANSACTION, $this->domain), 'error');
+                return;
+            }
+    
+            if ($data_status[0]->status == "success" && strlen($data_status[0]->mskey) > 9999) {
+                wc_add_notice(__("Error ms100 : " . MNS_NOTICE_CHECK_TRANSACTION . $data_status[0]->status, $this->domain), 'error');
+                return;
+            }
+    
+            $tranId = $data_status[0]->transaction_ID;
+            $mskey = $data_status[0]->mskey;
+            
+            update_post_meta($order_id, 'MNS_transaction_orderid', $ms_body['order_id']);
+            update_post_meta($order_id, 'MNS_transaction', $tranId);
+            update_post_meta($order_id, 'MNS_PAYMENT_KEY', $mskey);
+
+            wp_redirect(get_site_url() . "/mspaylink/" . $order_id);
+
+        } else {
+            $response = wp_remote_post(MNS_API_URL_CREATE_LINK_PAYMENT, array(
+                'method' => 'POST',
+                'timeout' => 120,
+                'body' => $ms_body
+            ));
+
+            if (is_wp_error($response)) {
+                wc_add_notice(__("Error : " . MNS_NOTICE_ERROR_SETUP, $this->domain), 'error');
+                return;
+            }
+    
+            $data_status = json_decode($response["body"]);
+            if (empty($data_status) || $data_status[0]->status != "success") {
+                wc_add_notice(__("Error ms102 : " . MNS_NOTICE_CHECK_TRANSACTION, $this->domain), 'error');
+                return;
+            }
+    
+            if ($data_status[0]->status == "success" && strlen($data_status[0]->mskey) > 9999) {
+                wc_add_notice(__("Error ms100 : " . MNS_NOTICE_CHECK_TRANSACTION . $data_status[0]->status, $this->domain), 'error');
+                return;
+            }
+
+            $tranId = $data_status[0]->transaction_ID;
+            $linkPayment = $data_status[0]->link_payment;
+
+            update_post_meta($order_id, 'MNS_transaction_orderid', $ms_body['order_id']);
+            update_post_meta($order_id, 'MNS_transaction', $tranId);
+            wp_redirect($linkPayment); 
+        }
     }
 
     public function create_payment_transaction($order_id, $ms_body, $ms_template_payment, $gateways) {
@@ -124,7 +189,6 @@ class MNS_Payment_Gateway extends WC_Payment_Gateway
             wp_register_style( 'custom-css-handle', false );
             wp_enqueue_style( 'custom-css-handle' );
             wp_add_inline_style( 'custom-css-handle', $customStyle );
-            // add_action('after_woocommerce_pay', array($this, 'custom_order_pay'), 10, 1);
         } else {
             wp_redirect(get_site_url() . "/mspaylink/" . $order_id);
         }
@@ -348,13 +412,11 @@ class MNS_Payment_Gateway extends WC_Payment_Gateway
             _e(wpautop(wptexturize($description)));
         }
         if ($ms_template_payment == "1" && $ms_fees == "include") {
-            // wp_enqueue_style( "bootstrap-grid-style", MNS_ROOT_URL ."includes/libs/bootstrap-4.6.0-dist/css/bootstrap-grid.css", array(), "4.6.0", "all");
             wp_register_style( "moneyspace-style", MNS_PAYMENT_FORM_CSS, array(), "1.0.0", "");
             wp_enqueue_style( "moneyspace-style", MNS_PAYMENT_FORM_CSS, array(), "1.0.0", "");
 
             require_once MNS_ROOT . '/templates/credit-cards/mns-cc-tpl-1.php';
         }
-
     }
     
 
@@ -375,7 +437,6 @@ class MNS_Payment_Gateway extends WC_Payment_Gateway
                 update_post_meta($order_id, 'MNS_PAYMENT_TYPE', "Card");
                 delete_post_meta($order_id, 'MNS_transaction');
 
-                //CC Info
                 $cardNumber = sanitize_text_field($_POST["cardNumber"] ?? $_POST["cardnumber"]);
                 $cardHolder = sanitize_text_field($_POST["cardHolder"]?? $_POST["cardholder"]);
                 $cardExpDate = sanitize_text_field($_POST["cardExpDate"]?? $_POST["cardexpdate"]);
@@ -383,8 +444,7 @@ class MNS_Payment_Gateway extends WC_Payment_Gateway
                 $cardCVV = sanitize_text_field($_POST["cardCVV"]?? $_POST["cardcvv"]);
                 $MNS_CARD = $cardNumber."|".$cardHolder."|".$cardExpDate."|".$cardExpDateYear."|".$cardCVV;
                 update_post_meta($order_id, 'MNS_CARD', base64_encode($MNS_CARD));
-                // var_dump(base64_encode($MNS_CARD));
-                // exit();
+
                 $mspay = sanitize_text_field($_POST["mspay"]);
                 update_post_meta($order_id, 'MNS_PAYMENT_PAY', $mspay);
                 $order = wc_get_order($order_id);
@@ -395,7 +455,6 @@ class MNS_Payment_Gateway extends WC_Payment_Gateway
             }
         } else {
             wc_add_notice(__("Error : Message to the store (150 characters maximum)", $this->domain), 'error');
-            // wc_add_notice(__("Error : Enter special instructions to merchant again", $this->domain), 'error');
             throw new Exception( __("Error : Message to the store (150 characters maximum)", $this->domain) );
         }
     } // End Process
@@ -416,8 +475,6 @@ class MNS_Payment_Gateway extends WC_Payment_Gateway
 
         $MNS_special_instructions_to_merchant = get_post_meta($order_id, 'MNS_special_instructions_to_merchant', true);
         $ms_time = date("YmdHis");
-
-        $items_order = new WC_Order($order_id);
         $items = $order->get_items();
         $items_msg = set_item_message($items);
         $return_url = get_site_url() . "/process/payment/" . $order_id;
@@ -427,16 +484,11 @@ class MNS_Payment_Gateway extends WC_Payment_Gateway
             _e("Error : " . MNS_NOTICE_ERROR_CONTINUE);
         }
 
-        // if (strlen($message_ins) > 150) {
-        //     wc_add_notice(__("Message to the store (150 characters maximum)", $this->domain), 'error');
-        //     return;
-        // }
-
         $body_post = set_body($order_id, $order, $gateways, $order_amount, $items_msg, $MNS_special_instructions_to_merchant, $ms_fee, $ms_time);
             
         if ($ms_fee == "include") {
             $ms_body = set_req_message($ms_secret_id, $ms_secret_key, $body_post, "card", $return_url);
-            return $this->create_payment_transaction($order_id, $ms_body, $ms_template_payment, $gateways);
+            return $this->create_payment_transaction_v3($order_id, $ms_body, $ms_template_payment, $gateways);
         }
 
         if ($ms_fee == "exclude") {
@@ -450,7 +502,6 @@ class MNS_Payment_Gateway extends WC_Payment_Gateway
             . $body_post["gatewayType"] . $body_post["successUrl"] . $body_post["failUrl"] . $body_post["cancelUrl"];
             $hash_body = hash_hmac('sha256', $hash_data, $ms_secret_key);
             $ms_body = array('secreteID' => $ms_secret_id, 'firstname' => $body_post["firstname"], 'lastname' => $body_post["lastname"], 'email' => $body_post["email"], 'phone' => $body_post["phone"], 'amount' => $body_post["amount"], 'currency' => $body_post["currency"], 'description' => preg_replace( "/<br>|\n/", "", $body_post["description"] ), 'address' => $body_post["address"], 'message' => $body_post["message"], 'feeType' => $body_post["feeType"], 'customer_order_id' => $body_post["customer_order_id"], 'gatewayType' => $body_post["gatewayType"], 'timeHash' => $body_post["timeHash"], 'hash' => $hash_body, 'successUrl' => $body_post["successUrl"], 'failUrl' => $body_post["failUrl"], 'cancelUrl' => $body_post["cancelUrl"]);
-            // $ms_body = set_req_message($ms_secret_id, $ms_secret_key, $body_post, "", $return_url, $hash_body);
             return $this->create_payment_transaction_v2($order_id, $ms_secret_key, $ms_body, $ms_template_payment, $gateways);
         }
     }
@@ -473,114 +524,32 @@ class MNS_Payment_Gateway extends WC_Payment_Gateway
         // Redirect to payment page, where payment form will be printed
         return array(
             'result' => 'success',
-            'redirect' => $order->get_checkout_payment_url(true) // $this->get_return_url( $order ) // 
+            'redirect' => $order->get_checkout_payment_url(true)
         );
     }
 
     public function after_checkout_validation($data, $errors)
     {
-        if($_POST["cardNumber"] == "" && $data["payment_method"] == "moneyspace")
+        if($_POST["cardNumber"] == "" && $data["payment_method"] == "moneyspace" && $data["ms_template_payment"] == "1")
             $errors->add( 'validation', __( 'Please input Card Number.' ));
 
-        if($_POST["cardHolder"] == "" && $data["payment_method"] == "moneyspace")
+        if($_POST["cardHolder"] == "" && $data["payment_method"] == "moneyspace" && $data["ms_template_payment"] == "1")
             $errors->add( 'validation', __( 'Please input Card Holder.' ));
 
-        if($_POST["cardExpDate"] == "" && $data["payment_method"] == "moneyspace")
+        if($_POST["cardExpDate"] == "" && $data["payment_method"] == "moneyspace" && $data["ms_template_payment"] == "1")
             $errors->add( 'validation', __( 'Please input Card Exp Date.' ));
 
-        if($_POST["cardExpDateYear"] == "" && $data["payment_method"] == "moneyspace")
+        if($_POST["cardExpDateYear"] == "" && $data["payment_method"] == "moneyspace" && $data["ms_template_payment"] == "1")
             $errors->add( 'validation', __( 'Please input Card Exp Year.' ));
 
-        if($_POST["cardCVV"] == "" && $data["payment_method"] == "moneyspace")
+        if($_POST["cardCVV"] == "" && $data["payment_method"] == "moneyspace" && $data["ms_template_payment"] == "1")
             $errors->add( 'validation', __( 'Please input Card CVV.' ));
     }
     
     public function avia_thank_you($msg, $order)
     {
-        // $gateways = WC()->payment_gateways->get_available_payment_gateways();
         $added_text = '';
         return $added_text;
     }
 
 }
-
-// add_filter( 'woocommerce_thankyou_order_received_text', 'change_received_order_text', 10, 2 );
-// function change_received_order_text( $text, $order ) {
-//   $shipping = $order->get_shipping_method();
-//   $message  = "Thank you. Your order has been received. Please check your email for your receipt and instructions regarding ";
-  
-//   if ( "Local pickup" == $shipping ) {
-//     $message .= "picking up";
-//   } else {
-//     $message .= "the delivery of";
-//   }
-  
-//   $message .= " your order. If you do not see an email from client@website.com within 30 minutes, please check your spam or junk folder.";
-  
-//   return esc_html__( $message, 'woocommerce' );  
-// }
-
-
-// add_filter( 'woocommerce_payment_complete_reduce_order_stock', 'filter_woocommerce_payment_complete_reduce_order_stock', 10, 2 ); 
-
-// function filter_woocommerce_payment_complete_reduce_order_stock( $order_order_get_data_store_get_stock_reduced_order_id, $order_id ) { 
-
-//     $order = new WC_Order( $order_id );
-
-
-//     if ($order->get_payment_method() == MNS_ID || $order->get_payment_method() == MNS_ID_QRPROM || $order->get_payment_method() == MNS_ID_INSTALLMENT){
-
-//         $order_order_get_data_store_get_stock_reduced_order_id = false;
-
-//     }else if ($order->get_payment_method() != MNS_ID || $order->get_payment_method() != MNS_ID_QRPROM || $order->get_payment_method() != MNS_ID_INSTALLMENT){
-       
-//         $order_order_get_data_store_get_stock_reduced_order_id = true;
- 
-//     }else if ( $order->has_status( 'on-hold' ) && $order->get_payment_method() == 'bacs' ) {
-
-//         $order_order_get_data_store_get_stock_reduced_order_id = true;
-
-//     }
-
-//     return $order_order_get_data_store_get_stock_reduced_order_id; 
-
-// }; 
-
-// add_action('woocommerce_order_details_before_order_table', 'custom_order_details_after_order_table', 10, 1);
-
-// function custom_order_details_after_order_table($order)
-// {
-//     //TODO
-// }
-
-// add_action('woocommerce_order_details_after_order_table', 'ms_order_detail_display', 10, 1);
-
-// function set_h6_html($msg) {
-//     return '<h6 style="margin:0; font-size: 1em;"><strong>' . $msg . '</strong></h6>';
-// }
-
-// function set_p_html($msg) {
-//     return "<p style='color:#a7a6a6; margin:0; font-size: 1em;'>" . $msg . " )</p>";
-// }
-
-// function ms_order_detail_display($order)
-// {
-//     $MNS_PAYMENT_TYPE = get_post_meta($order->id, 'MNS_PAYMENT_TYPE', true);
-//     $MNS_transaction = get_post_meta($order->id, 'MNS_transaction', true);
-//     $MNS_transaction_orderid = get_post_meta($order->id, 'MNS_transaction_orderid', true);
-//     $MNS_PAYMENT_PAID = get_post_meta($order->id, 'MNS_PAYMENT_PAID', true);
-//     $MNS_PAYMENT_STATUS = get_post_meta($order->id, 'MNS_PAYMENT_STATUS', true);
-
-//     $new_line = "<br>";
-//     if ($MNS_PAYMENT_STATUS == "Pay Success") {
-//         if ($MNS_PAYMENT_TYPE == "Qrnone" || $MNS_PAYMENT_TYPE == "Card") {
-//             _e(set_h6_html(MNS_THANK_PAYMENT_ORDER_1));
-//             _e(set_h6_html(MNS_THANK_PAYMENT_ORDER_2).$new_line);
-//             _e(set_p_html(wc_price($MNS_PAYMENT_PAID) . " ( Transaction ID : " . $MNS_transaction . " )"));
-//         } else if ($MNS_PAYMENT_TYPE == "Installment") {
-//             _e(set_h6_html(MNS_THANK_PAYMENT_ORDER_1));
-//             _e(set_h6_html(MNS_THANK_PAYMENT_ORDER_2). $new_line);
-//             _e(set_p_html(wc_price($MNS_PAYMENT_PAID) . " ( Transaction ID : " . $MNS_transaction . " [" . $MNS_transaction_orderid . "])" ));
-//         }
-//     }
-// }
