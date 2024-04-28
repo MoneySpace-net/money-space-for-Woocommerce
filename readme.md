@@ -433,6 +433,8 @@
 
 # Changelog
 
+- 2024-04-29 : tested up woocommerce 8.8.2 and wordpress 6.5.2
+
 - 2024-04-21 : enhance cc template 2 to call payment link and fix bug installment option
 
 - 2024-04-10 : fix bug filter cc template

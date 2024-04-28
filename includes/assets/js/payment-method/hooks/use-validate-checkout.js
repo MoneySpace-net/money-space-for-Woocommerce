@@ -7,9 +7,7 @@ export const useValidateCheckout = (
         onCheckoutValidationBeforeProcessing
     }) => {
     useEffect(() => {
-        console.log('useValidateCheckout formData', formData);
         const unsubscribe = onCheckoutValidationBeforeProcessing(() => {
-            console.log('!formData?.ccNo', formData, !formData?.ccNo);
             var isError = false;
             var arrMessage = [];
             // validate that the order has been created.
