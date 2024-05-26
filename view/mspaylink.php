@@ -8,7 +8,7 @@ global $woocommerce;
 
 $order = wc_get_order($pid);
 $redirect_url = get_site_url() . "/ms/cancel/" . $order->id;
-
+render_progress();
 if ($order && $pid) {
 
     $payment_gateway_id = MNS_ID;
@@ -68,6 +68,17 @@ if ($order && $pid) {
         $ms_title = $gateways['moneyspace_installment']->settings['title'];
     }
 }
+
+function render_progress()
+{
+    echo "
+    <link rel='stylesheet' href='".MNS_PAYMENT_FORM_CSS."' ></link>
+    <div class='spiner-block'>
+        <img src='".MNS_ROOT_URL."includes/images/icons8-spinner.gif' />
+    </div>
+    ";
+}
+
 ?>
 <!doctype html>
 <html lang="en">

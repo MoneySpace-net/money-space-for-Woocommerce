@@ -433,6 +433,8 @@
 
 # Changelog
 
+- 2024-05-27 : UI checkout page show progress when internet slow
+
 - 2024-04-29 : tested up woocommerce 8.8.2 and wordpress 6.5.2
 
 - 2024-04-21 : enhance cc template 2 to call payment link and fix bug installment option

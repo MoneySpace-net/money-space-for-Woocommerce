@@ -202,3 +202,16 @@ hr {
       padding-left: 15px;
   }
 } */
+
+.spiner-block {
+  width: 100%;
+  display: block;
+  height: 100%;
+}
+
+.spiner-block img {
+  margin-left: 40%;
+  margin-right: 40%;
+  margin-top: 50%;
+  height: 100px;
+}
