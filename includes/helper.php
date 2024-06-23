@@ -26,25 +26,12 @@ function set_body($order_id, $order, $gateways, $amount, $items_msg, $message, $
     $order_phone = "";
     $order_address = "";
 
-    if ($gateways['moneyspace']->settings['ms_firstname'] == "yes") {
-        $order_firstname = $order->get_billing_first_name();
-    }
-
-    if ($gateways['moneyspace']->settings['ms_lastname'] == "yes") {
-        $order_lastname = $order->get_billing_last_name();
-    }
-
-    if ($gateways['moneyspace']->settings['ms_email'] == "yes") {
-        $order_email = $order->get_billing_email();
-    }
-
-    if ($gateways['moneyspace']->settings['ms_phone'] == "yes") {
-        $order_phone = $order->get_billing_phone();
-    }
-
-    if ($gateways['moneyspace']->settings['ms_address'] == "yes") {
-        $order_address = $order->get_billing_address_1() . " " . $order->get_billing_address_2() . " " . $order->get_billing_city() . " " . $order->get_billing_postcode();
-    }
+    $order_firstname = $gateways['moneyspace']->settings['ms_firstname'] == "yes" ? $order->get_billing_first_name() : "สมชาย";
+    $order_lastname = $gateways['moneyspace']->settings['ms_lastname'] == "yes" ? $order->get_billing_last_name() : "ค้าขายดี";
+    $order_email = $gateways['moneyspace']->settings['ms_email'] == "yes" ? $order->get_billing_email() : "test@test.com";
+    $order_phone = $gateways['moneyspace']->settings['ms_phone'] == "yes" ? $order->get_billing_phone() : "0111111111";
+    $order_address = $gateways['moneyspace']->settings['ms_address'] == "yes" ? $order->get_billing_address_1() . " " . $order->get_billing_address_2() . " " . $order->get_billing_city() . " " . $order->get_billing_postcode() : "P23 สุขุมวิท 23";
+    
 
     return array("firstname" => $order_firstname
             , "lastname" => $order_lastname

@@ -23,7 +23,7 @@ class MNS_CheckPayment
             },
             'page_arguments' => array('pid'),
             'access_callback' => TRUE,
-            'template' => array('../view/check-payment.php', dirname(__FILE__) . DIRECTORY_SEPARATOR . '../view/check-payment.php')
+            'template' => array('../view/check-payment.php', MoneySpacePayment::plugin_abspath() . 'view/check-payment.php')
         ));
     }
 }

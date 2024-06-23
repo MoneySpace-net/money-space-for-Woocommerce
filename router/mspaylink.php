@@ -23,7 +23,7 @@ class MNS_Paylink
             },
             'page_arguments' => array('pid'),
             'access_callback' => TRUE,
-            'template' => array('../view/mspaylink.php', dirname(__FILE__) . DIRECTORY_SEPARATOR . '../view/mspaylink.php')
+            'template' => array('../view/mspaylink.php', MoneySpacePayment::plugin_abspath() . 'view/mspaylink.php')
         ));
     }
 }

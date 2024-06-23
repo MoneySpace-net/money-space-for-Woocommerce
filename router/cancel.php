@@ -23,7 +23,7 @@ class MNS_Cancel
             },
             'page_arguments' => array('pid'),
             'access_callback' => TRUE,
-            'template' => array('../view/cancel.php', dirname(__FILE__) . DIRECTORY_SEPARATOR . '../view/cancel.php')
+            'template' => array('../view/cancel.php', MoneySpacePayment::plugin_abspath() . 'view/cancel.php')
         ));
     }
 }

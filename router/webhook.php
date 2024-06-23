@@ -23,7 +23,7 @@ class MNS_Webhook
             },
             'page_arguments' => array('pid'),
             'access_callback' => TRUE,
-            'template' => array('../view/webhook.php', dirname(__FILE__) . DIRECTORY_SEPARATOR . '../view/webhook.php')
+            'template' => array('../view/webhook.php', MoneySpacePayment::plugin_abspath() . 'view/webhook.php')
         ));
     }
 }

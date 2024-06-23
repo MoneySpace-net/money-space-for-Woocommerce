@@ -24,7 +24,7 @@ class MNS_Payform
             'page_arguments' => array('pid'),
             'access_callback' => TRUE,
             'template' => array('../includes/moneyspace_payment_form.js'
-            , dirname(__FILE__) . DIRECTORY_SEPARATOR . '../includes/moneyspace_payment_form.js')
+            , MoneySpacePayment::plugin_abspath() . 'includes/moneyspace_payment_form.js')
         ));
     }
 }

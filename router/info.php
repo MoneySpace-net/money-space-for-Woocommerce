@@ -23,7 +23,7 @@ class MNS_Info
             },
             'page_arguments' => array('pid'),
             'access_callback' => TRUE,
-            'template' => array('../view/info.php', dirname(__FILE__) . DIRECTORY_SEPARATOR . '../view/info.php')
+            'template' => array('../view/info.php', MoneySpacePayment::plugin_abspath() . 'view/info.php')
         ));
     }
 }
