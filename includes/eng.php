@@ -82,6 +82,7 @@ define('MNS_QR_SCAN', 'Please scan below QR Code through your Mobile Banking. Af
 define('MNS_QR_SCANSUCCESS', 'Pay success please wait a sec.');
 define('MNS_QR_CONFIRM', ' Click here after payment completed');
 define('MNS_QR_NEWCREATE', 'Click here for new QR Code');
+define('MNS_NOTICE_ERROR_LOAD_QR', 'Cannot download QR CODE');
 
 define('MNS_PAY_INS', 'MoneySpace Monthly installments');
 define('MNS_PAY_QR', 'Pay bills with QR Code');

@@ -433,6 +433,8 @@
 
 # Changelog
 
+- 2024-07-04 : add feature to download qrcode
+
 - 2024-06-24 : fix bug router not found template and set default params
 
 - 2024-05-27 : UI checkout page show progress when internet slow

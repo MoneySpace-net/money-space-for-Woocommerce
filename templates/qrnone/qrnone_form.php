@@ -9,7 +9,11 @@ $auto_cancel = $payment_gateway_qr->settings['auto_cancel'];
 $enable_auto_check_result = $payment_gateway_qr->settings['enable_auto_check_result'];
 
 _e('<div style="text-align: center;">
-    <img type="image/jpeg" style="display: initial" src="'.$image_qrprom.'"/>
+    <img type="image/jpeg" style="display: initial" src="data:image/png;base64,'.$image_qrprom.'"/>
+    <br />
+    <a id="qrnone1" href="data:image/png;base64,'.$image_qrprom.'" download="qrcode.png" target="_blank">
+    Download QR
+    </a>
     </div>
 ');
 
@@ -68,7 +72,6 @@ function checkPayment(duration, pid) {
         });        
     }, 2000);
 }
-
 
 var endDate = new Date(Date.parse("'.$dt->format('Y/m/d H:i').'")).getTime();
 var startDate = new Date().getTime();

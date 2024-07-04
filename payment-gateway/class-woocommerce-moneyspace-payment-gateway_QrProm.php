@@ -68,6 +68,14 @@ class MNS_Payment_Gateway_QR extends WC_Payment_Gateway
 
         $tranId = $data_status[0]->transaction_ID;
         $image_qrprom = $data_status[0]->image_qrprom;
+        $response_qr = wp_remote_get($image_qrprom);
+        if (is_wp_error($response_qr)) {
+            wc_add_notice(__(MNS_NOTICE_ERROR_LOAD_QR, $this->domain), 'error');
+            return;
+        }
+        
+        if ($response_qr["response"]["code"] == 200)
+            $image_qrprom = base64_encode($response_qr["body"]);
 
         update_post_meta($order_id, 'MNS_transaction_orderid', $ms_body["order_id"]);
         update_post_meta($order_id, 'MNS_transaction', $tranId);

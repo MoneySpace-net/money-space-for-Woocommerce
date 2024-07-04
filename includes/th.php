@@ -82,6 +82,7 @@ define('MNS_QR_SCAN', 'กรุณาชำระเงินด้วยกา
 define('MNS_QR_SCANSUCCESS', 'ชำระเงินเรียบร้อยแล้ว กำลังเปลี่ยนหน้าเว็บ...');
 define('MNS_QR_CONFIRM', 'ยืนยันการชำระเงิน');
 define('MNS_QR_NEWCREATE', 'สร้าง QR Code ใหม่');
+define('MNS_NOTICE_ERROR_LOAD_QR', 'ไม่สามารถโหลด QR CODE ได้');
 
 define('MNS_PAY_INS', 'ผ่อนชำระรายเดือน');
 define('MNS_PAY_QR', 'จ่ายบิลด้วยคิวอาร์โค้ด');
