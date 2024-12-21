@@ -433,6 +433,8 @@
 
 # Changelog
 
+- 2024-12-21 : fix bug for woocommerce 9.5.1 and wordpress 6.7.1
+
 - 2024-07-04 : add feature to download qrcode
 
 - 2024-06-24 : fix bug router not found template and set default params

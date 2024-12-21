@@ -546,7 +546,7 @@ class MNS_Payment_Gateway extends WC_Payment_Gateway
             $errors->add( 'validation', __( 'Please input Card CVV.' ));
     }
     
-    public function avia_thank_you($msg, $order)
+    public function avia_thank_you($thank_you_text, $order)
     {
         $added_text = '';
         return $added_text;

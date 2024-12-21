@@ -1,6 +1,5 @@
 {
     "intelephense.environment.includePaths": [
-        "./../woo-web/_data/",
-        "./../woo-test/_data/"
+        "/Users/bus.ekapop/workspaces/moneyspace/woo-webapp/_data"
     ]
 }
