@@ -102,27 +102,3 @@ if ($order && $pid) {
 } else {
     wp_redirect(wc_get_order($order->id)->get_checkout_order_received_url());
 }
-
-function cancel_payment($order_id, $payment_gateway)
-{
-    $MNS_transaction = get_post_meta($order_id, 'MNS_transaction', true);
-
-    $ms_secret_id = $payment_gateway->settings['secret_id'];
-    $ms_secret_key = $payment_gateway->settings['secret_key'];
-    // trigger kill transaction id
-    $call_cancel = wp_remote_post(MNS_CANCEL_TRANSACTION, array(
-        'method' => 'POST',
-        'timeout' => 120,
-        'body' => array(
-            'secret_id' => $ms_secret_id,
-            'secret_key' => $ms_secret_key,
-            'transaction_ID' => $MNS_transaction,
-        )
-    ));
-    $json_status = json_decode($call_cancel["body"]);
-    if($json_status[0]->status == "success")
-    {
-        // TODO
-        
-    }
-}

@@ -61,8 +61,9 @@ Yes! In Live Mode, an SSL certificate must be installed on your site to use Mone
 3. Pay with a saved payment method, a new card, and allow customers to save the payment card for future transactions.
 
 == Changelog ==
-= 2.13.1 - 2025-01-05 =
+= 2.13.2 - 2025-04-21 =
 
+* 2025-04-21 : fix bug cannot redeclare cancel_payment
 * 2025-01-05 : fix bug update order status after pay
 * 2024-12-21 : fix bug for woocommerce 9.5.1 and wordpress 6.7.1
 * 2024-07-04 : add feature to download qrcode

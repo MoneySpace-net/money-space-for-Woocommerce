@@ -433,6 +433,8 @@
 
 # Changelog
 
+- 2025-04-21 : fix bug cannot redeclare cancel_payment
+
 - 2025-01-05 : fix bug update order status after pay
 
 - 2024-12-21 : fix bug for woocommerce 9.5.1 and wordpress 6.7.1
