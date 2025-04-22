@@ -45,7 +45,8 @@ class MNS_Payment_Gateway extends WC_Payment_Gateway
                 'timeout' => 120,
                 'body' => $ms_body
             ));
-            
+            (new Mslogs())->insert($response["body"], 1, 'Create Transaction Card', date("Y-m-d H:i:s"), json_encode($ms_body));
+
             if (is_wp_error($response)) {
                 wc_add_notice(__("Error : " . MNS_NOTICE_ERROR_SETUP, $this->domain), 'error');
                 return;
