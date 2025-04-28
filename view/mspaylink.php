@@ -150,7 +150,6 @@ function render_progress()
             $mscard = get_post_meta($order->id, 'MNS_CARD', true);
             $mscard_ext = explode("|", base64_decode($mscard));
             $mskey = get_post_meta( $order->id, 'MNS_PAYMENT_KEY', true);
-            $mspay = get_post_meta( $order->id, 'MNS_PAYMENT_PAY', true);
 
             $cardNumber = $mscard_ext[0];
             $cardHolder = $mscard_ext[1];
@@ -158,7 +157,6 @@ function render_progress()
             $cardExpDateYear = $mscard_ext[3];
             $cardCVV = $mscard_ext[4];
             delete_post_meta($order->id, 'MNS_PAYMENT_KEY', $mskey);
-            delete_post_meta($order->id, 'MNS_PAYMENT_PAY', $mspay);
             delete_post_meta($order->id, 'MNS_CARD', $mscard);
                 
             $customStyle = ("

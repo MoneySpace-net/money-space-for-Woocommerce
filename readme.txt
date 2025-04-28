@@ -2,7 +2,7 @@
 Contributors: moneyspace
 Tags: credit card, moneyspace, payment request, thaibank, woocommerce, automattic, bay, ktc, fcy, installment
 Requires at least: 4.9
-Tested up to: 6.5.4
+Tested up to: 6.8
 Stable tag: 2.11.3
 Requires PHP: 7.0
 Requires WordPress: 4.9
@@ -61,8 +61,9 @@ Yes! In Live Mode, an SSL certificate must be installed on your site to use Mone
 3. Pay with a saved payment method, a new card, and allow customers to save the payment card for future transactions.
 
 == Changelog ==
-= 2.13.2 - 2025-04-21 =
+= 2.13.3 - 2025-04-28 =
 
+* 2025-04-28 : fix bug plugin not work on wordpress 6.8
 * 2025-04-21 : fix bug cannot redeclare cancel_payment
 * 2025-01-05 : fix bug update order status after pay
 * 2024-12-21 : fix bug for woocommerce 9.5.1 and wordpress 6.7.1

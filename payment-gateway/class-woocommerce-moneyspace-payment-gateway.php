@@ -226,26 +226,6 @@ class MNS_Payment_Gateway extends WC_Payment_Gateway
         wp_redirect($link);
     }
 
-    public function call_payment_getpay($order_id, $mskey) {
-        $ms_body["mskey"] = $mskey;
-        $response = wp_remote_post(MNS_API_URL_GETPAY, array(
-            'method' => 'POST',
-            'timeout' => 120,
-            'body' => $ms_body
-        ));
-        (new Mslogs())->insert($response["body"], 2, 'Create Transaction Card 2', date("Y-m-d H:i:s"), json_encode($ms_body));
-
-        if (is_wp_error($response)) {
-            wc_add_notice(__("Error : " . MNS_NOTICE_ERROR_SETUP, $this->domain), 'error');
-            return;
-        }
-
-        $data_status = json_decode($response["body"]);
-        $mspay = json_encode($data_status->data);
-        update_post_meta($order_id, 'MNS_PAYMENT_PAY', $mspay);
-        return $mspay;
-    }
-
     public function init_form_fields()
     {
         $this->form_fields = array(
@@ -428,34 +408,23 @@ class MNS_Payment_Gateway extends WC_Payment_Gateway
      */
     public function process_payment($order_id)
     {
-        $MNS_special_instructions_to_merchant = get_post_meta($order_id, 'MNS_special_instructions_to_merchant', true);
-        $message_card = sanitize_text_field($_POST["message_card"]);
-        
-        if (strlen($MNS_special_instructions_to_merchant) <= 150) {
-            if (get_woocommerce_currency() == "THB") {
-                update_post_meta($order_id, 'MNS_special_instructions_to_merchant', $message_card);
-                update_post_meta($order_id, 'MNS_PAYMENT_TYPE', "Card");
-                delete_post_meta($order_id, 'MNS_transaction');
+        if (get_woocommerce_currency() == "THB") {
+            update_post_meta($order_id, 'MNS_PAYMENT_TYPE', "Card");
+            delete_post_meta($order_id, 'MNS_transaction');
 
-                $cardNumber = sanitize_text_field($_POST["cardNumber"] ?? $_POST["cardnumber"]);
-                $cardHolder = sanitize_text_field($_POST["cardHolder"]?? $_POST["cardholder"]);
-                $cardExpDate = sanitize_text_field($_POST["cardExpDate"]?? $_POST["cardexpdate"]);
-                $cardExpDateYear = sanitize_text_field($_POST["cardExpDateYear"]?? $_POST["cardexpdateyear"]);
-                $cardCVV = sanitize_text_field($_POST["cardCVV"]?? $_POST["cardcvv"]);
-                $MNS_CARD = $cardNumber."|".$cardHolder."|".$cardExpDate."|".$cardExpDateYear."|".$cardCVV;
-                update_post_meta($order_id, 'MNS_CARD', base64_encode($MNS_CARD));
+            $cardNumber = sanitize_text_field($_POST["cardNumber"] ?? $_POST["cardnumber"]);
+            $cardHolder = sanitize_text_field($_POST["cardHolder"]?? $_POST["cardholder"]);
+            $cardExpDate = sanitize_text_field($_POST["cardExpDate"]?? $_POST["cardexpdate"]);
+            $cardExpDateYear = sanitize_text_field($_POST["cardExpDateYear"]?? $_POST["cardexpdateyear"]);
+            $cardCVV = sanitize_text_field($_POST["cardCVV"]?? $_POST["cardcvv"]);
+            $MNS_CARD = $cardNumber."|".$cardHolder."|".$cardExpDate."|".$cardExpDateYear."|".$cardCVV;
+            update_post_meta($order_id, 'MNS_CARD', base64_encode($MNS_CARD));
 
-                $mspay = sanitize_text_field($_POST["mspay"]);
-                update_post_meta($order_id, 'MNS_PAYMENT_PAY', $mspay);
-                $order = wc_get_order($order_id);
-                return $this->_process_external_payment($order);
-            } else {
-                wc_add_notice(__(MNS_NOTICE_CURRENCY, $this->domain), 'error');
-                throw new Exception( __(MNS_NOTICE_CURRENCY, $this->domain) );
-            }
+            $order = wc_get_order($order_id);
+            return $this->_process_external_payment($order);
         } else {
-            wc_add_notice(__("Error : Message to the store (150 characters maximum)", $this->domain), 'error');
-            throw new Exception( __("Error : Message to the store (150 characters maximum)", $this->domain) );
+            wc_add_notice(__(MNS_NOTICE_CURRENCY, $this->domain), 'error');
+            throw new Exception( __(MNS_NOTICE_CURRENCY, $this->domain) );
         }
     } // End Process
 
@@ -473,7 +442,6 @@ class MNS_Payment_Gateway extends WC_Payment_Gateway
         $ms_fee = $payment_gateway->settings['fee_setting'];
         $ms_template_payment = $gateways['moneyspace']->settings['ms_template_payment'];
 
-        $MNS_special_instructions_to_merchant = get_post_meta($order_id, 'MNS_special_instructions_to_merchant', true);
         $ms_time = date("YmdHis");
         $items = $order->get_items();
         $items_msg = set_item_message($items);
@@ -484,7 +452,7 @@ class MNS_Payment_Gateway extends WC_Payment_Gateway
             _e("Error : " . MNS_NOTICE_ERROR_CONTINUE);
         }
 
-        $body_post = set_body($order_id, $order, $gateways, $order_amount, $items_msg, $MNS_special_instructions_to_merchant, $ms_fee, $ms_time);
+        $body_post = set_body($order_id, $order, $gateways, $order_amount, $items_msg, "", $ms_fee, $ms_time);
             
         if ($ms_fee == "include") {
             $ms_body = set_req_message($ms_secret_id, $ms_secret_key, $body_post, "card", $return_url);

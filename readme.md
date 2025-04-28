@@ -433,6 +433,8 @@
 
 # Changelog
 
+- 2025-04-28 : fix bug plugin not work on wordpress 6.8
+
 - 2025-04-21 : fix bug cannot redeclare cancel_payment
 
 - 2025-01-05 : fix bug update order status after pay
