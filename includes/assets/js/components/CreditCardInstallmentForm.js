@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback } from '@wordpress/element';
 import '../payment-method/styles.scss';
 import { __ } from '@wordpress/i18n';
 import _, { map } from 'underscore';
+import { debugLog, debugPaymentData } from '../debug/debug-helper.js';
 
 const CreditCardInstallmentForm = (props) => {
     const model = {
@@ -37,15 +38,22 @@ const CreditCardInstallmentForm = (props) => {
     const amount_total = cartTotal.value / Math.pow(10, currency.minorUnit);
 
     // Debug logging
-    console.log('CreditCardInstallmentForm Debug:', {
-        ccIns,
-        msfee,
+    debugPaymentData('CreditCardInstallmentForm', props);
+    
+    debugLog('Component State', {
+        paymentData,
         amount_total,
+        msfee,
+        ccIns,
         ktcObj,
         bayObj,
         fcyObj,
-        cartTotal,
-        currency
+        checkPrice: checkPrice(),
+        priceValidation: {
+            amount: amount_total,
+            isAbove3000: amount_total > 3000,
+            currency: currency
+        }
     });
 
     const checkPrice = () => {
