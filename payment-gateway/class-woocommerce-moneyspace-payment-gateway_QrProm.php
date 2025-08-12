@@ -50,34 +50,41 @@ class MNS_Payment_Gateway_QR extends WC_Payment_Gateway
             'timeout' => 120,
             'body' => $ms_body
         ));
-        (new Mslogs())->insert($response["body"], 3, 'Create Transaction QR', $dt->format("Y-m-d H:i:s"), json_encode($ms_body));
+
         if (is_wp_error($response)) {
+            (new Mslogs())->insert($response->get_error_message(), 3, 'Create Transaction QR (HTTP error)', $dt->format("Y-m-d H:i:s"), json_encode($ms_body));
             wc_add_notice(__(MNS_NOTICE_ERROR_SETUP, $this->domain), 'error');
             return;
         }
-        $data_status = json_decode($response["body"]);
-        if (empty($data_status) || $data_status[0]->status != "success") {
+
+        $body = wp_remote_retrieve_body($response);
+        (new Mslogs())->insert($body, 3, 'Create Transaction QR', $dt->format("Y-m-d H:i:s"), json_encode($ms_body));
+
+        $data_status = json_decode($body);
+        if (empty($data_status) || !isset($data_status[0]->status) || $data_status[0]->status != "success") {
             wc_add_notice(__("Error ms102 : " . MNS_NOTICE_CHECK_TRANSACTION, $this->domain), 'error');
             return;
         }
 
-        if ($data_status[0]->status == "success" && strlen($data_status[0]->mskey) > 9999) {
+        if ($data_status[0]->status == "success" && isset($data_status[0]->mskey) && strlen($data_status[0]->mskey) > 9999) {
             wc_add_notice(__("Error ms100 : " . MNS_NOTICE_CHECK_TRANSACTION . $data_status[0]->status, $this->domain), 'error');
             return;
         }
 
-        $tranId = $data_status[0]->transaction_ID;
-        $image_qrprom = $data_status[0]->image_qrprom;
-        $response_qr = wp_remote_get($image_qrprom);
+        $tranId = $data_status[0]->transaction_ID ?? '';
+        $image_qrprom = $data_status[0]->image_qrprom ?? '';
+        $response_qr = wp_remote_get($image_qrprom, array('timeout' => 120));
         if (is_wp_error($response_qr)) {
             wc_add_notice(__(MNS_NOTICE_ERROR_LOAD_QR, $this->domain), 'error');
             return;
         }
         
-        if ($response_qr["response"]["code"] == 200)
-            $image_qrprom = base64_encode($response_qr["body"]);
+        $code = wp_remote_retrieve_response_code($response_qr);
+        if ($code == 200) {
+            $image_qrprom = base64_encode(wp_remote_retrieve_body($response_qr));
+        }
 
-        update_post_meta($order_id, 'MNS_transaction_orderid', $ms_body["order_id"]);
+        update_post_meta($order_id, 'MNS_transaction_orderid', $ms_body["order_id"] ?? '');
         update_post_meta($order_id, 'MNS_transaction', $tranId);
         update_post_meta($order_id, 'MNS_PAYMENT_IMAGE_QRPROMT', $image_qrprom);
         update_post_meta($order_id, 'MNS_QR_TIME', $dt->getTimestamp());

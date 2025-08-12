@@ -519,24 +519,27 @@ class MNS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
             'body' => json_encode($payment_data)
             )
         );
-        (new Mslogs())->insert($response["body"], 4, 'Create Transaction Installment', date("Y-m-d H:i:s"), json_encode($payment_data));
         
         if (is_wp_error($response)) {
+            (new Mslogs())->insert($response->get_error_message(), 4, 'Create Transaction Installment (HTTP error)', date("Y-m-d H:i:s"), json_encode($payment_data));
             wc_add_notice(__(json_encode($response), $this->domain), 'error');
             return;
         }
 
-        $json_tranId_status = json_decode($response["body"]);
+        $body = wp_remote_retrieve_body($response);
+        (new Mslogs())->insert($body, 4, 'Create Transaction Installment', date("Y-m-d H:i:s"), json_encode($payment_data));
+
+        $json_tranId_status = json_decode($body);
                                     
-        if ($json_tranId_status[0]->status == "NotFound" 
+        if (empty($json_tranId_status) || (isset($json_tranId_status[0]->status) && ($json_tranId_status[0]->status == "NotFound" 
         || $json_tranId_status[0]->status == "The payment amount must be greater than 3000 baht." 
         || $json_tranId_status[0]->status == "Data Invalid"
-        || $json_tranId_status[0]->status == "Payment amount must be less than 10000.00") {
-            wc_add_notice(__($json_tranId_status[0]->status, $this->domain), 'error');
+        || $json_tranId_status[0]->status == "Payment amount must be less than 10000.00"))) {
+            wc_add_notice(__($json_tranId_status[0]->status ?? 'Error creating installment', $this->domain), 'error');
             return;
         }
-        $json_tranId = json_decode($response["body"]);
-        $tranId = $json_tranId[0]->transaction_ID;
+        $json_tranId = json_decode($body);
+        $tranId = $json_tranId[0]->transaction_ID ?? '';
 
         if ($payment_data['feeType'] == "include"){
             $ex_ktc_bay = $order_amount;

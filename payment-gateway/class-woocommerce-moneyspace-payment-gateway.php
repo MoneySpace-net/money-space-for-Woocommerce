@@ -45,32 +45,37 @@ class MNS_Payment_Gateway extends WC_Payment_Gateway
                 'timeout' => 120,
                 'body' => $ms_body
             ));
-            (new Mslogs())->insert($response["body"], 1, 'Create Transaction Card', date("Y-m-d H:i:s"), json_encode($ms_body));
 
+            // Handle HTTP errors before accessing body
             if (is_wp_error($response)) {
-                wc_add_notice(__("Error : " . MNS_NOTICE_ERROR_SETUP, $this->domain), 'error');
+                (new Mslogs())->insert($response->get_error_message(), 1, 'Create Transaction Card (HTTP error)', date("Y-m-d H:i:s"), json_encode($ms_body));
+                wc_add_notice(__('Error : ' . MNS_NOTICE_ERROR_SETUP, $this->domain), 'error');
                 return;
             }
-    
-            $data_status = json_decode($response["body"]);
-            if (empty($data_status) || $data_status[0]->status != "success") {
-                wc_add_notice(__("Error ms102 : " . MNS_NOTICE_CHECK_TRANSACTION, $this->domain), 'error');
+
+            $body = wp_remote_retrieve_body($response);
+            (new Mslogs())->insert($body, 1, 'Create Transaction Card', date("Y-m-d H:i:s"), json_encode($ms_body));
+
+            $data_status = json_decode($body);
+            if (empty($data_status) || !isset($data_status[0]->status) || $data_status[0]->status != "success") {
+                wc_add_notice(__('Error ms102 : ' . MNS_NOTICE_CHECK_TRANSACTION, $this->domain), 'error');
                 return;
             }
-    
-            if ($data_status[0]->status == "success" && strlen($data_status[0]->mskey) > 9999) {
-                wc_add_notice(__("Error ms100 : " . MNS_NOTICE_CHECK_TRANSACTION . $data_status[0]->status, $this->domain), 'error');
+
+            if ($data_status[0]->status == "success" && isset($data_status[0]->mskey) && strlen($data_status[0]->mskey) > 9999) {
+                wc_add_notice(__('Error ms100 : ' . MNS_NOTICE_CHECK_TRANSACTION . $data_status[0]->status, $this->domain), 'error');
                 return;
             }
-    
-            $tranId = $data_status[0]->transaction_ID;
-            $mskey = $data_status[0]->mskey;
+
+            $tranId = $data_status[0]->transaction_ID ?? '';
+            $mskey = $data_status[0]->mskey ?? '';
             
-            update_post_meta($order_id, 'MNS_transaction_orderid', $ms_body['order_id']);
+            update_post_meta($order_id, 'MNS_transaction_orderid', $ms_body['order_id'] ?? '');
             update_post_meta($order_id, 'MNS_transaction', $tranId);
             update_post_meta($order_id, 'MNS_PAYMENT_KEY', $mskey);
 
             wp_redirect(get_site_url() . "/mspaylink/" . $order_id);
+            exit;
 
         } else {
             $response = wp_remote_post(MNS_API_URL_CREATE_LINK_PAYMENT, array(
@@ -80,27 +85,31 @@ class MNS_Payment_Gateway extends WC_Payment_Gateway
             ));
 
             if (is_wp_error($response)) {
-                wc_add_notice(__("Error : " . MNS_NOTICE_ERROR_SETUP, $this->domain), 'error');
-                return;
-            }
-    
-            $data_status = json_decode($response["body"]);
-            if (empty($data_status) || $data_status[0]->status != "success") {
-                wc_add_notice(__("Error ms102 : " . MNS_NOTICE_CHECK_TRANSACTION, $this->domain), 'error');
-                return;
-            }
-    
-            if ($data_status[0]->status == "success" && strlen($data_status[0]->mskey) > 9999) {
-                wc_add_notice(__("Error ms100 : " . MNS_NOTICE_CHECK_TRANSACTION . $data_status[0]->status, $this->domain), 'error');
+                (new Mslogs())->insert($response->get_error_message(), 1, 'Create Link Payment (HTTP error)', date("Y-m-d H:i:s"), json_encode($ms_body));
+                wc_add_notice(__('Error : ' . MNS_NOTICE_ERROR_SETUP, $this->domain), 'error');
                 return;
             }
 
-            $tranId = $data_status[0]->transaction_ID;
-            $linkPayment = $data_status[0]->link_payment;
+            $body = wp_remote_retrieve_body($response);
 
-            update_post_meta($order_id, 'MNS_transaction_orderid', $ms_body['order_id']);
+            $data_status = json_decode($body);
+            if (empty($data_status) || !isset($data_status[0]->status) || $data_status[0]->status != "success") {
+                wc_add_notice(__('Error ms102 : ' . MNS_NOTICE_CHECK_TRANSACTION, $this->domain), 'error');
+                return;
+            }
+
+            if ($data_status[0]->status == "success" && isset($data_status[0]->mskey) && strlen($data_status[0]->mskey) > 9999) {
+                wc_add_notice(__('Error ms100 : ' . MNS_NOTICE_CHECK_TRANSACTION . $data_status[0]->status, $this->domain), 'error');
+                return;
+            }
+
+            $tranId = $data_status[0]->transaction_ID ?? '';
+            $linkPayment = $data_status[0]->link_payment ?? '';
+
+            update_post_meta($order_id, 'MNS_transaction_orderid', $ms_body['order_id'] ?? '');
             update_post_meta($order_id, 'MNS_transaction', $tranId);
-            wp_redirect($linkPayment); 
+            wp_redirect($linkPayment);
+            exit; 
         }
     }
 
@@ -113,30 +122,32 @@ class MNS_Payment_Gateway extends WC_Payment_Gateway
         ));
         
         if (is_wp_error($response)) {
-            wc_add_notice(__("Error : " . MNS_NOTICE_ERROR_SETUP, $this->domain), 'error');
+            wc_add_notice(__('Error : ' . MNS_NOTICE_ERROR_SETUP, $this->domain), 'error');
             return;
         }
 
-        $data_status = json_decode($response["body"]);
-        if (empty($data_status) || $data_status[0]->status != "success") {
-            wc_add_notice(__("Error ms102 : " . MNS_NOTICE_CHECK_TRANSACTION, $this->domain), 'error');
+        $body = wp_remote_retrieve_body($response);
+        $data_status = json_decode($body);
+        if (empty($data_status) || !isset($data_status[0]->status) || $data_status[0]->status != "success") {
+            wc_add_notice(__('Error ms102 : ' . MNS_NOTICE_CHECK_TRANSACTION, $this->domain), 'error');
             return;
         }
 
-        if ($data_status[0]->status == "success" && strlen($data_status[0]->mskey) > 9999) {
-            wc_add_notice(__("Error ms100 : " . MNS_NOTICE_CHECK_TRANSACTION . $data_status[0]->status, $this->domain), 'error');
+        if ($data_status[0]->status == "success" && isset($data_status[0]->mskey) && strlen($data_status[0]->mskey) > 9999) {
+            wc_add_notice(__('Error ms100 : ' . MNS_NOTICE_CHECK_TRANSACTION . $data_status[0]->status, $this->domain), 'error');
             return;
         }
 
-        $tranId = $data_status[0]->transaction_ID;
-        $mskey = $data_status[0]->mskey;
+        $tranId = $data_status[0]->transaction_ID ?? '';
+        $mskey = $data_status[0]->mskey ?? '';
         
-        update_post_meta($order_id, 'MNS_transaction_orderid', $ms_body['order_id']);
+        update_post_meta($order_id, 'MNS_transaction_orderid', $ms_body['order_id'] ?? '');
         update_post_meta($order_id, 'MNS_transaction', $tranId);
         update_post_meta($order_id, 'MNS_PAYMENT_KEY', $mskey);
         
         if ($ms_template_payment == "1") {
             wp_redirect(get_site_url() . "/mspaylink/" . $order_id);
+            exit;
         }
         
         if ($ms_template_payment == "2") {
@@ -192,6 +203,7 @@ class MNS_Payment_Gateway extends WC_Payment_Gateway
             wp_add_inline_style( 'custom-css-handle', $customStyle );
         } else {
             wp_redirect(get_site_url() . "/mspaylink/" . $order_id);
+            exit;
         }
     }
 
@@ -201,30 +213,34 @@ class MNS_Payment_Gateway extends WC_Payment_Gateway
             'timeout' => 120,
             'body' => $ms_body
         ));
-        (new Mslogs())->insert($response["body"], 1, 'Create Transaction Card', date("Y-m-d H:i:s"), json_encode($ms_body));
 
         if (is_wp_error($response)) {
+            (new Mslogs())->insert($response->get_error_message(), 1, 'Create Transaction Card (HTTP error)', date("Y-m-d H:i:s"), json_encode($ms_body));
             wc_add_notice(__(MNS_NOTICE_ERROR_SETUP, $this->domain), 'error');
             return;
         }
 
-        $json_tranId_status = json_decode($response["body"]);
-        if ($json_tranId_status[0]->status == "NotFound") {
+        $body = wp_remote_retrieve_body($response);
+        (new Mslogs())->insert($body, 1, 'Create Transaction Card', date("Y-m-d H:i:s"), json_encode($ms_body));
+
+        $json_tranId_status = json_decode($body);
+        if (empty($json_tranId_status) || (isset($json_tranId_status[0]->status) && $json_tranId_status[0]->status == "NotFound")) {
             wc_add_notice(__(MNS_NOTICE_ERROR_SETUP, $this->domain), 'error');
             return;
         } 
         $trans_ID = "Transaction ID";
-        $json_tranId = json_decode($response["body"]);
-        $tranId = $json_tranId[0]->$trans_ID;
-        $ms_time = $ms_body['timeHash'];
-        $ms_secret_id = $ms_body['secreteID'];
+        $json_tranId = json_decode($body);
+        $tranId = $json_tranId[0]->$trans_ID ?? '';
+        $ms_time = $ms_body['timeHash'] ?? '';
+        $ms_secret_id = $ms_body['secreteID'] ?? '';
         $hash_link = hash_hmac('sha256', $tranId . $ms_time, $ms_secret_key);
         $link = "https://www.moneyspace.net/merchantapi/makepayment/linkpaymentcard?transactionID=" . $tranId . "&timehash=" . $ms_time . "&secreteID=" . $ms_secret_id . "&hash=" . $hash_link;
         update_post_meta($order_id, 'MNS_transaction', $tranId);
-        update_post_meta($order_id, 'MNS_transaction_orderid', $ms_body["customer_order_id"]);
+        update_post_meta($order_id, 'MNS_transaction_orderid', $ms_body["customer_order_id"] ?? '');
         update_post_meta($order_id, 'MNS_LINK', $link);
         WC()->cart->empty_cart();
         wp_redirect($link);
+        exit;
     }
 
     public function init_form_fields()

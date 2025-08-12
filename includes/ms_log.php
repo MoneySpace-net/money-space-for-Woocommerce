@@ -13,7 +13,8 @@ class Mslogs
         global $wpdb;
         $this->table_name = $wpdb->prefix . 'ms_logs';
 
-        $table_check = $wpdb->get_var("SHOW TABLES LIKE '{$this->table_name}'");
+        // Use prepare and suppress long operations
+        $table_check = $wpdb->get_var( $wpdb->prepare("SHOW TABLES LIKE %s", $this->table_name) );
 
         if ($table_check !== $this->table_name) {
             $charset_collate = $wpdb->get_charset_collate();
@@ -35,12 +36,25 @@ class Mslogs
     {
         global $wpdb;
         $table = $this->table_name;
+
+        // Truncate large payloads to avoid oversized rows and timeouts
+        $truncate = function($val) {
+            if (!is_string($val)) {
+                $val = wp_json_encode($val);
+            }
+            if ($val === null) {
+                $val = '';
+            }
+            $max = 65535; // TEXT limit safeguard
+            return mb_strimwidth($val, 0, $max, '');
+        };
+
         $data = array(
-            'response' => $response,
-            'm_func_type' => $m_type,
-            'm_func_desc' => $m_status,
-            'm_datetime' => $m_datetime,
-            'm_other' => $m_other
+            'response' => $truncate($response),
+            'm_func_type' => $truncate($m_type),
+            'm_func_desc' => $truncate($m_status),
+            'm_datetime' => $truncate($m_datetime),
+            'm_other' => $truncate($m_other)
         );
         $format = array('%s', '%s', '%s', '%s', '%s');
         $wpdb->insert($table, $data, $format);
@@ -50,14 +64,14 @@ class Mslogs
     public function get()
     {
       global $wpdb;
-      return $wpdb->get_results("SELECT * FROM {$this->table_name}");
+      return $wpdb->get_results("SELECT * FROM {$this->table_name} ORDER BY id DESC LIMIT 200");
     }
 
     public function getType($m_func_type)
     {
       global $wpdb;
       return $wpdb->get_results(
-          $wpdb->prepare("SELECT * FROM {$this->table_name} WHERE m_func_type = %s", $m_func_type)
+          $wpdb->prepare("SELECT * FROM {$this->table_name} WHERE m_func_type = %s ORDER BY id DESC LIMIT 200", $m_func_type)
       );
     }
 }
