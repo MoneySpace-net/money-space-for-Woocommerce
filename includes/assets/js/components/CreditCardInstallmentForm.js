@@ -36,6 +36,18 @@ const CreditCardInstallmentForm = (props) => {
     const fcyObj = findObj("fcy");
     const amount_total = cartTotal.value / Math.pow(10, currency.minorUnit);
 
+    // Debug logging
+    console.log('CreditCardInstallmentForm Debug:', {
+        ccIns,
+        msfee,
+        amount_total,
+        ktcObj,
+        bayObj,
+        fcyObj,
+        cartTotal,
+        currency
+    });
+
     const checkPrice = () => {
         return amount_total > 3000;
     }
@@ -129,18 +141,32 @@ const CreditCardInstallmentForm = (props) => {
                         <div id="KTC" class="installment wc-block-components-text-input is-active">
                             <label>{i18n.MNS_CC_INS_MONTH}</label>
                             <select name="KTC_permonths" id="permonths" value={paymentData.KTC_permonths} onChange={handleChange('KTC_permonths')}>
-                                {
+                                {ktcObj && ktcObj.months && ktcObj.months.length > 0 ? (
                                     _.map(ktcObj.months, function(month, index) {
+                                        let shouldShow = false;
+                                        let optionText = '';
+                                        
                                         if (msfee == 'include') {
-                                            return Math.round(amount_total/month) >= 300 && month <=  ktcObj.maxMonth ? 
-                                                (<option value={month} selected={ index==0 }>{i18n.MNS_INS} {month} {i18n.MNS_MONTH} ( { formatNum(amount_total/month) } {i18n.MNS_BAHT} / {i18n.MNS_MONTH} )</option>) : (<></>)
+                                            shouldShow = Math.round(amount_total/month) >= 300 && month <= (ktcObj.maxMonth || 10);
+                                            optionText = `${i18n.MNS_INS || 'Installment'} ${month} ${i18n.MNS_MONTH || 'months'} ( ${formatNum(amount_total/month)} ${i18n.MNS_BAHT || 'THB'} / ${i18n.MNS_MONTH || 'month'} )`;
                                         } else if (msfee == 'exclude') {
-                                            var ex_ktc = amount_total / 100 * ktcObj.rate * month + amount_total;
-                                            return Math.round(amount_total/month) >= 300 && month <=  ktcObj.maxMonth ? 
-                                                (<option value={month} selected={ index==0 }>{i18n.MNS_INS} {month} {i18n.MNS_MONTH} ( { formatNum(ex_ktc/month) } {i18n.MNS_BAHT} / {i18n.MNS_MONTH} )</option>) : (<></>)
+                                            var ex_ktc = amount_total / 100 * (ktcObj.rate || 0.8) * month + amount_total;
+                                            shouldShow = Math.round(amount_total/month) >= 300 && month <= (ktcObj.maxMonth || 10);
+                                            optionText = `${i18n.MNS_INS || 'Installment'} ${month} ${i18n.MNS_MONTH || 'months'} ( ${formatNum(ex_ktc/month)} ${i18n.MNS_BAHT || 'THB'} / ${i18n.MNS_MONTH || 'month'} )`;
                                         }
+                                        
+                                        if (shouldShow) {
+                                            return (<option key={`ktc-${month}`} value={month}>{optionText}</option>);
+                                        }
+                                        return null;
                                     })
-                                }
+                                ) : (
+                                    <>
+                                        <option value="3">3 months (Test)</option>
+                                        <option value="6">6 months (Test)</option>
+                                        <option value="12">12 months (Test)</option>
+                                    </>
+                                )}
                             </select>
                         </div>
                     </div>
@@ -165,18 +191,28 @@ const CreditCardInstallmentForm = (props) => {
                         <div id="BAY" class="installment wc-block-components-text-input is-active">
                             <label>{i18n.MNS_CC_INS_MONTH}</label>
                             <select name="BAY_permonths" id="permonths" value={paymentData.BAY_permonths} onChange={handleChange('BAY_permonths')} >
-                                {
+                                {bayObj && bayObj.months ? (
                                     _.map(bayObj.months, function(month, index) {
+                                        let shouldShow = false;
+                                        let optionText = '';
+                                        
                                         if (msfee == 'include') {
-                                            return Math.round(amount_total/month) >= 500 && month <=  bayObj.maxMonth ? 
-                                                (<option value={month} selected={ index==0 }>{i18n.MNS_INS} {month} {i18n.MNS_MONTH} ( { formatNum(amount_total/month) } {i18n.MNS_BAHT} / {i18n.MNS_MONTH} )</option>) : (<></>)
+                                            shouldShow = Math.round(amount_total/month) >= 500 && month <= bayObj.maxMonth;
+                                            optionText = `${i18n.MNS_INS || 'Installment'} ${month} ${i18n.MNS_MONTH || 'months'} ( ${formatNum(amount_total/month)} ${i18n.MNS_BAHT || 'THB'} / ${i18n.MNS_MONTH || 'month'} )`;
                                         } else if (msfee == 'exclude') {
-                                            var ex_bay = amount_total / 100 * bayObj.rate * month + amount_total;
-                                            return Math.round(amount_total/month) >= 500 && month <=  bayObj.maxMonth ? 
-                                                (<option value={month} selected={ index==0 }>{i18n.MNS_INS} {month} {i18n.MNS_MONTH} ( { formatNum(ex_bay/month) } {i18n.MNS_BAHT} / {i18n.MNS_MONTH} )</option>) : (<></>)
+                                            var ex_bay = amount_total / 100 * (bayObj.rate || 0.8) * month + amount_total;
+                                            shouldShow = Math.round(amount_total/month) >= 500 && month <= bayObj.maxMonth;
+                                            optionText = `${i18n.MNS_INS || 'Installment'} ${month} ${i18n.MNS_MONTH || 'months'} ( ${formatNum(ex_bay/month)} ${i18n.MNS_BAHT || 'THB'} / ${i18n.MNS_MONTH || 'month'} )`;
                                         }
+                                        
+                                        if (shouldShow) {
+                                            return (<option key={`bay-${month}`} value={month}>{optionText}</option>);
+                                        }
+                                        return null;
                                     })
-                                }
+                                ) : (
+                                    <option value="">No options available</option>
+                                )}
                             </select>
                         </div>
                     </div>
@@ -201,18 +237,28 @@ const CreditCardInstallmentForm = (props) => {
                         <div id="FCY" class="installment wc-block-components-text-input is-active">
                             <label>{i18n.MNS_CC_INS_MONTH}</label>
                             <select name="FCY_permonths" id="permonths" value={paymentData.FCY_permonths} onChange={handleChange('FCY_permonths')} >
-                                {
+                                {fcyObj && fcyObj.months ? (
                                     _.map(fcyObj.months, function(month, index) {
+                                        let shouldShow = false;
+                                        let optionText = '';
+                                        
                                         if (msfee == 'include') {
-                                            return Math.round(amount_total/month) >= 300 && month <=  fcyObj.maxMonth ? 
-                                                (<option value={month} selected={ index==0 }>{i18n.MNS_INS} {month} {i18n.MNS_MONTH} ( { formatNum(amount_total/month) } {i18n.MNS_BAHT} / {i18n.MNS_MONTH} )</option>) : (<></>)
+                                            shouldShow = Math.round(amount_total/month) >= 300 && month <= fcyObj.maxMonth;
+                                            optionText = `${i18n.MNS_INS || 'Installment'} ${month} ${i18n.MNS_MONTH || 'months'} ( ${formatNum(amount_total/month)} ${i18n.MNS_BAHT || 'THB'} / ${i18n.MNS_MONTH || 'month'} )`;
                                         } else if (msfee == 'exclude') {
-                                            var ex_fcy = amount_total / 100 * fcyObj.rate * month + amount_total;
-                                            return Math.round(amount_total/month) >= 300 && month <=  fcyObj.maxMonth ? 
-                                                (<option value={month} selected={ index==0 }>{i18n.MNS_INS} {month} {i18n.MNS_MONTH} ( { formatNum(ex_fcy/month) } {i18n.MNS_BAHT} / {i18n.MNS_MONTH} )</option>) : (<></>)
+                                            var ex_fcy = amount_total / 100 * (fcyObj.rate || 1.0) * month + amount_total;
+                                            shouldShow = Math.round(amount_total/month) >= 300 && month <= fcyObj.maxMonth;
+                                            optionText = `${i18n.MNS_INS || 'Installment'} ${month} ${i18n.MNS_MONTH || 'months'} ( ${formatNum(ex_fcy/month)} ${i18n.MNS_BAHT || 'THB'} / ${i18n.MNS_MONTH || 'month'} )`;
                                         }
+                                        
+                                        if (shouldShow) {
+                                            return (<option key={`fcy-${month}`} value={month}>{optionText}</option>);
+                                        }
+                                        return null;
                                     })
-                                }
+                                ) : (
+                                    <option value="">No options available</option>
+                                )}
                             </select>
                         </div>
                     </div>
