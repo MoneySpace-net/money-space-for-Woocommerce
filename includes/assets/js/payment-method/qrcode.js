@@ -1,7 +1,6 @@
 import { getSetting } from '@woocommerce/settings';
 import { decodeEntities } from '@wordpress/html-entities';
 import { registerPaymentMethod  } from '@woocommerce/blocks-registry';
-import PaymentMethodLabel from './../components/PaymentMethodLabel';
 import './styles.scss';
 
 const id = "moneyspace_qrprom";
@@ -17,12 +16,9 @@ const Content = () => {
 
 const options = {
 	name: id,
-	label: <PaymentMethodLabel
-			id={id}
-			title={label}
-			icons={settings.icons}/>,
+	label: label,  // Use simple string label
 	content: <Content />,
-	edit:  <Content />,
+	edit: <Content />,
 	ariaLabel: label,
 	canMakePayment: () => true,
 	supports: {

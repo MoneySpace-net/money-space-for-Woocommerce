@@ -4,10 +4,10 @@ import {__} from '@wordpress/i18n';
 export const useValidateCheckout = (
     {
         formData,
-        onCheckoutValidationBeforeProcessing
+        onCheckoutValidation
     }) => {
     useEffect(() => {
-        const unsubscribe = onCheckoutValidationBeforeProcessing(() => {
+        const unsubscribe = onCheckoutValidation(() => {
             var isError = false;
             var arrMessage = [];
             // validate that the order has been created.
@@ -44,5 +44,5 @@ export const useValidateCheckout = (
             return true;
         });
         return unsubscribe;
-    }, [formData]);
+    }, [onCheckoutValidation, formData]);
 }

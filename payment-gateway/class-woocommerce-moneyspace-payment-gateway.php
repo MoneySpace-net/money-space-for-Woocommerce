@@ -198,9 +198,11 @@ class MNS_Payment_Gateway extends WC_Payment_Gateway
                 max-width: 100%;
             }");    
             
-            wp_register_style( 'custom-css-handle', false );
-            wp_enqueue_style( 'custom-css-handle' );
-            wp_add_inline_style( 'custom-css-handle', $customStyle );
+            add_action('wp_enqueue_scripts', function() use ($customStyle) {
+                wp_register_style( 'custom-css-handle', false );
+                wp_enqueue_style( 'custom-css-handle' );
+                wp_add_inline_style( 'custom-css-handle', $customStyle );
+            });
         } else {
             wp_redirect(get_site_url() . "/mspaylink/" . $order_id);
             exit;
@@ -409,8 +411,10 @@ class MNS_Payment_Gateway extends WC_Payment_Gateway
             _e(wpautop(wptexturize($description)));
         }
         if ($ms_template_payment == "1" && $ms_fees == "include") {
-            wp_register_style( "moneyspace-style", MNS_PAYMENT_FORM_CSS, array(), "1.0.0", "");
-            wp_enqueue_style( "moneyspace-style", MNS_PAYMENT_FORM_CSS, array(), "1.0.0", "");
+            add_action('wp_enqueue_scripts', function() {
+                wp_register_style( "moneyspace-style", MNS_PAYMENT_FORM_CSS, array(), "1.0.0", "");
+                wp_enqueue_style( "moneyspace-style", MNS_PAYMENT_FORM_CSS, array(), "1.0.0", "");
+            });
 
             require_once MNS_ROOT . '/templates/credit-cards/mns-cc-tpl-1.php';
         }
@@ -497,8 +501,10 @@ class MNS_Payment_Gateway extends WC_Payment_Gateway
         $order = new WC_Order($order_id);
         if (strtolower($order->get_status()) != "cancelled")
         {
-            wp_register_style( "bootstrap-style", MNS_ROOT_URL ."includes/libs/bootstrap-4.6.0-dist/css/bootstrap.css", array(), "4.6.0", "all" );
-            wp_enqueue_style( "bootstrap-style", MNS_ROOT_URL ."includes/libs/bootstrap-4.6.0-dist/css/bootstrap.css", array(), "4.6.0", "all");
+            add_action('wp_enqueue_scripts', function() {
+                wp_register_style( "bootstrap-style", MNS_ROOT_URL ."includes/libs/bootstrap-4.6.0-dist/css/bootstrap.css", array(), "4.6.0", "all" );
+                wp_enqueue_style( "bootstrap-style", MNS_ROOT_URL ."includes/libs/bootstrap-4.6.0-dist/css/bootstrap.css", array(), "4.6.0", "all");
+            });
             require_once MNS_ROOT . '/templates/credit-cards/mns-cc-tpl-1.php';
             
         }

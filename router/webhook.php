@@ -8,7 +8,7 @@ class MNS_Webhook
 
     public static function init()
     {
-        add_action('mns_router_generate_routes', array(get_class(), 'generate_routes'), 10, 1);
+        add_action('mns_router_generate_routes', array(__CLASS__, 'generate_routes'), 10, 1);
     }
 
     public static function generate_routes(MNS_Router $router)

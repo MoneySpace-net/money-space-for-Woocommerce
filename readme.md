@@ -1,6 +1,39 @@
+# 🚀 MoneySpace Payment Gateway for WooCommerce
 
+[![WordPress](https://img.shields.io/badge/WordPress-6.0+-blue.svg)](https://wordpress.org/)
+[![WooCommerce](https://img.shields.io/badge/WooCommerce-8.0+-purple.svg)](https://woocommerce.com/)
+[![PHP](https://img.shields.io/badge/PHP-8.0+-777BB4.svg)](https://php.net/)
+[![Build Status](https://img.shields.io/badge/build-passing-brightgreen.svg)](https://github.com/MoneySpace-net/money-space-for-woocommerce/actions)
+[![License](https://img.shields.io/badge/License-GPL--2.0+-red.svg)](LICENSE)
+[![Version](https://img.shields.io/badge/version-2.13.3-blue.svg)](https://github.com/MoneySpace-net/money-space-for-woocommerce/releases)
 
-  
+A comprehensive WordPress/WooCommerce payment gateway plugin that enables secure online payments through **credit cards**, **QR codes (PromptPay)**, and **installment plans**. This plugin integrates with MoneySpace Payment Gateway to provide Thai businesses with a complete, PCI DSS-compliant payment solution.
+
+## 🎯 Features
+
+### 💳 Payment Methods
+- **Credit Card Payments** - Secure 3D-secured processing for Visa, MasterCard, and local Thai cards
+- **QR Code Payments** - PromptPay integration for instant mobile banking payments
+- **Installment Plans** - Monthly installments with major Thai banks (KTC, BAY, FCY)
+
+### 🏗️ Modern Architecture
+- **WooCommerce Blocks** - Full support for Gutenberg block-based checkout
+- **React Components** - Modern JavaScript with error boundaries and performance optimization
+- **REST API Integration** - Robust API communication with comprehensive error handling
+- **Mobile Responsive** - Optimized experience across all devices
+
+### 🔒 Security & Compliance
+- **PCI DSS Compliant** - Bank of Thailand approved payment method
+- **3D Secure 2.0** - Enhanced fraud protection for card payments
+- **SSL Required** - Encrypted communication for all payment data
+- **Webhook Security** - Signed webhook validation for transaction updates
+
+### 🌍 International Support
+- **Multi-Currency** - Support for up to 27 foreign currencies
+- **Alipay & WeChat Pay** - Chinese payment methods for international customers
+- **Localization** - Thai and English language support
+
+---
 
 # วิธีติดตั้งและตั้งค่า Plugin
 

@@ -1,7 +1,7 @@
 import { getSetting } from '@woocommerce/settings';
 import { decodeEntities } from '@wordpress/html-entities';
 import { registerPaymentMethod  } from '@woocommerce/blocks-registry';
-import PaymentMethodLabel from './../components/PaymentMethodLabel';
+import { memo, useMemo } from '@wordpress/element';
 import CreditCardInstallmentForm from './../components/CreditCardInstallmentForm';
 import './styles.scss';
 
@@ -11,20 +11,41 @@ const settings = getSetting( `${id}_data`, {} );
 const label = decodeEntities( settings.i18n.MNS_PAY_INS );
 
 /**
- * Content component
+ * Content component - This receives WooCommerce blocks context
  */
-const Content = () => {
+const Content = (props) => {
+    // This component receives props from WooCommerce blocks including:
+    // - billing data
+    // - cart data  
+    // - eventRegistration
+    // - etc.
+    
+    console.log('WooCommerce Blocks Props received in Content:', props);
+    console.log('WooCommerce Blocks Props keys:', Object.keys(props || {}));
+    
+    const formProps = useMemo(() => ({
+        i18n: settings.i18n,
+        msfee: settings.msfee,
+        ccIns: settings.ccIns,
+        // Pass through all WooCommerce blocks context
+        ...props
+    }), [props]);
+
+    return <CreditCardInstallmentForm {...formProps} />;
+};
+
+/**
+ * Edit component (for admin/editor)
+ */
+const Edit = () => {
 	return decodeEntities( settings.description || '' );
 };
 
 const options = {
 	name: 'moneyspace_installment',
-	label: <PaymentMethodLabel
-            id={id}
-            title={label}
-            icons={settings.icons}/>,
-	content: <CreditCardInstallmentForm i18n={settings.i18n} msfee={settings.msfee} ccIns={settings.ccIns} />,
-	edit:  <Content />,
+	label: label,
+	content: <Content />,
+	edit: <Edit />,
 	ariaLabel: label,
 	paymentMethodId: id,
 	canMakePayment: () => true,

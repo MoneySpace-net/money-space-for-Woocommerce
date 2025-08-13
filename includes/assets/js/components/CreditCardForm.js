@@ -17,7 +17,7 @@ const CreditCardForm = (props) => {
     var errorFields = [];
     const listNumber = [1,2,3,4,5,6,7,8,9,10,11,12];
     const [formData, setFormData] = useState(model);
-    const { onPaymentSetup, onPaymentProcessing, onCheckoutValidationBeforeProcessing } = props.eventRegistration;
+    const { onPaymentSetup, onCheckoutValidation } = props.eventRegistration;
     const { i18n } = props;
 
     if (document.getElementById('radio-control-wc-payment-method-options-moneyspace') !== null) {
@@ -27,10 +27,10 @@ const CreditCardForm = (props) => {
     const useValidateCheckout = (
         {
             formData,
-            onCheckoutValidationBeforeProcessing
+            onCheckoutValidation
         }, errorFields) => {
         useEffect(() => {
-            const unsubscribe = onCheckoutValidationBeforeProcessing(() => {
+            const unsubscribe = onCheckoutValidation(() => {
                 if (formData.dirty == false) {
                     setFormData({ ...formData, ["dirty"]: true });
                     return {
@@ -60,9 +60,9 @@ const CreditCardForm = (props) => {
     }
     usePaymentSetup({formData, onPaymentSetup});
 
-    const useProcessPayment = ({formData, onPaymentProcessing}) => {
+    const useProcessPayment = ({formData, onPaymentSetup}) => {
         useEffect(() => {
-            const unsubscribe = onPaymentProcessing(() => {
+            const unsubscribe = onPaymentSetup(() => {
                 const response = {
                     meta: {
                         paymentMethodData: {
@@ -80,11 +80,11 @@ const CreditCardForm = (props) => {
             return unsubscribe;
         }, [formData]);
     }
-    useProcessPayment({formData, onPaymentProcessing});
+    useProcessPayment({formData, onPaymentSetup});
 
     useValidateCheckout({
         formData,
-        onCheckoutValidationBeforeProcessing
+        onCheckoutValidation
     }, errorFields);
 
     const FieldValidatorClass = (fieldName) => {

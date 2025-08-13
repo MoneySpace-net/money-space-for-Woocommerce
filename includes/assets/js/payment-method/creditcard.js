@@ -1,7 +1,7 @@
 import { getSetting } from '@woocommerce/settings';
 import { decodeEntities } from '@wordpress/html-entities';
 import { registerPaymentMethod  } from '@woocommerce/blocks-registry';
-import PaymentMethodLabel from './../components/PaymentMethodLabel';
+import { memo, useMemo } from '@wordpress/element';
 import CreditCardForm from './../components/CreditCardForm';
 import './styles.scss';
 
@@ -17,14 +17,20 @@ const Content = () => {
 	return decodeEntities( settings.description || '' );
 };
 
+// Memoize the credit card form
+const MemoizedCreditCardForm = memo(() => {
+    const formProps = useMemo(() => ({
+        i18n: settings.i18n
+    }), [settings.i18n]);
+
+    return <CreditCardForm {...formProps} />;
+});
+
 const options = {
 	name: id,
-	label: <PaymentMethodLabel
-			id={id}
-			title={label}
-			icons={settings.icons}/>,
-	content: template_payment == 1 ? <CreditCardForm i18n={settings.i18n} /> : <Content />,
-	edit:  <Content />,
+	label: label,
+	content: template_payment == 1 ? <MemoizedCreditCardForm /> : <Content />,
+	edit: <Content />,
 	ariaLabel: label,
 	paymentMethodId: id,
 	canMakePayment: () => true,
