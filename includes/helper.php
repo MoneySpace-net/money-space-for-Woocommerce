@@ -119,8 +119,8 @@ function update_order_status($order) {
         $ms_order_select_qr = $payment_gateway_qr->settings['order_status_if_success'];
         $ms_order_select_installment = $payment_gateway_installment->settings['order_status_if_success'];
 
-        $MNS_transaction_orderid = get_post_meta($order->id, 'MNS_transaction_orderid', true);
-        $MNS_PAYMENT_TYPE = get_post_meta($order->id, 'MNS_PAYMENT_TYPE', true);
+        $MNS_transaction_orderid = get_post_meta($order->get_id(), 'MNS_transaction_orderid', true);
+        $MNS_PAYMENT_TYPE = get_post_meta($order->get_id(), 'MNS_PAYMENT_TYPE', true);
         $check_orderid = wp_remote_post(MNS_API_URL_CHECK, array(
             'method' => 'POST',
             'timeout' => 120,
@@ -132,13 +132,27 @@ function update_order_status($order) {
         ));
     
         if (!is_wp_error($check_orderid)) {
-            $oid = "order id";
             $json_status = json_decode($check_orderid["body"]);
-            $ms_status = $json_status[0]->$oid;
+            
+            // Add safety check for API response
+            if (empty($json_status) || !is_array($json_status) || !isset($json_status[0])) {
+                error_log('MoneySpace API: Invalid response format in helper.php');
+                return false;
+            }
+            
+            // Access the order data using proper property notation
+            $response_data = $json_status[0];
+            $ms_status = isset($response_data->{'order id'}) ? $response_data->{'order id'} : null;
+            
+            // Additional safety check for order status
+            if (empty($ms_status)) {
+                error_log('MoneySpace API: No order status found in response in helper.php');
+                return false;
+            }
     
-            cancel_payment($order->id, $payment_gateway);
+            cancel_payment($order->get_id(), $payment_gateway);
     
-            if ($ms_status->status == "Pay Success") {
+            if (isset($ms_status->status) && $ms_status->status == "Pay Success") {
     
                 if($MNS_PAYMENT_TYPE == "Card"){
     
@@ -164,10 +178,10 @@ function update_order_status($order) {
                 }
     
                 if ($ms_stock_setting != "Disable") {
-                    wc_reduce_stock_levels($order->id);
+                    wc_reduce_stock_levels($order->get_id());
                 }
-                update_post_meta($order->id, 'MNS_PAYMENT_PAID', $ms_status->amount);
-                update_post_meta($order->id, 'MNS_PAYMENT_STATUS', $ms_status->status);
+                update_post_meta($order->get_id(), 'MNS_PAYMENT_PAID', $ms_status->amount);
+                update_post_meta($order->get_id(), 'MNS_PAYMENT_STATUS', $ms_status->status);
             } else if ($ms_status->status == "Cancel") {
                 $order->update_status("wc-cancelled");
             }

@@ -37,10 +37,16 @@ if ($order && $pid) {
     $MNS_PAYMENT_IMAGE_QRPROMT = get_post_meta($order_id, 'MNS_PAYMENT_IMAGE_QRPROMT', true);
     $MNS_PAYMENT_KEY = get_post_meta($order_id, 'MNS_PAYMENT_KEY', true);
 
-    if ((strlen($MNS_PAYMENT_KEY) > 9999 && isset($MNS_PAYMENT_KEY) && $MNS_PAYMENT_KEY != "")
-    || (!isset($MNS_PAYMENT_KEY) && $MNS_PAYMENT_KEY == "")) {
-        if ($MNS_PAYMENT_TYPE != "Qrnone")
-        {
+    error_log('MoneySpace MSPayLink Debug - Order ID: ' . $order_id);
+    error_log('MoneySpace MSPayLink Debug - Payment Type: ' . $MNS_PAYMENT_TYPE);
+    error_log('MoneySpace MSPayLink Debug - Payment Key Length: ' . strlen($MNS_PAYMENT_KEY));
+    error_log('MoneySpace MSPayLink Debug - Payment Key Set: ' . (isset($MNS_PAYMENT_KEY) ? 'YES' : 'NO'));
+    error_log('MoneySpace MSPayLink Debug - Payment Key Empty: ' . (empty($MNS_PAYMENT_KEY) ? 'YES' : 'NO'));
+
+    // Fix the payment key validation logic - the key is supposed to be long for security
+    if (empty($MNS_PAYMENT_KEY) || !isset($MNS_PAYMENT_KEY)) {
+        if ($MNS_PAYMENT_TYPE != "Qrnone") {
+            error_log('MoneySpace MSPayLink Debug - Redirecting due to missing payment key');
             wp_redirect(wc_get_account_endpoint_url('orders'));
         }
     }
@@ -115,9 +121,12 @@ function render_progress()
                 wc_get_template(
                     'emails/email-order-details.php',
                     array(
-                      'order' => $order
+                        'order' => $order,
+                        'sent_to_admin' => false,
+                        'plain_text' => false,
+                        'email' => null
                     )
-                  );
+                );
             ?>
             </div>
             <script>
@@ -148,15 +157,28 @@ function render_progress()
             </script>
         <?php } else if (strtolower($MNS_PAYMENT_TYPE) == "card") { ?>
         <?php
+            error_log('MoneySpace MSPayLink Debug - Processing card payment');
+            
             $mscard = get_post_meta($order_id, 'MNS_CARD', true);
             $mscard_ext = explode("|", base64_decode($mscard));
             $mskey = get_post_meta($order_id, 'MNS_PAYMENT_KEY', true);
 
-            $cardNumber = $mscard_ext[0];
-            $cardHolder = $mscard_ext[1];
-            $cardExpDate = $mscard_ext[2];
-            $cardExpDateYear = $mscard_ext[3];
-            $cardCVV = $mscard_ext[4];
+            error_log('MoneySpace MSPayLink Debug - Card data exists: ' . (!empty($mscard) ? 'YES' : 'NO'));
+            error_log('MoneySpace MSPayLink Debug - MSKey exists: ' . (!empty($mskey) ? 'YES' : 'NO'));
+
+            $cardNumber = $mscard_ext[0] ?? '';
+            $cardHolder = $mscard_ext[1] ?? '';
+            $cardExpDate = $mscard_ext[2] ?? '';
+            $cardExpDateYear = $mscard_ext[3] ?? '';
+            $cardCVV = $mscard_ext[4] ?? '';
+            
+            error_log('MoneySpace MSPayLink Debug - Card components: ' . json_encode([
+                'cardNumber' => $cardNumber ? 'XXXX-XXXX-XXXX-' . substr($cardNumber, -4) : 'EMPTY',
+                'cardHolder' => $cardHolder ?: 'EMPTY',
+                'cardExpDate' => $cardExpDate ?: 'EMPTY',
+                'cardExpDateYear' => $cardExpDateYear ?: 'EMPTY',
+                'cardCVV' => $cardCVV ? 'XXX' : 'EMPTY'
+            ]));
             delete_post_meta($order_id, 'MNS_PAYMENT_KEY', $mskey);
             delete_post_meta($order_id, 'MNS_CARD', $mscard);
                 

@@ -45,23 +45,56 @@ if ($order && $pid) {
         )
     ));
 
+    error_log('MoneySpace Payment Status Check - Order ID: ' . $order_id);
+    error_log('MoneySpace Payment Status Check - Transaction Order ID: ' . $MNS_transaction_orderid);
+    error_log('MoneySpace Payment Status Check - Payment Type: ' . $MNS_PAYMENT_TYPE);
+
     if (!is_wp_error($check_orderid)) {
-        $oid = "order id";
-        $json_status = json_decode($check_orderid["body"]);
+        $response_body = wp_remote_retrieve_body($check_orderid);
+        error_log('MoneySpace Payment Status Check - Raw Response: ' . $response_body);
+        
+        $json_status = json_decode($response_body);
         
         // Add safety check for API response
         if (empty($json_status) || !is_array($json_status) || !isset($json_status[0])) {
-            error_log('MoneySpace API: Invalid response format');
+            error_log('MoneySpace API: Invalid response format in process-payment.php - Response: ' . $response_body);
             $order->update_status("wc-failed");
             wp_redirect($order->get_checkout_order_received_url());
             return;
         }
         
-        $ms_status = $json_status[0]->$oid;
+        error_log('MoneySpace Payment Status Check - Parsed Response: ' . json_encode($json_status[0]));
+        
+        // Access the order data using proper property notation
+        $response_data = $json_status[0];
+        $ms_status = isset($response_data->{'order id'}) ? $response_data->{'order id'} : null;
+        
+        error_log('MoneySpace Payment Status Check - Order Status Object: ' . json_encode($ms_status));
+        
+        // Additional safety check for order status
+        if (empty($ms_status)) {
+            error_log('MoneySpace API: No order status found in response in process-payment.php');
+            error_log('MoneySpace API: Available properties: ' . json_encode(array_keys((array)$response_data)));
+            $order->update_status("wc-failed");
+            wp_redirect($order->get_checkout_order_received_url());
+            return;
+        }
 
         cancel_payment($order_id, $payment_gateway);
 
-        if (isset($ms_status->status) && $ms_status->status == "Pay Success") {
+        // Handle different success status values based on payment type
+        $is_payment_successful = false;
+        if (isset($ms_status->status)) {
+            $status = $ms_status->status;
+            
+            // Check for all possible success status values
+            if ($status == "Pay Success" || $status == "Success") {
+                $is_payment_successful = true;
+                error_log('MoneySpace Payment: Payment successful with status "' . $status . '" for payment type: ' . $MNS_PAYMENT_TYPE);
+            }
+        }
+
+        if ($is_payment_successful) {
 
             if($MNS_PAYMENT_TYPE == "Card"){
 
@@ -99,8 +132,39 @@ if ($order && $pid) {
         } else if (isset($ms_status->status) && $ms_status->status == "Cancel") {
             $order->update_status("wc-cancelled");
             wp_redirect($order->get_cancel_order_url());
+        } else if (isset($ms_status->status) && $ms_status->status == "Pending") {
+            // Handle pending payments - keep order in pending status and redirect to payment page
+            error_log('MoneySpace Payment Status: Pending - keeping order in pending status');
+            $order->update_status("wc-pending");
+            update_post_meta($order_id, 'MNS_PAYMENT_STATUS', $ms_status->status);
+            
+            // For installment payments, redirect back to complete the payment
+            if ($MNS_PAYMENT_TYPE == "Installment") {
+                // Check if we have a payment link in the transaction data
+                $payment_link = get_post_meta($order_id, 'MNS_PAYMENT_LINK', true);
+                if (!empty($payment_link)) {
+                    wp_redirect($payment_link);
+                } else {
+                    // Redirect to a pending payment page or back to checkout
+                    wc_add_notice(__('Your payment is pending. Please complete the payment process.', 'woocommerce'), 'notice');
+                    wp_redirect($order->get_checkout_payment_url(true));
+                }
+            } else {
+                wp_redirect($order->get_checkout_order_received_url());
+            }
         } else {
-            # Fail case
+            # Fail case - log the received status for debugging
+            $received_status = isset($ms_status->status) ? $ms_status->status : 'Unknown';
+            error_log('MoneySpace Payment Status: "' . $received_status . '" for payment type: ' . $MNS_PAYMENT_TYPE . ' - treating as failed');
+            error_log('MoneySpace Payment Debug: Recognized success statuses are "Success" and "Pay Success"');
+            
+            // Add detailed order note for admin reference
+            $failure_reason = 'MoneySpace payment declined. Status: "' . $received_status . '". Payment Type: ' . $MNS_PAYMENT_TYPE;
+            if (isset($MNS_transaction_orderid)) {
+                $failure_reason .= '. Transaction Order ID: ' . $MNS_transaction_orderid;
+            }
+            $order->add_order_note($failure_reason);
+            
             $order->update_status("wc-failed");
             wp_redirect($order->get_checkout_order_received_url());
         }

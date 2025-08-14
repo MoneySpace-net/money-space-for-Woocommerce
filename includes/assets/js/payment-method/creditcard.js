@@ -1,7 +1,7 @@
 import { getSetting } from '@woocommerce/settings';
 import { decodeEntities } from '@wordpress/html-entities';
 import { registerPaymentMethod  } from '@woocommerce/blocks-registry';
-import { memo, useMemo } from '@wordpress/element';
+import { useMemo } from '@wordpress/element';
 import CreditCardForm from './../components/CreditCardForm';
 import './styles.scss';
 
@@ -11,25 +11,28 @@ const label = decodeEntities( settings.title );
 const template_payment = settings.ms_template_payment;
 
 /**
- * Content component
+ * Content component - This receives WooCommerce blocks context
  */
-const Content = () => {
-	return decodeEntities( settings.description || '' );
-};
-
-// Memoize the credit card form
-const MemoizedCreditCardForm = memo(() => {
+const Content = (props) => {
+    // This component receives props from WooCommerce blocks including:
+    // - billing data
+    // - cart data  
+    // - eventRegistration
+    // - etc.
+    
     const formProps = useMemo(() => ({
-        i18n: settings.i18n
-    }), [settings.i18n]);
+        i18n: settings.i18n,
+        // Pass through all WooCommerce blocks context
+        ...props
+    }), [props]);
 
-    return <CreditCardForm {...formProps} />;
-});
+    return template_payment == 1 ? <CreditCardForm {...formProps} /> : decodeEntities( settings.description || '' );
+};
 
 const options = {
 	name: id,
 	label: label,
-	content: template_payment == 1 ? <MemoizedCreditCardForm /> : <Content />,
+	content: <Content />,
 	edit: <Content />,
 	ariaLabel: label,
 	paymentMethodId: id,

@@ -40,6 +40,9 @@ class MNS_Payment_Gateway extends WC_Payment_Gateway
 
     public function create_payment_transaction_v3($order_id, $ms_body, $ms_template_payment, $gateways) {
         if ($ms_template_payment == 1) {
+            error_log('MoneySpace API: Creating payment transaction for order ' . $order_id);
+            error_log('MoneySpace API: Request body: ' . json_encode($ms_body));
+            
             $response = wp_remote_post(MNS_API_URL_CREATE, array(
                 'method' => 'POST',
                 'timeout' => 120,
@@ -48,27 +51,42 @@ class MNS_Payment_Gateway extends WC_Payment_Gateway
 
             // Handle HTTP errors before accessing body
             if (is_wp_error($response)) {
-                (new Mslogs())->insert($response->get_error_message(), 1, 'Create Transaction Card (HTTP error)', date("Y-m-d H:i:s"), json_encode($ms_body));
+                $error_message = $response->get_error_message();
+                error_log('MoneySpace API: HTTP Error - ' . $error_message);
+                (new Mslogs())->insert($error_message, 1, 'Create Transaction Card (HTTP error)', date("Y-m-d H:i:s"), json_encode($ms_body));
                 wc_add_notice(__('Error : ' . MNS_NOTICE_ERROR_SETUP, $this->domain), 'error');
                 return;
             }
 
             $body = wp_remote_retrieve_body($response);
+            $http_code = wp_remote_retrieve_response_code($response);
+            
+            error_log('MoneySpace API: HTTP Response Code - ' . $http_code);
+            error_log('MoneySpace API: Response Body - ' . $body);
+            
             (new Mslogs())->insert($body, 1, 'Create Transaction Card', date("Y-m-d H:i:s"), json_encode($ms_body));
 
             $data_status = json_decode($body);
-            if (empty($data_status) || !isset($data_status[0]->status) || $data_status[0]->status != "success") {
-                wc_add_notice(__('Error ms102 : ' . MNS_NOTICE_CHECK_TRANSACTION, $this->domain), 'error');
+            if (empty($data_status) || !isset($data_status[0]->status)) {
+                error_log('MoneySpace API: Invalid response format - no status field');
+                wc_add_notice(__('Error ms101 : Invalid response from payment gateway', $this->domain), 'error');
+                return;
+            }
+            
+            if ($data_status[0]->status != "success") {
+                $error_msg = isset($data_status[0]->message) ? $data_status[0]->message : 'Unknown error';
+                error_log('MoneySpace API: Transaction failed - Status: ' . $data_status[0]->status . ', Message: ' . $error_msg);
+                wc_add_notice(__('Error ms102 : ' . $error_msg, $this->domain), 'error');
                 return;
             }
 
-            if ($data_status[0]->status == "success" && isset($data_status[0]->mskey) && strlen($data_status[0]->mskey) > 9999) {
-                wc_add_notice(__('Error ms100 : ' . MNS_NOTICE_CHECK_TRANSACTION . $data_status[0]->status, $this->domain), 'error');
-                return;
-            }
+            // Note: MSKey is supposed to be long for security - it's an encrypted payment token
+            // Removed incorrect length validation that was preventing successful payments
 
             $tranId = $data_status[0]->transaction_ID ?? '';
             $mskey = $data_status[0]->mskey ?? '';
+            
+            error_log('MoneySpace API: Transaction created successfully - ID: ' . $tranId);
             
             update_post_meta($order_id, 'MNS_transaction_orderid', $ms_body['order_id'] ?? '');
             update_post_meta($order_id, 'MNS_transaction', $tranId);
@@ -98,10 +116,8 @@ class MNS_Payment_Gateway extends WC_Payment_Gateway
                 return;
             }
 
-            if ($data_status[0]->status == "success" && isset($data_status[0]->mskey) && strlen($data_status[0]->mskey) > 9999) {
-                wc_add_notice(__('Error ms100 : ' . MNS_NOTICE_CHECK_TRANSACTION . $data_status[0]->status, $this->domain), 'error');
-                return;
-            }
+            // Note: MSKey is supposed to be long for security - it's an encrypted payment token
+            // Removed incorrect length validation that was preventing successful payments
 
             $tranId = $data_status[0]->transaction_ID ?? '';
             $linkPayment = $data_status[0]->link_payment ?? '';
@@ -133,10 +149,8 @@ class MNS_Payment_Gateway extends WC_Payment_Gateway
             return;
         }
 
-        if ($data_status[0]->status == "success" && isset($data_status[0]->mskey) && strlen($data_status[0]->mskey) > 9999) {
-            wc_add_notice(__('Error ms100 : ' . MNS_NOTICE_CHECK_TRANSACTION . $data_status[0]->status, $this->domain), 'error');
-            return;
-        }
+        // Note: MSKey is supposed to be long for security - it's an encrypted payment token
+        // Removed incorrect length validation that was preventing successful payments
 
         $tranId = $data_status[0]->transaction_ID ?? '';
         $mskey = $data_status[0]->mskey ?? '';
@@ -433,11 +447,55 @@ class MNS_Payment_Gateway extends WC_Payment_Gateway
             update_post_meta($order_id, 'MNS_PAYMENT_TYPE', "Card");
             delete_post_meta($order_id, 'MNS_transaction');
 
-            $cardNumber = sanitize_text_field($_POST["cardNumber"] ?? $_POST["cardnumber"]);
-            $cardHolder = sanitize_text_field($_POST["cardHolder"]?? $_POST["cardholder"]);
-            $cardExpDate = sanitize_text_field($_POST["cardExpDate"]?? $_POST["cardexpdate"]);
-            $cardExpDateYear = sanitize_text_field($_POST["cardExpDateYear"]?? $_POST["cardexpdateyear"]);
-            $cardCVV = sanitize_text_field($_POST["cardCVV"]?? $_POST["cardcvv"]);
+            // Debug logging for payment data
+            error_log('MoneySpace Payment Debug - POST data: ' . print_r($_POST, true));
+            
+            // Handle WooCommerce Blocks payment data
+            $cardNumber = '';
+            $cardHolder = '';
+            $cardExpDate = '';
+            $cardExpDateYear = '';
+            $cardCVV = '';
+            
+            // Check if payment data comes from WooCommerce Blocks
+            if (isset($_POST['payment_data']) && is_array($_POST['payment_data'])) {
+                $payment_data = $_POST['payment_data'];
+                $cardNumber = sanitize_text_field($payment_data['cardNumber'] ?? '');
+                $cardHolder = sanitize_text_field($payment_data['cardHolder'] ?? '');
+                $cardExpDate = sanitize_text_field($payment_data['cardExpDate'] ?? '');
+                $cardExpDateYear = sanitize_text_field($payment_data['cardExpDateYear'] ?? '');
+                $cardCVV = sanitize_text_field($payment_data['cardCVV'] ?? '');
+                
+                error_log('MoneySpace Payment Debug - Using Blocks payment data');
+            }
+            
+            // Fallback to traditional POST fields if Blocks data not available
+            if (empty($cardNumber)) {
+                $cardNumber = sanitize_text_field($_POST["cardNumber"] ?? $_POST["cardnumber"] ?? '');
+                $cardHolder = sanitize_text_field($_POST["cardHolder"] ?? $_POST["cardholder"] ?? '');
+                $cardExpDate = sanitize_text_field($_POST["cardExpDate"] ?? $_POST["cardexpdate"] ?? '');
+                $cardExpDateYear = sanitize_text_field($_POST["cardExpDateYear"] ?? $_POST["cardexpdateyear"] ?? '');
+                $cardCVV = sanitize_text_field($_POST["cardCVV"] ?? $_POST["cardcvv"] ?? '');
+                
+                error_log('MoneySpace Payment Debug - Using traditional POST data');
+            }
+            
+            // Log the extracted card data
+            error_log('MoneySpace Payment Debug - Card data extracted: ' . json_encode([
+                'cardNumber' => $cardNumber ? 'XXXX-XXXX-XXXX-' . substr($cardNumber, -4) : 'EMPTY',
+                'cardHolder' => $cardHolder ?: 'EMPTY',
+                'cardExpDate' => $cardExpDate ?: 'EMPTY', 
+                'cardExpDateYear' => $cardExpDateYear ?: 'EMPTY',
+                'cardCVV' => $cardCVV ? 'XXX' : 'EMPTY'
+            ]));
+            
+            // Validate card data
+            if (empty($cardNumber) || empty($cardHolder) || empty($cardExpDate) || empty($cardExpDateYear) || empty($cardCVV)) {
+                error_log('MoneySpace Payment Error: Missing card data');
+                wc_add_notice(__('Error: Missing credit card information. Please check your card details.', $this->domain), 'error');
+                return;
+            }
+            
             $MNS_CARD = $cardNumber."|".$cardHolder."|".$cardExpDate."|".$cardExpDateYear."|".$cardCVV;
             update_post_meta($order_id, 'MNS_CARD', base64_encode($MNS_CARD));
 

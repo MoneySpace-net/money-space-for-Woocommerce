@@ -66,10 +66,8 @@ class MNS_Payment_Gateway_QR extends WC_Payment_Gateway
             return;
         }
 
-        if ($data_status[0]->status == "success" && isset($data_status[0]->mskey) && strlen($data_status[0]->mskey) > 9999) {
-            wc_add_notice(__("Error ms100 : " . MNS_NOTICE_CHECK_TRANSACTION . $data_status[0]->status, $this->domain), 'error');
-            return;
-        }
+        // Note: MSKey is supposed to be long for security - it's an encrypted payment token
+        // Removed incorrect length validation that was preventing successful payments
 
         $tranId = $data_status[0]->transaction_ID ?? '';
         $image_qrprom = $data_status[0]->image_qrprom ?? '';
@@ -191,7 +189,7 @@ class MNS_Payment_Gateway_QR extends WC_Payment_Gateway
     public function process_payment($order_id)
     {
         $MNS_special_instructions_to_merchant = get_post_meta($order_id, 'MNS_special_instructions_to_merchant', true);
-        $message_qr = sanitize_text_field($_POST["message_qr"]);
+        $message_qr = sanitize_text_field($_POST["message_qr"] ?? '');
         if (strlen($MNS_special_instructions_to_merchant) <= 150) {
             if (get_woocommerce_currency() == "THB") {
                 update_post_meta($order_id, 'MNS_special_instructions_to_merchant', $message_qr);

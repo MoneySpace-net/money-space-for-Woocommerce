@@ -10,7 +10,10 @@ include_once 'qrnone_form.php';
 wc_get_template(
     'emails/email-order-details.php',
     array(
-      'order' => $order
+        'order' => $order,
+        'sent_to_admin' => false,
+        'plain_text' => false,
+        'email' => null
     )
 );
 

@@ -408,14 +408,57 @@ class MNS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
         $order_amount = $order->get_total();
         $is_error = false;
 
-        update_post_meta($order_id, 'MNS_special_instructions_to_merchant', sanitize_text_field($_POST["message_card"]));
+        // Debug logging for installment payment data
+        error_log('MoneySpace Installment Payment Debug - POST data: ' . print_r($_POST, true));
+        
+        // Handle WooCommerce Blocks payment data for installments
+        $selectbank = '';
+        $ktc_permonths = '';
+        $bay_permonths = '';
+        $fcy_permonths = '';
+        $message_card = '';
+        
+        // Check if payment data comes from WooCommerce Blocks
+        if (isset($_POST['payment_data']) && is_array($_POST['payment_data'])) {
+            $payment_data = $_POST['payment_data'];
+            $selectbank = sanitize_text_field($payment_data['selectbank'] ?? '');
+            $ktc_permonths = sanitize_text_field($payment_data['KTC_permonths'] ?? '');
+            $bay_permonths = sanitize_text_field($payment_data['BAY_permonths'] ?? '');
+            $fcy_permonths = sanitize_text_field($payment_data['FCY_permonths'] ?? '');
+            $message_card = sanitize_text_field($payment_data['message_card'] ?? '');
+            
+            error_log('MoneySpace Installment Payment Debug - Using Blocks payment data');
+        }
+        
+        // Fallback to traditional POST fields if Blocks data not available
+        if (empty($selectbank)) {
+            $selectbank = sanitize_text_field($_POST["selectbank"] ?? '');
+            $ktc_permonths = sanitize_text_field($_POST["KTC_permonths"] ?? $_POST["ktc_permonths"] ?? '');
+            $bay_permonths = sanitize_text_field($_POST["BAY_permonths"] ?? $_POST["bay_permonths"] ?? '');
+            $fcy_permonths = sanitize_text_field($_POST["FCY_permonths"] ?? $_POST["fcy_permonths"] ?? '');
+            $message_card = sanitize_text_field($_POST["message_card"] ?? '');
+            
+            error_log('MoneySpace Installment Payment Debug - Using traditional POST data');
+        }
+        
+        // Log the extracted installment data
+        error_log('MoneySpace Installment Payment Debug - Installment data extracted: ' . json_encode([
+            'selectbank' => $selectbank ?: 'EMPTY',
+            'ktc_permonths' => $ktc_permonths ?: 'EMPTY',
+            'bay_permonths' => $bay_permonths ?: 'EMPTY',
+            'fcy_permonths' => $fcy_permonths ?: 'EMPTY',
+            'message_card' => $message_card ?: 'EMPTY'
+        ]));
+
+        // Handle installment payment data safely
+        update_post_meta($order_id, 'MNS_special_instructions_to_merchant', $message_card);
 
         if (!is_user_logged_in() && !$is_error) {
             wc_add_notice(__("Please login !", $this->domain), 'error');
             $is_error = true;
         }
 
-        if (strlen(sanitize_text_field($_POST["message_card"])) > 150 && !$is_error) {
+        if (strlen($message_card) > 150 && !$is_error) {
             wc_add_notice(__("Message to the store (150 characters maximum)", $this->domain), 'error');
             $is_error = true;
         }
@@ -430,8 +473,8 @@ class MNS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
             $is_error = true;
         }
 
-        if(sanitize_text_field($_POST["selectbank"]) == "" && !$is_error) {
-            wc_add_notice(__("กรุณาเลือกการผ่อนชำระ".sanitize_text_field($_POST["selectbank"]), $this->domain), 'error');
+        if($selectbank == "" && !$is_error) {
+            wc_add_notice(__("กรุณาเลือกการผ่อนชำระ".$selectbank, $this->domain), 'error');
             $is_error = true;
         }
 
@@ -439,20 +482,20 @@ class MNS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
             delete_post_meta($order_id, 'MNS_transaction');
             delete_post_meta($order_id, 'MNS_QR_URL');
             update_post_meta($order_id, 'MNS_PAYMENT_TYPE', "Installment");
-            update_post_meta($order_id, 'MNS_INSTALLMENT_BANK', sanitize_text_field($_POST["selectbank"]));
+            update_post_meta($order_id, 'MNS_INSTALLMENT_BANK', $selectbank);
             $endterm = "";
-            $bankType = sanitize_text_field($_POST["selectbank"]);
+            $bankType = $selectbank;
             
             if ($bankType == "KTC"){
-                $endterm = sanitize_text_field($_POST["KTC_permonths"] ?? $_POST["ktc_permonths"]);
+                $endterm = $ktc_permonths;
             }
 
             if ($bankType == "BAY"){
-                $endterm = sanitize_text_field($_POST["BAY_permonths"] ?? $_POST["bay_permonths"]);
+                $endterm = $bay_permonths;
             }
 
             if ($bankType == "FCY"){
-                $endterm = sanitize_text_field($_POST["FCY_permonths"] ?? $_POST["fcy_permonths"]);
+                $endterm = $fcy_permonths;
             }
 
             update_post_meta($order_id, 'MNS_INSTALLMENT_BANK_TYPE', $bankType);
@@ -511,6 +554,9 @@ class MNS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
         , "startTerm" => $endTerm
         , "endTerm" => $endTerm);
         
+        error_log('MoneySpace Installment API: Creating payment transaction for order ' . $order_id);
+        error_log('MoneySpace Installment API: Request body: ' . json_encode($payment_data));
+        
         $response = wp_remote_post(MNS_API_URL_CREATE_INSTALLMENT, 
         array(
             'headers' => array('Content-Type' => 'application/json; charset=utf-8'),
@@ -527,6 +573,11 @@ class MNS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
         }
 
         $body = wp_remote_retrieve_body($response);
+        $http_code = wp_remote_retrieve_response_code($response);
+        
+        error_log('MoneySpace Installment API: HTTP Response Code - ' . $http_code);
+        error_log('MoneySpace Installment API: Response Body - ' . $body);
+        
         (new Mslogs())->insert($body, 4, 'Create Transaction Installment', date("Y-m-d H:i:s"), json_encode($payment_data));
 
         $json_tranId_status = json_decode($body);
@@ -540,6 +591,20 @@ class MNS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
         }
         $json_tranId = json_decode($body);
         $tranId = $json_tranId[0]->transaction_ID ?? '';
+        $linkPayment = $json_tranId[0]->link_payment ?? '';
+        
+        // Save the transaction order ID for payment status checking
+        update_post_meta($order_id, 'MNS_transaction_orderid', $payment_data['order_id']);
+        update_post_meta($order_id, 'MNS_transaction', $tranId);
+        
+        // Save the payment link for pending payments
+        if (!empty($linkPayment)) {
+            update_post_meta($order_id, 'MNS_PAYMENT_LINK', $linkPayment);
+        }
+        
+        error_log('MoneySpace Installment API: Transaction created successfully - ID: ' . $tranId);
+        error_log('MoneySpace Installment API: Order ID saved: ' . $payment_data['order_id']);
+        error_log('MoneySpace Installment API: Payment link saved: ' . $linkPayment);
 
         if ($payment_data['feeType'] == "include"){
             $ex_ktc_bay = $order_amount;
@@ -590,7 +655,24 @@ class MNS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
             </form>
         </div>
         <?php 
+        // Use the modern payment link from API response instead of legacy form submission
+        if (!empty($linkPayment)) {
+            error_log('MoneySpace Installment: Redirecting to payment link: ' . $linkPayment);
+            ?>
+            <div style="text-align: center; padding: 20px;">
+                <p>กำลังเปลี่ยนเส้นทางไปยังหน้าชำระเงิน...</p>
+                <p>Redirecting to payment page...</p>
+            </div>
+            <script>
+                // Use proper URL for JavaScript redirection without HTML entity encoding
+                var paymentUrl = <?php echo json_encode($linkPayment); ?>;
+                console.log('MoneySpace: Redirecting to payment URL:', paymentUrl);
+                window.location.href = paymentUrl;
+            </script>
+            <?php
+        } else {
             wc_enqueue_js("document.getElementById('mainform').submit();");
+        }
     }
 
     public function getHash($data,$key) {

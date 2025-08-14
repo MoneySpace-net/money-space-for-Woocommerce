@@ -17,8 +17,10 @@ const CreditCardForm = (props) => {
     var errorFields = [];
     const listNumber = [1,2,3,4,5,6,7,8,9,10,11,12];
     const [formData, setFormData] = useState(model);
-    const { onPaymentSetup, onCheckoutValidation } = props.eventRegistration;
-    const { i18n } = props;
+    
+    // Safely destructure eventRegistration with default values
+    const { eventRegistration = {}, i18n = {} } = props;
+    const { onPaymentSetup, onCheckoutValidation } = eventRegistration;
 
     if (document.getElementById('radio-control-wc-payment-method-options-moneyspace') !== null) {
         checkPaymentMethodCC = document.getElementById('radio-control-wc-payment-method-options-moneyspace').checked;
@@ -30,6 +32,8 @@ const CreditCardForm = (props) => {
             onCheckoutValidation
         }, errorFields) => {
         useEffect(() => {
+            if (!onCheckoutValidation) return;
+            
             const unsubscribe = onCheckoutValidation(() => {
                 if (formData.dirty == false) {
                     setFormData({ ...formData, ["dirty"]: true });
@@ -46,24 +50,30 @@ const CreditCardForm = (props) => {
                 return true;
             });
             return unsubscribe;
-        }, [formData]);
+        }, [formData, onCheckoutValidation]);
     }
 
     const usePaymentSetup = ({formData, onPaymentSetup}) => {
         useEffect(() => {
+            if (!onPaymentSetup) return;
+            
             const unsubscribe = onPaymentSetup(() => {
                 return formData;
             });
 
             return unsubscribe;
-        }, [formData]);
+        }, [formData, onPaymentSetup]);
     }
     usePaymentSetup({formData, onPaymentSetup});
 
     const useProcessPayment = ({formData, onPaymentSetup}) => {
         useEffect(() => {
+            if (!onPaymentSetup) return;
+            
             const unsubscribe = onPaymentSetup(() => {
-                const response = {
+                // WooCommerce Blocks expects payment data in a specific format
+                return {
+                    type: "success",
                     meta: {
                         paymentMethodData: {
                             cardNumber: formData.ccNo.replaceAll(" ", ""),
@@ -72,13 +82,20 @@ const CreditCardForm = (props) => {
                             cardExpDateYear: formData.ccExpYear,
                             cardCVV: formData.ccCVV
                         }
+                    },
+                    // Also provide the data in the format the gateway expects
+                    paymentMethodData: {
+                        cardNumber: formData.ccNo.replaceAll(" ", ""),
+                        cardHolder: formData.ccName,
+                        cardExpDate: formData.ccExpMonth,
+                        cardExpDateYear: formData.ccExpYear,
+                        cardCVV: formData.ccCVV
                     }
-                }
-                return {type: "success", ...response};
+                };
             });
 
             return unsubscribe;
-        }, [formData]);
+        }, [formData, onPaymentSetup]);
     }
     useProcessPayment({formData, onPaymentSetup});
 
