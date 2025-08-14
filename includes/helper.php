@@ -1,5 +1,61 @@
 <?php
 
+/**
+ * MoneySpace debug logging helper
+ * Only logs when WP_DEBUG is enabled
+ * NEVER logs sensitive payment data (PCI DSS compliance)
+ */
+function moneyspace_debug_log($message, $always_log = false) {
+    if ($always_log || (defined('WP_DEBUG') && WP_DEBUG)) {
+        error_log('MoneySpace: ' . $message);
+    }
+}
+
+/**
+ * Safely mask sensitive card data for logging
+ * PCI DSS compliant - only shows last 4 digits
+ */
+function moneyspace_mask_card_data($card_data) {
+    $masked_data = [];
+    
+    foreach ($card_data as $key => $value) {
+        if (stripos($key, 'card') !== false || stripos($key, 'cvv') !== false) {
+            if (stripos($key, 'number') !== false && strlen($value) >= 4) {
+                // Show only last 4 digits for card numbers
+                $masked_data[$key] = 'XXXX-XXXX-XXXX-' . substr($value, -4);
+            } elseif (stripos($key, 'cvv') !== false) {
+                // Never show CVV
+                $masked_data[$key] = $value ? 'XXX' : 'EMPTY';
+            } elseif (stripos($key, 'holder') !== false || stripos($key, 'name') !== false) {
+                // Show card holder name (not sensitive per PCI DSS)
+                $masked_data[$key] = $value ?: 'EMPTY';
+            } else {
+                // Other card data like expiry (not sensitive per PCI DSS)
+                $masked_data[$key] = $value ?: 'EMPTY';
+            }
+        } else {
+            // Non-card data, safe to log
+            $masked_data[$key] = $value;
+        }
+    }
+    
+    return $masked_data;
+}
+
+/**
+ * Remove sensitive payment data from arrays before logging
+ * PCI DSS compliance - never log full card numbers or CVV
+ */
+function moneyspace_filter_sensitive_data($data) {
+    $sensitive_keys = [
+        'cardNumber', 'cardnumber', 'card_number',
+        'cardCVV', 'cardcvv', 'cvv', 'cvc', 'security_code',
+        'card_cvv', 'card_cvc'
+    ];
+    
+    return array_diff_key($data, array_flip($sensitive_keys));
+}
+
 function set_title_html($title) {
     return $title; //  '<h1><b>'.$title.'</b></h1>';
 }

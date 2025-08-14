@@ -157,14 +157,18 @@ function render_progress()
             </script>
         <?php } else if (strtolower($MNS_PAYMENT_TYPE) == "card") { ?>
         <?php
-            error_log('MoneySpace MSPayLink Debug - Processing card payment');
+            if (defined('WP_DEBUG') && WP_DEBUG) {
+                error_log('MoneySpace MSPayLink Debug - Processing card payment');
+            }
             
             $mscard = get_post_meta($order_id, 'MNS_CARD', true);
             $mscard_ext = explode("|", base64_decode($mscard));
             $mskey = get_post_meta($order_id, 'MNS_PAYMENT_KEY', true);
 
-            error_log('MoneySpace MSPayLink Debug - Card data exists: ' . (!empty($mscard) ? 'YES' : 'NO'));
-            error_log('MoneySpace MSPayLink Debug - MSKey exists: ' . (!empty($mskey) ? 'YES' : 'NO'));
+            if (defined('WP_DEBUG') && WP_DEBUG) {
+                error_log('MoneySpace MSPayLink Debug - Card data exists: ' . (!empty($mscard) ? 'YES' : 'NO'));
+                error_log('MoneySpace MSPayLink Debug - MSKey exists: ' . (!empty($mskey) ? 'YES' : 'NO'));
+            }
 
             $cardNumber = $mscard_ext[0] ?? '';
             $cardHolder = $mscard_ext[1] ?? '';
@@ -172,13 +176,17 @@ function render_progress()
             $cardExpDateYear = $mscard_ext[3] ?? '';
             $cardCVV = $mscard_ext[4] ?? '';
             
-            error_log('MoneySpace MSPayLink Debug - Card components: ' . json_encode([
-                'cardNumber' => $cardNumber ? 'XXXX-XXXX-XXXX-' . substr($cardNumber, -4) : 'EMPTY',
-                'cardHolder' => $cardHolder ?: 'EMPTY',
-                'cardExpDate' => $cardExpDate ?: 'EMPTY',
-                'cardExpDateYear' => $cardExpDateYear ?: 'EMPTY',
-                'cardCVV' => $cardCVV ? 'XXX' : 'EMPTY'
-            ]));
+            // Safe logging - PCI DSS compliant (no sensitive card data)
+            if (defined('WP_DEBUG') && WP_DEBUG) {
+                $safe_card_data = moneyspace_mask_card_data([
+                    'cardNumber' => $cardNumber,
+                    'cardHolder' => $cardHolder,
+                    'cardExpDate' => $cardExpDate,
+                    'cardExpDateYear' => $cardExpDateYear,
+                    'cardCVV' => $cardCVV
+                ]);
+                error_log('MoneySpace MSPayLink Debug - Card components: ' . json_encode($safe_card_data));
+            }
             delete_post_meta($order_id, 'MNS_PAYMENT_KEY', $mskey);
             delete_post_meta($order_id, 'MNS_CARD', $mscard);
                 

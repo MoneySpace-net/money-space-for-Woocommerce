@@ -447,8 +447,11 @@ class MNS_Payment_Gateway extends WC_Payment_Gateway
             update_post_meta($order_id, 'MNS_PAYMENT_TYPE', "Card");
             delete_post_meta($order_id, 'MNS_transaction');
 
-            // Debug logging for payment data
-            error_log('MoneySpace Payment Debug - POST data: ' . print_r($_POST, true));
+            // Debug logging for payment data (SAFE - no sensitive card data)
+            if (defined('WP_DEBUG') && WP_DEBUG) {
+                $safe_post_data = moneyspace_filter_sensitive_data($_POST);
+                error_log('MoneySpace Payment Debug - POST data (sensitive data removed): ' . print_r($safe_post_data, true));
+            }
             
             // Handle WooCommerce Blocks payment data
             $cardNumber = '';
@@ -477,21 +480,24 @@ class MNS_Payment_Gateway extends WC_Payment_Gateway
                 $cardExpDateYear = sanitize_text_field($_POST["cardExpDateYear"] ?? $_POST["cardexpdateyear"] ?? '');
                 $cardCVV = sanitize_text_field($_POST["cardCVV"] ?? $_POST["cardcvv"] ?? '');
                 
-                error_log('MoneySpace Payment Debug - Using traditional POST data');
+                error_log('MoneySpace Payment Debug - Using traditional POST data (card data extracted safely)');
             }
             
-            // Log the extracted card data
-            error_log('MoneySpace Payment Debug - Card data extracted: ' . json_encode([
-                'cardNumber' => $cardNumber ? 'XXXX-XXXX-XXXX-' . substr($cardNumber, -4) : 'EMPTY',
-                'cardHolder' => $cardHolder ?: 'EMPTY',
-                'cardExpDate' => $cardExpDate ?: 'EMPTY', 
-                'cardExpDateYear' => $cardExpDateYear ?: 'EMPTY',
-                'cardCVV' => $cardCVV ? 'XXX' : 'EMPTY'
-            ]));
+            // Log the extracted card data (SAFELY - PCI DSS compliant)
+            if (defined('WP_DEBUG') && WP_DEBUG) {
+                $safe_card_data = moneyspace_mask_card_data([
+                    'cardNumber' => $cardNumber,
+                    'cardHolder' => $cardHolder,
+                    'cardExpDate' => $cardExpDate, 
+                    'cardExpDateYear' => $cardExpDateYear,
+                    'cardCVV' => $cardCVV
+                ]);
+                error_log('MoneySpace Payment Debug - Card data extracted: ' . json_encode($safe_card_data));
+            }
             
             // Validate card data
             if (empty($cardNumber) || empty($cardHolder) || empty($cardExpDate) || empty($cardExpDateYear) || empty($cardCVV)) {
-                error_log('MoneySpace Payment Error: Missing card data');
+                moneyspace_debug_log('Payment Error: Missing credit card information', true); // Always log errors
                 wc_add_notice(__('Error: Missing credit card information. Please check your card details.', $this->domain), 'error');
                 return;
             }

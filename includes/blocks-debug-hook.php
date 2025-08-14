@@ -17,7 +17,12 @@ add_action('woocommerce_rest_checkout_process_payment_with_context', function($c
             foreach ($context->payment_data as $key => $value) {
                 $_POST[$key] = sanitize_text_field($value);
             }
-            error_log('MoneySpace Debug Hook: Mapped to $_POST - ' . json_encode($_POST));
+            // Safe logging - no sensitive card data
+            $safe_post_data = array_diff_key($_POST, array_flip([
+                'cardNumber', 'cardnumber', 'cardHolder', 'cardholder', 
+                'cardCVV', 'cardcvv', 'cvv', 'security_code'
+            ]));
+            error_log('MoneySpace Debug Hook: Mapped to $_POST (sensitive data removed) - ' . json_encode($safe_post_data));
         }
     }
 }, 10, 2);
@@ -26,7 +31,12 @@ add_action('woocommerce_rest_checkout_process_payment_with_context', function($c
 add_action('woocommerce_checkout_process_payment', function($payment_method) {
     if ($payment_method === 'moneyspace') {
         error_log('MoneySpace Debug Hook: Processing payment for method - ' . $payment_method);
-        error_log('MoneySpace Debug Hook: $_POST data - ' . json_encode($_POST));
+        // Safe logging - no sensitive card data
+        $safe_post_data = array_diff_key($_POST, array_flip([
+            'cardNumber', 'cardnumber', 'cardHolder', 'cardholder', 
+            'cardCVV', 'cardcvv', 'cvv', 'security_code'
+        ]));
+        error_log('MoneySpace Debug Hook: $_POST data (sensitive data removed) - ' . json_encode($safe_post_data));
     }
 }, 10, 1);
 

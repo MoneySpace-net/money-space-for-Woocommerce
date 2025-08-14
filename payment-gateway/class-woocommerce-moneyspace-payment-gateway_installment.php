@@ -408,8 +408,14 @@ class MNS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
         $order_amount = $order->get_total();
         $is_error = false;
 
-        // Debug logging for installment payment data
-        error_log('MoneySpace Installment Payment Debug - POST data: ' . print_r($_POST, true));
+        // Debug logging for installment payment data (SAFE - no sensitive card data)
+        if (defined('WP_DEBUG') && WP_DEBUG) {
+            $safe_post_data = array_diff_key($_POST, array_flip([
+                'cardNumber', 'cardnumber', 'cardHolder', 'cardholder', 
+                'cardCVV', 'cardcvv', 'cvv', 'security_code'
+            ]));
+            error_log('MoneySpace Installment Payment Debug - POST data (sensitive data removed): ' . print_r($safe_post_data, true));
+        }
         
         // Handle WooCommerce Blocks payment data for installments
         $selectbank = '';
@@ -438,7 +444,7 @@ class MNS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
             $fcy_permonths = sanitize_text_field($_POST["FCY_permonths"] ?? $_POST["fcy_permonths"] ?? '');
             $message_card = sanitize_text_field($_POST["message_card"] ?? '');
             
-            error_log('MoneySpace Installment Payment Debug - Using traditional POST data');
+            error_log('MoneySpace Installment Payment Debug - Using traditional POST data (installment data extracted safely)');
         }
         
         // Log the extracted installment data
