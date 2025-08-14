@@ -289,7 +289,7 @@ Navigate to: WooCommerce → Settings → Payments → MoneySpace Installments
 2. **Create Webhook**
    ```
    Domain: https://yourstore.com
-   Webhook URL: https://yourstore.com/?moneyspace_webhook=1
+   Webhook URL: https://yourstore.com/ms/webhook
    ```
 
 3. **Copy Credentials**
@@ -312,7 +312,7 @@ curl -I https://yourstore.com
 # Should return: HTTP/2 200
 
 # Test webhook endpoint
-curl -X POST https://yourstore.com/?moneyspace_webhook=1
+curl -X POST https://yourstore.com/ms/webhook
 ```
 
 ### 3. Security Headers
@@ -353,7 +353,7 @@ update_option('moneyspace_test_mode', 'yes');
 ### 4. Webhook Testing
 ```bash
 # Test webhook endpoint
-curl -X POST https://yourstore.com/?moneyspace_webhook=1 \
+curl -X POST https://yourstore.com/ms/webhook \
   -H "Content-Type: application/json" \
   -d '{"test": "webhook"}'
 ```
@@ -469,15 +469,15 @@ curl -H "Authorization: Bearer YOUR_SECRET_KEY" \
 #### 2. Webhook Not Receiving
 ```bash
 # Check webhook URL
-echo "https://yoursite.com/?moneyspace_webhook=1"
+echo "https://yoursite.com/ms/webhook"
 
 # Test webhook manually
-curl -X POST "https://yoursite.com/?moneyspace_webhook=1" \
+curl -X POST "https://yoursite.com/ms/webhook" \
   -H "Content-Type: application/json" \
   -d '{"transaction_id": "test123"}'
 
 # Check server logs
-tail -f /var/log/nginx/access.log | grep moneyspace_webhook
+tail -f /var/log/nginx/access.log | grep ms/webhook
 ```
 
 #### 3. SSL Certificate Issues
@@ -489,7 +489,7 @@ openssl s_client -connect yoursite.com:443 -servername yoursite.com
 curl -I https://yoursite.com
 
 # Test webhook with SSL
-curl -k -X POST https://yoursite.com/?moneyspace_webhook=1
+curl -k -X POST https://yoursite.com/ms/webhook
 ```
 
 ### Debug Mode
