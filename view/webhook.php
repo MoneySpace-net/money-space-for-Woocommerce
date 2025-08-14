@@ -29,9 +29,10 @@ if (!empty(sanitize_text_field($_POST["transectionID"]))) {
     $ms_install_stock_setting = $payment_gateway_installment->settings['ms_stock_setting']; // installment mode stock reduce
 
     $ms_time = date("YmdHis");
+    $order_id = $order->get_id();
 
-    $MNS_transaction_orderid = get_post_meta($order->id, 'MNS_transaction_orderid', true);
-    $MNS_PAYMENT_TYPE = get_post_meta($order->id, 'MNS_PAYMENT_TYPE', true);
+    $MNS_transaction_orderid = get_post_meta($order_id, 'MNS_transaction_orderid', true);
+    $MNS_PAYMENT_TYPE = get_post_meta($order_id, 'MNS_PAYMENT_TYPE', true);
     $order_amount = $order->get_total();
 
     $ms_order_select = $payment_gateway->settings['order_status_if_success'];
@@ -48,7 +49,7 @@ if (!empty(sanitize_text_field($_POST["transectionID"]))) {
         if($MNS_PAYMENT_TYPE == "Card"){
 
             if ($ms_stock_setting != "Disable") {
-                wc_reduce_stock_levels($order->id);
+                wc_reduce_stock_levels($order_id);
             }
 
             if(empty($ms_order_select)){
@@ -59,19 +60,19 @@ if (!empty(sanitize_text_field($_POST["transectionID"]))) {
         } else if($MNS_PAYMENT_TYPE == "Qrnone"){
 
             if ($ms_qr_stock_setting != "Disable") {
-                wc_reduce_stock_levels($order->id);
+                wc_reduce_stock_levels($order_id);
             }
 
             if(empty($ms_order_select_qr)){
                 $order->update_status("wc-processing");
             }else{
                 $order->update_status($ms_order_select_qr);
-                wp_redirect(wc_get_order($order->id)->get_checkout_order_received_url());
+                wp_redirect($order->get_checkout_order_received_url());
             }
         } else if($MNS_PAYMENT_TYPE == "Installment"){
 
-            if ($ms_order_select_installment != "Disable") {
-                wc_reduce_stock_levels($order->id);
+            if ($ms_install_stock_setting != "Disable") {
+                wc_reduce_stock_levels($order_id);
             }
 
             if(empty($ms_order_select_installment)){

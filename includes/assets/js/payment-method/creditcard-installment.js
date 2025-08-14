@@ -20,8 +20,7 @@ const Content = (props) => {
     // - eventRegistration
     // - etc.
     
-    console.log('WooCommerce Blocks Props received in Content:', props);
-    console.log('WooCommerce Blocks Props keys:', Object.keys(props || {}));
+    // Debug logging removed for production
     
     const formProps = useMemo(() => ({
         i18n: settings.i18n,

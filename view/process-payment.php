@@ -31,8 +31,9 @@ if ($order && $pid) {
     $enable_auto_check_result = $payment_gateway_qr->settings['enable_auto_check_result'];
 
     $ms_time = date("YmdHis");
-    $MNS_transaction_orderid = get_post_meta($order->id, 'MNS_transaction_orderid', true);
-    $MNS_PAYMENT_TYPE = get_post_meta($order->id, 'MNS_PAYMENT_TYPE', true);
+    $order_id = $order->get_id();
+    $MNS_transaction_orderid = get_post_meta($order_id, 'MNS_transaction_orderid', true);
+    $MNS_PAYMENT_TYPE = get_post_meta($order_id, 'MNS_PAYMENT_TYPE', true);
     $order_amount = $order->get_total();
     $check_orderid = wp_remote_post(MNS_API_URL_CHECK, array(
         'method' => 'POST',
@@ -47,11 +48,20 @@ if ($order && $pid) {
     if (!is_wp_error($check_orderid)) {
         $oid = "order id";
         $json_status = json_decode($check_orderid["body"]);
+        
+        // Add safety check for API response
+        if (empty($json_status) || !is_array($json_status) || !isset($json_status[0])) {
+            error_log('MoneySpace API: Invalid response format');
+            $order->update_status("wc-failed");
+            wp_redirect($order->get_checkout_order_received_url());
+            return;
+        }
+        
         $ms_status = $json_status[0]->$oid;
 
-        cancel_payment($order->id, $payment_gateway);
+        cancel_payment($order_id, $payment_gateway);
 
-        if ($ms_status->status == "Pay Success") {
+        if (isset($ms_status->status) && $ms_status->status == "Pay Success") {
 
             if($MNS_PAYMENT_TYPE == "Card"){
 
@@ -68,7 +78,7 @@ if ($order && $pid) {
                     $order->update_status($ms_order_select_qr);
 
                     if($enable_auto_check_result == "yes" || $enable_auto_check_result == "") {
-                        wp_redirect(wc_get_order($order->id)->get_checkout_order_received_url());
+                        wp_redirect($order->get_checkout_order_received_url());
                     }
                 }
             } else if($MNS_PAYMENT_TYPE == "Installment"){
@@ -81,24 +91,28 @@ if ($order && $pid) {
             }
 
             if ($ms_stock_setting != "Disable") {
-                wc_reduce_stock_levels($order->id);
+                wc_reduce_stock_levels($order_id);
             }
-            update_post_meta($order->id, 'MNS_PAYMENT_PAID', $ms_status->amount);
-            update_post_meta($order->id, 'MNS_PAYMENT_STATUS', $ms_status->status);
-            wp_redirect(wc_get_order($order->id)->get_checkout_order_received_url());
-        } else if ($ms_status->status == "Cancel") {
+            update_post_meta($order_id, 'MNS_PAYMENT_PAID', $ms_status->amount);
+            update_post_meta($order_id, 'MNS_PAYMENT_STATUS', $ms_status->status);
+            wp_redirect($order->get_checkout_order_received_url());
+        } else if (isset($ms_status->status) && $ms_status->status == "Cancel") {
             $order->update_status("wc-cancelled");
-            wp_redirect(wc_get_order($order->id)->get_cancel_order_url());
+            wp_redirect($order->get_cancel_order_url());
         } else {
             # Fail case
             $order->update_status("wc-failed");
-            wp_redirect(wc_get_order($order->id)->get_checkout_order_received_url());
+            wp_redirect($order->get_checkout_order_received_url());
         }
     } else {
         $order->update_status("wc-failed");
-        wp_redirect(wc_get_order($order->id)->get_checkout_order_received_url());
+        wp_redirect($order->get_checkout_order_received_url());
     }
     WC()->cart->empty_cart();
 } else {
-    wp_redirect(wc_get_order($order->id)->get_checkout_order_received_url());
+    if ($order) {
+        wp_redirect($order->get_checkout_order_received_url());
+    } else {
+        wp_redirect(wc_get_cart_url());
+    }
 }

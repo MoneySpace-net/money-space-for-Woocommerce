@@ -23,13 +23,14 @@ if ($order && $pid) {
 
     $ms_secret_id = $payment_gateway->settings['secret_id'];
     $ms_secret_key = $payment_gateway->settings['secret_key'];
-
-    $MNS_PAYMENT_TYPE = get_post_meta($order->id, 'MNS_PAYMENT_TYPE', true);
+    
+    $order_id = $order->get_id();
+    $MNS_PAYMENT_TYPE = get_post_meta($order_id, 'MNS_PAYMENT_TYPE', true);
 
     if ($MNS_PAYMENT_TYPE == "Qrnone") {
 
-        $MNS_transaction = get_post_meta($order->id, 'MNS_transaction', true);
-        $MNS_QR_TIME = get_post_meta($order->id, 'MNS_QR_TIME', true);
+        $MNS_transaction = get_post_meta($order_id, 'MNS_transaction', true);
+        $MNS_QR_TIME = get_post_meta($order_id, 'MNS_QR_TIME', true);
         $auto_cancel = $payment_gateway_qr->settings['auto_cancel'];
 
         if(empty($auto_cancel)){
@@ -65,7 +66,7 @@ if ($order && $pid) {
                     $force_cancelling = true;
                 } 
             } else {
-                wp_redirect(wc_get_order($order->id)->get_checkout_order_received_url());
+                wp_redirect($order->get_checkout_order_received_url());
             }
         }else{
             $force_cancelling = true;
@@ -78,9 +79,9 @@ if ($order && $pid) {
 }
 
 if ($force_cancelling) {
-    do_action( 'woocommerce_cancelled_order', $order->id);
+    do_action( 'woocommerce_cancelled_order', $order_id);
     $order->update_status("wc-cancelled");
-    wp_redirect(wc_get_order($order->id)->get_cancel_order_url());
+    wp_redirect($order->get_cancel_order_url());
 }
 
 function checkPaymentStatus($ms_secret_id, $ms_secret_key, $MNS_transaction) {

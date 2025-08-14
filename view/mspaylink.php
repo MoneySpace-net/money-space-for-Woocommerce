@@ -7,7 +7,8 @@ global $wpdb;
 global $woocommerce;
 
 $order = wc_get_order($pid);
-$redirect_url = get_site_url() . "/ms/cancel/" . $order->id;
+$order_id = $order ? $order->get_id() : 0;
+$redirect_url = get_site_url() . "/ms/cancel/" . $order_id;
 render_progress();
 if ($order && $pid) {
 
@@ -29,12 +30,12 @@ if ($order && $pid) {
     $ms_template_payment = $gateways['moneyspace']->settings['ms_template_payment'];
 
     $ms_time = date("YmdHis");
-    $MNS_transaction_orderid = get_post_meta($order->id, 'MNS_transaction_orderid', true);
-    $MNS_transaction = get_post_meta($order->id, 'MNS_transaction', true);
+    $MNS_transaction_orderid = get_post_meta($order_id, 'MNS_transaction_orderid', true);
+    $MNS_transaction = get_post_meta($order_id, 'MNS_transaction', true);
     $order_amount = $order->get_total();
-    $MNS_PAYMENT_TYPE = get_post_meta($order->id, 'MNS_PAYMENT_TYPE', true);
-    $MNS_PAYMENT_IMAGE_QRPROMT = get_post_meta($order->id, 'MNS_PAYMENT_IMAGE_QRPROMT', true);
-    $MNS_PAYMENT_KEY = get_post_meta($order->id, 'MNS_PAYMENT_KEY', true);
+    $MNS_PAYMENT_TYPE = get_post_meta($order_id, 'MNS_PAYMENT_TYPE', true);
+    $MNS_PAYMENT_IMAGE_QRPROMT = get_post_meta($order_id, 'MNS_PAYMENT_IMAGE_QRPROMT', true);
+    $MNS_PAYMENT_KEY = get_post_meta($order_id, 'MNS_PAYMENT_KEY', true);
 
     if ((strlen($MNS_PAYMENT_KEY) > 9999 && isset($MNS_PAYMENT_KEY) && $MNS_PAYMENT_KEY != "")
     || (!isset($MNS_PAYMENT_KEY) && $MNS_PAYMENT_KEY == "")) {
@@ -49,7 +50,7 @@ if ($order && $pid) {
     } else if ($MNS_PAYMENT_TYPE == "Qrnone") {
 
         $ms_title = $gateways['moneyspace_qrprom']->settings['title'];
-        $MNS_QR_TIME = get_post_meta($order->id, 'MNS_QR_TIME', true);
+        $MNS_QR_TIME = get_post_meta($order_id, 'MNS_QR_TIME', true);
         $auto_cancel = $payment_gateway_qr->settings['auto_cancel'];
 
         if(empty($auto_cancel)){
@@ -147,17 +148,17 @@ function render_progress()
             </script>
         <?php } else if (strtolower($MNS_PAYMENT_TYPE) == "card") { ?>
         <?php
-            $mscard = get_post_meta($order->id, 'MNS_CARD', true);
+            $mscard = get_post_meta($order_id, 'MNS_CARD', true);
             $mscard_ext = explode("|", base64_decode($mscard));
-            $mskey = get_post_meta( $order->id, 'MNS_PAYMENT_KEY', true);
+            $mskey = get_post_meta($order_id, 'MNS_PAYMENT_KEY', true);
 
             $cardNumber = $mscard_ext[0];
             $cardHolder = $mscard_ext[1];
             $cardExpDate = $mscard_ext[2];
             $cardExpDateYear = $mscard_ext[3];
             $cardCVV = $mscard_ext[4];
-            delete_post_meta($order->id, 'MNS_PAYMENT_KEY', $mskey);
-            delete_post_meta($order->id, 'MNS_CARD', $mscard);
+            delete_post_meta($order_id, 'MNS_PAYMENT_KEY', $mskey);
+            delete_post_meta($order_id, 'MNS_CARD', $mscard);
                 
             $customStyle = ("
             input[type=text]{
