@@ -169,16 +169,39 @@ const CreditCardInstallmentForm = (props) => {
     
         const handleChange = (field) => (event) => {
             try {
-                if (field == "selectbank" && event.target.value == "KTC")
-                    setPaymentData({ ...paymentData, [field]: event.target.value, ["dirty"]: true, ["KTC_permonths"]: "3", ["BAY_permonths"]: "", ["FCY_permonths"]: "" });
-                else if (field == "selectbank" && event.target.value == "BAY")
-                    setPaymentData({ ...paymentData, [field]: event.target.value, ["dirty"]: true, ["KTC_permonths"]: "", ["BAY_permonths"]: "3", ["FCY_permonths"]: "" });
-                else if (field == "selectbank" && event.target.value == "FCY")
-                    setPaymentData({ ...paymentData, [field]: event.target.value, ["dirty"]: true, ["KTC_permonths"]: "", ["BAY_permonths"]: "0", ["FCY_permonths"]: "3" });
-                else
-                    setPaymentData({ ...paymentData, [field]: event.target.value, ["dirty"]: true });
+                const value = event.target.value;
+                
+                if (field === "selectbank") {
+                    // Reset all month selections when bank changes
+                    const newData = {
+                        ...paymentData,
+                        selectbank: value,
+                        dirty: true,
+                        KTC_permonths: "",
+                        BAY_permonths: "",
+                        FCY_permonths: ""
+                    };
+                    
+                    // Set default month for selected bank
+                    if (value === "KTC") {
+                        newData.KTC_permonths = "3";
+                    } else if (value === "BAY") {
+                        newData.BAY_permonths = "3";
+                    } else if (value === "FCY") {
+                        newData.FCY_permonths = "3";
+                    }
+                    
+                    setPaymentData(newData);
+                } else {
+                    // Handle month selection changes
+                    setPaymentData(prev => ({
+                        ...prev,
+                        [field]: value,
+                        dirty: true
+                    }));
+                }
             } catch (changeError) {
-                // Handle change error silently
+                console.error('Error in handleChange:', changeError);
             }
         };
 
@@ -256,37 +279,113 @@ const CreditCardInstallmentForm = (props) => {
                     return;
                 }
 
-                if (paymentData.selectbank == "KTC")
-                    handleChange("KTC_permonths");
-
-                if (paymentData.selectbank == "BAY")
-                    handleChange("BAY_permonths");
-                
-                if (paymentData.selectbank == "FCY")
-                    handleChange("FCY_permonths");
-                
                 const unsubscribe = onCheckoutValidation(() => {
+                    // Check if this payment method is selected
+                    const radioElement = document.getElementById('radio-control-wc-payment-method-options-moneyspace_installment');
+                    const isInstallmentSelected = radioElement ? radioElement.checked : false;
+                    
+                    // Only validate if installment payment method is selected
+                    if (!isInstallmentSelected) {
+                        return true;
+                    }
+
+                    // Validate minimum amount for installment
                     if (!checkPrice()) {
                         return {
                             errorMessage: "The amount of balance must be 3,000.01 baht or more in order to make the installment payment."
-                        }
+                        };
                     }
 
-                    if (paymentData.selectbank == "") {
+                    // Validate bank selection
+                    if (!paymentData.selectbank || paymentData.selectbank === "") {
                         return {
-                            errorMessage: "Please choose bank type for installment."
+                            errorMessage: "Please choose a bank for installment payment."
+                        };
+                    }
+
+                    // Validate installment months based on selected bank
+                    if (paymentData.selectbank === "KTC") {
+                        if (!paymentData.KTC_permonths || paymentData.KTC_permonths === "") {
+                            return {
+                                errorMessage: "Please select the number of installment months for KTC."
+                            };
+                        }
+                        
+                        // Validate KTC minimum amount per month
+                        const monthlyAmount = amount_total / parseInt(paymentData.KTC_permonths);
+                        if (monthlyAmount < 300) {
+                            return {
+                                errorMessage: "KTC installment requires a minimum of 300 THB per month."
+                            };
+                        }
+                    } else if (paymentData.selectbank === "BAY") {
+                        if (!paymentData.BAY_permonths || paymentData.BAY_permonths === "") {
+                            return {
+                                errorMessage: "Please select the number of installment months for BAY."
+                            };
+                        }
+                        
+                        // Validate BAY minimum amount per month
+                        const monthlyAmount = amount_total / parseInt(paymentData.BAY_permonths);
+                        if (monthlyAmount < 500) {
+                            return {
+                                errorMessage: "BAY installment requires a minimum of 500 THB per month."
+                            };
+                        }
+                    } else if (paymentData.selectbank === "FCY") {
+                        if (!paymentData.FCY_permonths || paymentData.FCY_permonths === "") {
+                            return {
+                                errorMessage: "Please select the number of installment months for FCY."
+                            };
+                        }
+                        
+                        // Validate FCY minimum amount per month
+                        const monthlyAmount = amount_total / parseInt(paymentData.FCY_permonths);
+                        if (monthlyAmount < 300) {
+                            return {
+                                errorMessage: "FCY installment requires a minimum of 300 THB per month."
+                            };
                         }
                     }
 
+                    // Validate that selected months are within allowed range
+                    const selectedBank = paymentData.selectbank;
+                    const bankObj = selectedBank === "KTC" ? ktcObj : 
+                                   selectedBank === "BAY" ? bayObj : 
+                                   selectedBank === "FCY" ? fcyObj : null;
+                    
+                    if (bankObj) {
+                        const maxMonth = parseMaxMonth(bankObj.maxMonth);
+                        const selectedMonths = parseInt(
+                            selectedBank === "KTC" ? paymentData.KTC_permonths :
+                            selectedBank === "BAY" ? paymentData.BAY_permonths :
+                            selectedBank === "FCY" ? paymentData.FCY_permonths : "0"
+                        );
+                        
+                        if (selectedMonths > maxMonth) {
+                            return {
+                                errorMessage: `Maximum installment period for ${selectedBank} is ${maxMonth} months.`
+                            };
+                        }
+                        
+                        if (bankObj.months && !bankObj.months.includes(selectedMonths)) {
+                            return {
+                                errorMessage: `${selectedMonths} months installment is not available for ${selectedBank}.`
+                            };
+                        }
+                    }
+
+                    // All validation passed
                     return true;
                 });
 
                 return unsubscribe;
             } catch (validateError) {
                 console.error('Error in useValidateCheckout:', validateError);
+                return () => {}; // Return empty cleanup function
             }
-        }, [paymentData, onCheckoutValidation]);
-    }
+        }, [paymentData, onCheckoutValidation, checkPrice, amount_total, ktcObj, bayObj, fcyObj, parseMaxMonth]);
+    };
 
     useValidateCheckout({ paymentData, onCheckoutValidation });
 
@@ -299,24 +398,42 @@ const CreditCardInstallmentForm = (props) => {
                 }
 
                 const unsubscribe = onPaymentSetup(() => {
+                    // Prepare payment method data based on selected bank
+                    const selectedBank = paymentData.selectbank;
+                    const selectedMonths = selectedBank === "KTC" ? paymentData.KTC_permonths :
+                                         selectedBank === "BAY" ? paymentData.BAY_permonths :
+                                         selectedBank === "FCY" ? paymentData.FCY_permonths : "";
+                    
+                    const paymentMethodData = {
+                        selectbank: selectedBank,
+                        installment_months: selectedMonths,
+                        // Include individual bank fields for backward compatibility
+                        KTC_permonths: paymentData.KTC_permonths,
+                        BAY_permonths: paymentData.BAY_permonths,
+                        FCY_permonths: paymentData.FCY_permonths,
+                        // Add calculated amounts for reference
+                        total_amount: amount_total,
+                        monthly_amount: selectedMonths ? (amount_total / parseInt(selectedMonths)).toFixed(2) : "0"
+                    };
+
                     const response = {
+                        type: "success",
                         meta: {
-                            paymentMethodData: {
-                                selectbank: paymentData.selectbank,
-                                KTC_permonths: paymentData.KTC_permonths,
-                                BAY_permonths: paymentData.BAY_permonths,
-                                FCY_permonths: paymentData.FCY_permonths
-                            }
-                        }
-                    }
-                    return {type: "success", ...response};
+                            paymentMethodData: paymentMethodData
+                        },
+                        // Also provide the data in the format the gateway expects
+                        paymentMethodData: paymentMethodData
+                    };
+                    
+                    return response;
                 });
 
                 return unsubscribe;
             } catch (processError) {
                 console.error('Error in useProcessPayment:', processError);
+                return () => {}; // Return empty cleanup function
             }
-        }, [paymentData, onPaymentSetup]);
+        }, [paymentData, onPaymentSetup, amount_total]);
     }
     useProcessPayment({paymentData, onPaymentSetup});
 

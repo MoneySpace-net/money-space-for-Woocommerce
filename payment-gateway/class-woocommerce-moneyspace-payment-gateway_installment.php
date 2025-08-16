@@ -433,7 +433,9 @@ class MNS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
             $fcy_permonths = sanitize_text_field($payment_data['FCY_permonths'] ?? '');
             $message_card = sanitize_text_field($payment_data['message_card'] ?? '');
             
-            error_log('MoneySpace Installment Payment Debug - Using Blocks payment data');
+            if (defined('WP_DEBUG') && WP_DEBUG) {
+                error_log('MoneySpace Installment Payment Debug - Using Blocks payment data');
+            }
         }
         
         // Fallback to traditional POST fields if Blocks data not available
@@ -444,17 +446,21 @@ class MNS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
             $fcy_permonths = sanitize_text_field($_POST["FCY_permonths"] ?? $_POST["fcy_permonths"] ?? '');
             $message_card = sanitize_text_field($_POST["message_card"] ?? '');
             
-            error_log('MoneySpace Installment Payment Debug - Using traditional POST data (installment data extracted safely)');
+            if (defined('WP_DEBUG') && WP_DEBUG) {
+                error_log('MoneySpace Installment Payment Debug - Using traditional POST data (installment data extracted safely)');
+            }
         }
         
         // Log the extracted installment data
-        error_log('MoneySpace Installment Payment Debug - Installment data extracted: ' . json_encode([
-            'selectbank' => $selectbank ?: 'EMPTY',
-            'ktc_permonths' => $ktc_permonths ?: 'EMPTY',
-            'bay_permonths' => $bay_permonths ?: 'EMPTY',
-            'fcy_permonths' => $fcy_permonths ?: 'EMPTY',
-            'message_card' => $message_card ?: 'EMPTY'
-        ]));
+        if (defined('WP_DEBUG') && WP_DEBUG) {
+            error_log('MoneySpace Installment Payment Debug - Installment data extracted: ' . json_encode([
+                'selectbank' => $selectbank ?: 'EMPTY',
+                'ktc_permonths' => $ktc_permonths ?: 'EMPTY',
+                'bay_permonths' => $bay_permonths ?: 'EMPTY',
+                'fcy_permonths' => $fcy_permonths ?: 'EMPTY',
+                'message_card' => $message_card ?: 'EMPTY'
+            ]));
+        }
 
         // Handle installment payment data safely
         update_post_meta($order_id, 'MNS_special_instructions_to_merchant', $message_card);
@@ -560,8 +566,10 @@ class MNS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
         , "startTerm" => $endTerm
         , "endTerm" => $endTerm);
         
-        error_log('MoneySpace Installment API: Creating payment transaction for order ' . $order_id);
-        error_log('MoneySpace Installment API: Request body: ' . json_encode($payment_data));
+        if (defined('WP_DEBUG') && WP_DEBUG) {
+            error_log('MoneySpace Installment API: Creating payment transaction for order ' . $order_id);
+            error_log('MoneySpace Installment API: Request body: ' . json_encode($payment_data));
+        }
         
         $response = wp_remote_post(MNS_API_URL_CREATE_INSTALLMENT, 
         array(
@@ -581,8 +589,10 @@ class MNS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
         $body = wp_remote_retrieve_body($response);
         $http_code = wp_remote_retrieve_response_code($response);
         
-        error_log('MoneySpace Installment API: HTTP Response Code - ' . $http_code);
-        error_log('MoneySpace Installment API: Response Body - ' . $body);
+        if (defined('WP_DEBUG') && WP_DEBUG) {
+            error_log('MoneySpace Installment API: HTTP Response Code - ' . $http_code);
+            error_log('MoneySpace Installment API: Response Body - ' . $body);
+        }
         
         (new Mslogs())->insert($body, 4, 'Create Transaction Installment', date("Y-m-d H:i:s"), json_encode($payment_data));
 
@@ -608,9 +618,11 @@ class MNS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
             update_post_meta($order_id, 'MNS_PAYMENT_LINK', $linkPayment);
         }
         
-        error_log('MoneySpace Installment API: Transaction created successfully - ID: ' . $tranId);
-        error_log('MoneySpace Installment API: Order ID saved: ' . $payment_data['order_id']);
-        error_log('MoneySpace Installment API: Payment link saved: ' . $linkPayment);
+        if (defined('WP_DEBUG') && WP_DEBUG) {
+            error_log('MoneySpace Installment API: Transaction created successfully - ID: ' . $tranId);
+            error_log('MoneySpace Installment API: Order ID saved: ' . $payment_data['order_id']);
+            error_log('MoneySpace Installment API: Payment link saved: ' . $linkPayment);
+        }
 
         if ($payment_data['feeType'] == "include"){
             $ex_ktc_bay = $order_amount;
@@ -663,7 +675,9 @@ class MNS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
         <?php 
         // Use the modern payment link from API response instead of legacy form submission
         if (!empty($linkPayment)) {
-            error_log('MoneySpace Installment: Redirecting to payment link: ' . $linkPayment);
+            if (defined('WP_DEBUG') && WP_DEBUG) {
+                error_log('MoneySpace Installment: Redirecting to payment link: ' . $linkPayment);
+            }
             ?>
             <div style="text-align: center; padding: 20px;">
                 <p>กำลังเปลี่ยนเส้นทางไปยังหน้าชำระเงิน...</p>
@@ -672,7 +686,9 @@ class MNS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
             <script>
                 // Use proper URL for JavaScript redirection without HTML entity encoding
                 var paymentUrl = <?php echo json_encode($linkPayment); ?>;
+                <?php if (defined('WP_DEBUG') && WP_DEBUG): ?>
                 console.log('MoneySpace: Redirecting to payment URL:', paymentUrl);
+                <?php endif; ?>
                 window.location.href = paymentUrl;
             </script>
             <?php

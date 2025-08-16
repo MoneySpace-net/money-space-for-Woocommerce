@@ -40,8 +40,10 @@ class MNS_Payment_Gateway extends WC_Payment_Gateway
 
     public function create_payment_transaction_v3($order_id, $ms_body, $ms_template_payment, $gateways) {
         if ($ms_template_payment == 1) {
-            error_log('MoneySpace API: Creating payment transaction for order ' . $order_id);
-            error_log('MoneySpace API: Request body: ' . json_encode($ms_body));
+            if (defined('WP_DEBUG') && WP_DEBUG) {
+                error_log('MoneySpace API: Creating payment transaction for order ' . $order_id);
+                error_log('MoneySpace API: Request body: ' . json_encode($ms_body));
+            }
             
             $response = wp_remote_post(MNS_API_URL_CREATE, array(
                 'method' => 'POST',
@@ -52,7 +54,9 @@ class MNS_Payment_Gateway extends WC_Payment_Gateway
             // Handle HTTP errors before accessing body
             if (is_wp_error($response)) {
                 $error_message = $response->get_error_message();
-                error_log('MoneySpace API: HTTP Error - ' . $error_message);
+                if (defined('WP_DEBUG') && WP_DEBUG) {
+                    error_log('MoneySpace API: HTTP Error - ' . $error_message);
+                }
                 (new Mslogs())->insert($error_message, 1, 'Create Transaction Card (HTTP error)', date("Y-m-d H:i:s"), json_encode($ms_body));
                 wc_add_notice(__('Error : ' . MNS_NOTICE_ERROR_SETUP, $this->domain), 'error');
                 return;
@@ -61,21 +65,27 @@ class MNS_Payment_Gateway extends WC_Payment_Gateway
             $body = wp_remote_retrieve_body($response);
             $http_code = wp_remote_retrieve_response_code($response);
             
-            error_log('MoneySpace API: HTTP Response Code - ' . $http_code);
-            error_log('MoneySpace API: Response Body - ' . $body);
+            if (defined('WP_DEBUG') && WP_DEBUG) {
+                error_log('MoneySpace API: HTTP Response Code - ' . $http_code);
+                error_log('MoneySpace API: Response Body - ' . $body);
+            }
             
             (new Mslogs())->insert($body, 1, 'Create Transaction Card', date("Y-m-d H:i:s"), json_encode($ms_body));
 
             $data_status = json_decode($body);
             if (empty($data_status) || !isset($data_status[0]->status)) {
-                error_log('MoneySpace API: Invalid response format - no status field');
+                if (defined('WP_DEBUG') && WP_DEBUG) {
+                    error_log('MoneySpace API: Invalid response format - no status field');
+                }
                 wc_add_notice(__('Error ms101 : Invalid response from payment gateway', $this->domain), 'error');
                 return;
             }
             
             if ($data_status[0]->status != "success") {
                 $error_msg = isset($data_status[0]->message) ? $data_status[0]->message : 'Unknown error';
-                error_log('MoneySpace API: Transaction failed - Status: ' . $data_status[0]->status . ', Message: ' . $error_msg);
+                if (defined('WP_DEBUG') && WP_DEBUG) {
+                    error_log('MoneySpace API: Transaction failed - Status: ' . $data_status[0]->status . ', Message: ' . $error_msg);
+                }
                 wc_add_notice(__('Error ms102 : ' . $error_msg, $this->domain), 'error');
                 return;
             }
@@ -86,7 +96,9 @@ class MNS_Payment_Gateway extends WC_Payment_Gateway
             $tranId = $data_status[0]->transaction_ID ?? '';
             $mskey = $data_status[0]->mskey ?? '';
             
-            error_log('MoneySpace API: Transaction created successfully - ID: ' . $tranId);
+            if (defined('WP_DEBUG') && WP_DEBUG) {
+                error_log('MoneySpace API: Transaction created successfully - ID: ' . $tranId);
+            }
             
             update_post_meta($order_id, 'MNS_transaction_orderid', $ms_body['order_id'] ?? '');
             update_post_meta($order_id, 'MNS_transaction', $tranId);

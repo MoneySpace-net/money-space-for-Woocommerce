@@ -52,13 +52,17 @@ class MNS_Payment_Gateway_QR extends WC_Payment_Gateway
         ));
 
         if (is_wp_error($response)) {
-            (new Mslogs())->insert($response->get_error_message(), 3, 'Create Transaction QR (HTTP error)', $dt->format("Y-m-d H:i:s"), json_encode($ms_body));
+            if (defined('WP_DEBUG') && WP_DEBUG) {
+                (new Mslogs())->insert($response->get_error_message(), 3, 'Create Transaction QR (HTTP error)', $dt->format("Y-m-d H:i:s"), json_encode($ms_body));
+            }
             wc_add_notice(__(MNS_NOTICE_ERROR_SETUP, $this->domain), 'error');
             return;
         }
 
         $body = wp_remote_retrieve_body($response);
-        (new Mslogs())->insert($body, 3, 'Create Transaction QR', $dt->format("Y-m-d H:i:s"), json_encode($ms_body));
+        if (defined('WP_DEBUG') && WP_DEBUG) {
+            (new Mslogs())->insert($body, 3, 'Create Transaction QR', $dt->format("Y-m-d H:i:s"), json_encode($ms_body));
+        }
 
         $data_status = json_decode($body);
         if (empty($data_status) || !isset($data_status[0]->status) || $data_status[0]->status != "success") {
