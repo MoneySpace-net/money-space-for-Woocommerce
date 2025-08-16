@@ -13,7 +13,7 @@ use Automattic\WooCommerce\Blocks\Assets\Api;
  */
 class MoneySpace_CreditCard_Installment extends AbstractPaymentMethodType {
 
-	public $name = MNS_ID_INSTALLMENT;
+	public $name = 'moneyspace_installment'; // Use string instead of constant to prevent undefined constant error
 
 	/**
 	 * The gateway instance.
@@ -23,15 +23,37 @@ class MoneySpace_CreditCard_Installment extends AbstractPaymentMethodType {
 	private $gateway;
 	
 	public function __construct( ) {
+		// Set name with fallback
+		$this->name = defined('MNS_ID_INSTALLMENT') ? MNS_ID_INSTALLMENT : 'moneyspace_installment';
 	}
 
 	/**
 	 * Initializes the payment method type.
 	 */
 	public function initialize() {
-		$this->settings = get_option( 'woocommerce_'.$this->name.'_settings', [] );
-		$gateways       = WC()->payment_gateways->payment_gateways();
-		$this->gateway  = $gateways[ $this->name ];
+		try {
+			$this->settings = get_option( 'woocommerce_'.$this->name.'_settings', [] );
+			
+			// Check if WooCommerce payment gateways are available
+			if (WC() && WC()->payment_gateways) {
+				$gateways = WC()->payment_gateways->payment_gateways();
+				
+				// Check if our gateway exists in the gateways array
+				if (isset($gateways[$this->name]) && is_object($gateways[$this->name])) {
+					$this->gateway = $gateways[$this->name];
+				} else {
+					// Log error but don't throw exception to prevent critical error
+					error_log('MoneySpace: Installment gateway not found during initialization: ' . $this->name);
+					$this->gateway = null;
+				}
+			} else {
+				error_log('MoneySpace: WooCommerce payment gateways not available during installment initialization');
+				$this->gateway = null;
+			}
+		} catch (\Exception $e) {
+			error_log('MoneySpace: Error during installment initialization: ' . $e->getMessage());
+			$this->gateway = null;
+		}
 	}
 
 	/**
@@ -40,6 +62,11 @@ class MoneySpace_CreditCard_Installment extends AbstractPaymentMethodType {
 	 * @return boolean
 	 */
 	public function is_active() {
+		// If gateway failed to initialize, don't activate
+		if (!$this->gateway) {
+			return false;
+		}
+		
 		return filter_var( $this->get_setting( 'enabled', false ), FILTER_VALIDATE_BOOLEAN );
 	}
 
@@ -76,35 +103,55 @@ class MoneySpace_CreditCard_Installment extends AbstractPaymentMethodType {
 	 */
 	public function get_payment_method_data() {
 		$gateways = WC()->payment_gateways->get_available_payment_gateways();
-		$id = "moneyspace_installment";
-		$ktc_enabled = $gateways[$id]->settings['ktc_enabled'] ?? "yes";
-        $bay_enabled = $gateways[$id]->settings['bay_enabled'] ?? "yes";
-        $fcy_enabled = $gateways[$id]->settings['fcy_enabled'] ?? "yes";
-		$ktc_max_months_setting = $gateways[$id]->settings['ktc_max_months_setting']; 
-        $bay_max_months_setting = $gateways[$id]->settings['bay_max_months_setting']; 
-        $fcy_max_months_setting = $gateways[$id]->settings['fcy_max_months_setting']; 
-		$msfee = $gateways[$id]->settings['fee_setting'] ?? "include";
+		$id = $this->name;
+		
+		// Safety checks for gateway settings
+		$ktc_enabled = isset($gateways[$id]) && isset($gateways[$id]->settings['ktc_enabled']) 
+			? $gateways[$id]->settings['ktc_enabled'] : "yes";
+		$bay_enabled = isset($gateways[$id]) && isset($gateways[$id]->settings['bay_enabled']) 
+			? $gateways[$id]->settings['bay_enabled'] : "yes";
+		$fcy_enabled = isset($gateways[$id]) && isset($gateways[$id]->settings['fcy_enabled']) 
+			? $gateways[$id]->settings['fcy_enabled'] : "yes";
+		$ktc_max_months_setting = isset($gateways[$id]) && isset($gateways[$id]->settings['ktc_max_months_setting']) 
+			? $gateways[$id]->settings['ktc_max_months_setting'] : 10;
+		$bay_max_months_setting = isset($gateways[$id]) && isset($gateways[$id]->settings['bay_max_months_setting']) 
+			? $gateways[$id]->settings['bay_max_months_setting'] : 10;
+		$fcy_max_months_setting = isset($gateways[$id]) && isset($gateways[$id]->settings['fcy_max_months_setting']) 
+			? $gateways[$id]->settings['fcy_max_months_setting'] : 10;
+		$msfee = isset($gateways[$id]) && isset($gateways[$id]->settings['fee_setting']) 
+			? $gateways[$id]->settings['fee_setting'] : "include";
+			
 		if ($msfee == "include"){
-            $KTC = [ 3, 4, 5, 6, 7, 8, 9, 10];
-            $BAY = [ 3, 4, 6, 9, 10];
-            $FCY = [ 3, 4, 6, 9, 10];
-        } else if ($msfee == "exclude") {
-            $KTC = [ 3, 4, 5, 6, 7, 8, 9, 10];
-            $BAY = [ 3, 4, 6, 9, 10];
-            $FCY = [ 3, 4, 6, 9, 10, 12, 18, 24, 36];
-        }
+			$KTC = [ 3, 4, 5, 6, 7, 8, 9, 10];
+			$BAY = [ 3, 4, 6, 9, 10];
+			$FCY = [ 3, 4, 6, 9, 10];
+		} else if ($msfee == "exclude") {
+			$KTC = [ 3, 4, 5, 6, 7, 8, 9, 10];
+			$BAY = [ 3, 4, 6, 9, 10];
+			$FCY = [ 3, 4, 6, 9, 10, 12, 18, 24, 36];
+		}
 
-		$cc_ins_i18n = array(
-			'MNS_CC_INS_TITLE' => MNS_CC_INS_TITLE,
-			'MNS_CC_INS_MONTH' => MNS_CC_INS_MONTH,
-			'MNS_MONTH' => MNS_MONTH,
-			'MNS_BAHT' => MNS_BAHT,
-			'MNS_INS' => MNS_INS,
-			'MNS_CC_INS_KTC' => MNS_CC_INS_KTC,
-			'MNS_CC_INS_BAY' => MNS_CC_INS_BAY,
-			'MNS_CC_INS_FCY' => MNS_CC_INS_FCY,
-			'MNS_PAY_INS' => MNS_PAY_INS,
+		// Define fallback translations in case constants are not loaded
+		$fallback_translations = array(
+			'MNS_CC_INS_TITLE' => 'Credit Card Installment',
+			'MNS_CC_INS_MONTH' => 'Installment Months',
+			'MNS_MONTH' => 'Month',
+			'MNS_BAHT' => 'THB',
+			'MNS_INS' => 'Installment',
+			'MNS_CC_INS_KTC' => 'KTC Credit Card',
+			'MNS_CC_INS_BAY' => 'BAY Credit Card',
+			'MNS_CC_INS_FCY' => 'FCY Credit Card',
+			'MNS_PAY_INS' => 'Pay by Installment',
 		);
+		
+		// Use constants if defined, otherwise use fallback
+		$cc_ins_i18n = array();
+		foreach ($fallback_translations as $constant_name => $fallback_value) {
+			$cc_ins_i18n[$constant_name] = defined($constant_name) ? constant($constant_name) : $fallback_value;
+		}
+
+		// Safe root URL
+		$root_url = defined('MNS_ROOT_URL') ? MNS_ROOT_URL : plugins_url('/', dirname(__DIR__));
 
 		return [
 			'title'       => $this->get_setting( 'title' ),
@@ -116,9 +163,9 @@ class MoneySpace_CreditCard_Installment extends AbstractPaymentMethodType {
 				array(
 					"code" => "ktc",
 					"isEnabled" => $ktc_enabled,
-					"label" => MNS_CC_INS_KTC,
+					"label" => $cc_ins_i18n['MNS_CC_INS_KTC'],
 					"maxMonth" => $ktc_max_months_setting,
-					"icon" => MNS_ROOT_URL . 'includes/images/installment/ktc-logo.png',
+					"icon" => $root_url . 'includes/images/installment/ktc-logo.png',
 					"months" => $KTC,
 					"rate" => 0.8
 
@@ -126,31 +173,40 @@ class MoneySpace_CreditCard_Installment extends AbstractPaymentMethodType {
 				array(
 					"code" => "bay",
 					"isEnabled" => $bay_enabled,
-					"label" => MNS_CC_INS_BAY,
+					"label" => $cc_ins_i18n['MNS_CC_INS_BAY'],
 					"maxMonth" => $bay_max_months_setting,
-					"icon" => MNS_ROOT_URL . 'includes/images/installment/bay_central_lotus.png',
+					"icon" => $root_url . 'includes/images/installment/bay_central_lotus.png',
 					"months" => $BAY,
 					"rate" => 0.8
 				),
 				array(
 					"code" => "fcy",
 					"isEnabled" => $fcy_enabled,
-					"label" => MNS_CC_INS_FCY,
+					"label" => $cc_ins_i18n['MNS_CC_INS_FCY'],
 					"maxMonth" => $fcy_max_months_setting,
-					"icon" => MNS_ROOT_URL . 'includes/images/installment/fcy-logo.png',
+					"icon" => $root_url . 'includes/images/installment/fcy-logo.png',
 					"months" => $FCY,
 					"rate" => 1
 				),
 			],
-			'supports'    => array_filter( $this->gateway->supports, [ $this->gateway, 'supports' ] )
+			'supports'    => $this->gateway && $this->gateway->supports 
+				? array_filter( $this->gateway->supports, [ $this->gateway, 'supports' ] ) 
+				: []
 		];
 	}
 
 	public function get_payment_method_icons() {
+		// Safety check for gateway existence
+		if (!$this->gateway || !is_object($this->gateway)) {
+			$icon_url = defined('MNS_LOGO_INSTALLMENT') ? MNS_LOGO_INSTALLMENT : plugins_url('includes/images/moneyspace-installment-logo.png', dirname(__DIR__));
+		} else {
+			$icon_url = $this->gateway->icon;
+		}
+		
 		return [
-			'id'  => 'moneyspace',
-			'src' => $this->gateway->icon,
-			'alt' => 'moneyspace'
+			'id'  => 'moneyspace_installment',
+			'src' => $icon_url,
+			'alt' => 'moneyspace_installment'
 		];
 	}
 }

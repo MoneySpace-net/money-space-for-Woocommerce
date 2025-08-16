@@ -13,7 +13,7 @@ use Automattic\WooCommerce\Blocks\Assets\Api;
  */
 class MoneySpace_QRCode extends AbstractPaymentMethodType {
 
-	public $name = MNS_ID_QRPROM;
+	public $name = 'moneyspace_qrprom'; // Use string instead of constant to prevent undefined constant error
 
 	/**
 	 * The gateway instance.
@@ -23,16 +23,37 @@ class MoneySpace_QRCode extends AbstractPaymentMethodType {
 	private $gateway;
 	
 	public function __construct( ) {
+		// Set name with fallback
+		$this->name = defined('MNS_ID_QRPROM') ? MNS_ID_QRPROM : 'moneyspace_qrprom';
 	}
 
 	/**
 	 * Initializes the payment method type.
 	 */
 	public function initialize() {
-		$this->settings = get_option( 'woocommerce_'.$this->name.'_settings', [] );
-		$gateways       = WC()->payment_gateways->payment_gateways();
-		$this->gateway  = $gateways[ $this->name ];
-		
+		try {
+			$this->settings = get_option( 'woocommerce_'.$this->name.'_settings', [] );
+			
+			// Check if WooCommerce payment gateways are available
+			if (WC() && WC()->payment_gateways) {
+				$gateways = WC()->payment_gateways->payment_gateways();
+				
+				// Check if our gateway exists in the gateways array
+				if (isset($gateways[$this->name]) && is_object($gateways[$this->name])) {
+					$this->gateway = $gateways[$this->name];
+				} else {
+					// Log error but don't throw exception to prevent critical error
+					error_log('MoneySpace: QR gateway not found during initialization: ' . $this->name);
+					$this->gateway = null;
+				}
+			} else {
+				error_log('MoneySpace: WooCommerce payment gateways not available during QR initialization');
+				$this->gateway = null;
+			}
+		} catch (\Exception $e) {
+			error_log('MoneySpace: Error during QR initialization: ' . $e->getMessage());
+			$this->gateway = null;
+		}
 	}
 
 	/**
@@ -41,6 +62,11 @@ class MoneySpace_QRCode extends AbstractPaymentMethodType {
 	 * @return boolean
 	 */
 	public function is_active() {
+		// If gateway failed to initialize, don't activate
+		if (!$this->gateway) {
+			return false;
+		}
+		
 		return filter_var( $this->get_setting( 'enabled', false ), FILTER_VALIDATE_BOOLEAN );
 	}
 
@@ -81,15 +107,24 @@ class MoneySpace_QRCode extends AbstractPaymentMethodType {
 			'title'       => $this->get_setting( 'title' ),
 			'description' => $this->get_setting( 'description' ),
 			'icons'		  => [$this->get_payment_method_icons()],
-			'supports'    => array_filter( $this->gateway->supports, [ $this->gateway, 'supports' ] )
+			'supports'    => $this->gateway && $this->gateway->supports 
+				? array_filter( $this->gateway->supports, [ $this->gateway, 'supports' ] ) 
+				: []
 		];
 	}
 
 	public function get_payment_method_icons() {
+		// Safety check for gateway existence
+		if (!$this->gateway || !is_object($this->gateway)) {
+			$icon_url = defined('MNS_LOGO_QR') ? MNS_LOGO_QR : plugins_url('includes/images/moneyspace-qr-logo.png', dirname(__DIR__));
+		} else {
+			$icon_url = $this->gateway->icon;
+		}
+		
 		return [
-			'id'  => 'moneyspace',
-			'src' => $this->gateway->icon,
-			'alt' => 'moneyspace'
+			'id'  => 'moneyspace_qr',
+			'src' => $icon_url,
+			'alt' => 'moneyspace_qr'
 		];
 	}
 }

@@ -29,9 +29,29 @@ class MoneySpace_CreditCard extends AbstractPaymentMethodType {
 	 * Initializes the payment method type.
 	 */
 	public function initialize() {
-		$this->settings = get_option( 'woocommerce_moneyspace_settings', [] ); // '.MNS_ID.'_settings
-		$gateways       = WC()->payment_gateways->payment_gateways();
-		$this->gateway  = $gateways[ $this->name ];
+		try {
+			$this->settings = get_option( 'woocommerce_moneyspace_settings', [] ); // '.MNS_ID.'_settings
+			
+			// Check if WooCommerce payment gateways are available
+			if (WC() && WC()->payment_gateways) {
+				$gateways = WC()->payment_gateways->payment_gateways();
+				
+				// Check if our gateway exists in the gateways array
+				if (isset($gateways[$this->name]) && is_object($gateways[$this->name])) {
+					$this->gateway = $gateways[$this->name];
+				} else {
+					// Log error but don't throw exception to prevent critical error
+					error_log('MoneySpace: Gateway not found during initialization: ' . $this->name);
+					$this->gateway = null;
+				}
+			} else {
+				error_log('MoneySpace: WooCommerce payment gateways not available during initialization');
+				$this->gateway = null;
+			}
+		} catch (\Exception $e) {
+			error_log('MoneySpace: Error during initialization: ' . $e->getMessage());
+			$this->gateway = null;
+		}
 	}
 
 	/**
@@ -40,6 +60,11 @@ class MoneySpace_CreditCard extends AbstractPaymentMethodType {
 	 * @return boolean
 	 */
 	public function is_active() {
+		// If gateway failed to initialize, don't activate
+		if (!$this->gateway) {
+			return false;
+		}
+		
 		return filter_var( $this->get_setting( 'enabled', false ), FILTER_VALIDATE_BOOLEAN );
 		// return true; // $this->gateway->is_available();
 	}
@@ -77,25 +102,43 @@ class MoneySpace_CreditCard extends AbstractPaymentMethodType {
 	 * @return array
 	 */
 	public function get_payment_method_data() {
-		$payment_gateway_id = MNS_ID;
+		$payment_gateway_id = defined('MNS_ID') ? MNS_ID : 'moneyspace';
 		$gateways = WC()->payment_gateways->get_available_payment_gateways();
-		$ms_template_payment = $gateways[$payment_gateway_id]->settings['ms_template_payment'];
-		$cc_i18n = array(
-			'MNS_CC_NO' => MNS_CC_NO,
-			'MNS_CC_NAME' => MNS_CC_NAME,
-			'MNS_CC_EXP_MONTH' => MNS_CC_EXP_MONTH,
-			'MNS_CC_EXP_YEAR' => MNS_CC_EXP_YEAR,
-			'MNS_CC_CVV' => MNS_CC_CVV,
-			'MNS_MONTH' => MNS_MONTH,
-			'MNS_YEAR' => MNS_YEAR,
-			'MNS_CC_WARN_CC_NO_1' => MNS_CC_WARN_CC_NO_1,
-			'MNS_CC_WARN_CC_NO_2' => MNS_CC_WARN_CC_NO_2,
-			'MNS_CC_WARN_CC_NAME' => MNS_CC_WARN_CC_NAME,
-			'MNS_CC_WARN_CC_EXP_MONTH' => MNS_CC_WARN_CC_EXP_MONTH,
-			'MNS_CC_WARN_CC_EXP_YEAR' => MNS_CC_WARN_CC_EXP_YEAR,
-			'MNS_CC_WARN_CVV_1' => MNS_CC_WARN_CVV_1,
-			'MNS_CC_WARN_CVV_2' => MNS_CC_WARN_CVV_2,
+		
+		// Safety check for gateway existence
+		if (!isset($gateways[$payment_gateway_id]) || !is_object($gateways[$payment_gateway_id])) {
+			error_log('MoneySpace: Gateway not found for ID: ' . $payment_gateway_id);
+			$ms_template_payment = 1; // Default value
+		} else {
+			$ms_template_payment = isset($gateways[$payment_gateway_id]->settings['ms_template_payment']) 
+				? $gateways[$payment_gateway_id]->settings['ms_template_payment'] 
+				: 1;
+		}
+		
+		// Define fallback translations in case constants are not loaded
+		$fallback_translations = array(
+			'MNS_CC_NO' => 'Card Number',
+			'MNS_CC_NAME' => 'Cardholder Name',
+			'MNS_CC_EXP_MONTH' => 'Expiry Month',
+			'MNS_CC_EXP_YEAR' => 'Expiry Year',
+			'MNS_CC_CVV' => 'CVV',
+			'MNS_MONTH' => 'Month',
+			'MNS_YEAR' => 'Year',
+			'MNS_CC_WARN_CC_NO_1' => 'Card number is required',
+			'MNS_CC_WARN_CC_NO_2' => 'Card number must be 16 digits',
+			'MNS_CC_WARN_CC_NAME' => 'Cardholder name is required',
+			'MNS_CC_WARN_CC_EXP_MONTH' => 'Expiry month is required',
+			'MNS_CC_WARN_CC_EXP_YEAR' => 'Expiry year is required',
+			'MNS_CC_WARN_CVV_1' => 'CVV is required',
+			'MNS_CC_WARN_CVV_2' => 'CVV must be 3 digits',
 		);
+		
+		// Use constants if defined, otherwise use fallback
+		$cc_i18n = array();
+		foreach ($fallback_translations as $constant_name => $fallback_value) {
+			$cc_i18n[$constant_name] = defined($constant_name) ? constant($constant_name) : $fallback_value;
+		}
+		
 		return [
 			'title'       => $this->get_setting( 'title' ),
 			'description' => $this->get_setting( 'description' ),
@@ -107,9 +150,16 @@ class MoneySpace_CreditCard extends AbstractPaymentMethodType {
 	}
 
 	public function get_payment_method_icons() {
+		// Safety check for gateway existence
+		if (!$this->gateway || !is_object($this->gateway)) {
+			$icon_url = defined('MNS_LOGO') ? MNS_LOGO : plugins_url('includes/images/moneyspace-logo.png', dirname(__DIR__));
+		} else {
+			$icon_url = $this->gateway->icon;
+		}
+		
 		return [
 			'id'  => 'moneyspace',
-			'src' => $this->gateway->icon,
+			'src' => $icon_url,
 			'alt' => 'moneyspace'
 		];
 	}
