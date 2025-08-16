@@ -203,11 +203,17 @@ class MNS_Payment_Gateway_QR extends WC_Payment_Gateway
                 return $this->_process_external_payment($order);
             } else {
                 wc_add_notice(__(MNS_NOTICE_CURRENCY, $this->domain), 'error');
-                return;
+                return array(
+                    'result' => 'failure',
+                    'messages' => __(MNS_NOTICE_CURRENCY, $this->domain)
+                );
             }
         } else {
             wc_add_notice(__("Error : Enter special instructions to merchant again", $this->domain), 'error');
-            return;
+            return array(
+                'result' => 'failure',
+                'messages' => __("Error : Enter special instructions to merchant again", $this->domain)
+            );
         }
     } // End Process
 

@@ -514,8 +514,11 @@ class MNS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
             update_post_meta($order_id, 'MNS_INSTALLMENT_MONTHS', $endterm);
             return $this->_process_external_payment($order); // go to paymentgateway_form
         } else {
-            wc_add_notice(__("Error : Message to the store (150 characters maximum)", $this->domain), 'error');
-            throw new Exception( __("Error : Message to the store (150 characters maximum)", $this->domain) );
+            moneyspace_debug_log('Installment Payment Error: Validation failed', true); // Always log errors
+            return array(
+                'result' => 'failure',
+                'messages' => __("Error : Message to the store (150 characters maximum)", $this->domain)
+            );
         }
     }
 

@@ -511,7 +511,10 @@ class MNS_Payment_Gateway extends WC_Payment_Gateway
             if (empty($cardNumber) || empty($cardHolder) || empty($cardExpDate) || empty($cardExpDateYear) || empty($cardCVV)) {
                 moneyspace_debug_log('Payment Error: Missing credit card information', true); // Always log errors
                 wc_add_notice(__('Error: Missing credit card information. Please check your card details.', $this->domain), 'error');
-                return;
+                return array(
+                    'result' => 'failure',
+                    'messages' => __('Error: Missing credit card information. Please check your card details.', $this->domain)
+                );
             }
             
             $MNS_CARD = $cardNumber."|".$cardHolder."|".$cardExpDate."|".$cardExpDateYear."|".$cardCVV;
@@ -521,7 +524,10 @@ class MNS_Payment_Gateway extends WC_Payment_Gateway
             return $this->_process_external_payment($order);
         } else {
             wc_add_notice(__(MNS_NOTICE_CURRENCY, $this->domain), 'error');
-            throw new Exception( __(MNS_NOTICE_CURRENCY, $this->domain) );
+            return array(
+                'result' => 'failure',
+                'messages' => __(MNS_NOTICE_CURRENCY, $this->domain)
+            );
         }
     } // End Process
 
