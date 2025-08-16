@@ -23,8 +23,30 @@ const CreditCardForm = (props) => {
 
     // Check if this payment method is selected
     const isPaymentMethodSelected = () => {
-        const radioElement = document.getElementById('radio-control-wc-payment-method-options-moneyspace');
-        return radioElement ? radioElement.checked : false;
+        // Try multiple selectors to ensure we catch the payment method selection
+        const radioElement = document.querySelector('input[name="radio-control-wc-payment-method-options"]:checked');
+        if (radioElement) {
+            const isSelected = radioElement.value === 'moneyspace_creditcard' || radioElement.value === 'moneyspace';
+            console.log('Payment method selection check via radio:', radioElement.value, '-> selected:', isSelected);
+            return isSelected;
+        }
+        
+        // Fallback to direct ID check
+        const directRadio = document.getElementById('radio-control-wc-payment-method-options-moneyspace_creditcard');
+        if (directRadio && directRadio.checked) {
+            console.log('Payment method selection check via direct ID -> selected: true');
+            return true;
+        }
+        
+        // Another fallback
+        const legacyRadio = document.getElementById('radio-control-wc-payment-method-options-moneyspace');
+        if (legacyRadio && legacyRadio.checked) {
+            console.log('Payment method selection check via legacy ID -> selected: true');
+            return true;
+        }
+        
+        console.log('⚠️ Warning: Could not determine if credit card payment method is selected');
+        return false;
     };
 
     // Comprehensive validation function
@@ -104,6 +126,11 @@ const CreditCardForm = (props) => {
         if (formData.dirty) {
             const errors = validateFormData();
             setValidationErrors(errors);
+            
+            // If this payment method is selected and there are errors, show them immediately
+            if (isPaymentMethodSelected() && Object.keys(errors).length > 0) {
+                console.log('Credit Card Form Validation Errors:', errors);
+            }
         }
     }, [formData, validateFormData]);
     
@@ -118,8 +145,11 @@ const CreditCardForm = (props) => {
             const unsubscribe = onCheckoutValidation(() => {
                 // Only validate if this payment method is selected
                 if (!isPaymentMethodSelected()) {
+                    console.log('Credit Card validation skipped - payment method not selected');
                     return true;
                 }
+
+                console.log('Credit Card validation running - payment method IS selected');
 
                 // Mark form as dirty to show validation errors
                 if (!formData.dirty) {
@@ -129,17 +159,28 @@ const CreditCardForm = (props) => {
                 // Perform comprehensive validation
                 const errors = validateFormData();
                 
+                console.log('Credit Card validation errors:', errors);
+                
                 if (Object.keys(errors).length > 0) {
                     // Update validation errors state
                     setValidationErrors(errors);
                     
-                    // Return first error message
+                    // Get the first error message
                     const firstError = Object.values(errors)[0];
+                    
+                    console.error('🚨 Credit Card Validation Failed - BLOCKING CHECKOUT:', firstError);
+                    console.error('🚨 Full validation errors:', errors);
+                    
+                    // Return validation error object that WooCommerce Blocks expects
                     return {
-                        errorMessage: `Payment validation failed: ${firstError}`
+                        type: 'error',
+                        message: firstError,
+                        hidden: false
                     };
                 }
 
+                console.log('✅ Credit Card Validation Passed - allowing checkout');
+                
                 // All validation passed
                 return true;
             });
@@ -197,6 +238,59 @@ const CreditCardForm = (props) => {
         formData,
         onCheckoutValidation
     });
+
+    // Simple notice clearing - only hide notices, never remove them from DOM
+    useEffect(() => {
+        const clearValidationNotices = () => {
+            try {
+                console.log('Hiding validation notices...');
+                
+                // Just hide the notices with CSS - no DOM manipulation
+                const allNotices = document.querySelectorAll([
+                    '.wc-block-components-notice-banner',
+                    '.wc-block-components-validation-error'
+                ].join(', '));
+                
+                allNotices.forEach((notice) => {
+                    if (notice && notice.style) {
+                        notice.style.display = 'none';
+                        notice.setAttribute('aria-hidden', 'true');
+                    }
+                });
+                
+                console.log(`Hidden ${allNotices.length} notices`);
+            } catch (error) {
+                console.log('Error hiding notices:', error.message);
+            }
+        };
+
+        const handlePaymentMethodChange = (event) => {
+            console.log('Payment method changed:', event.target.value);
+            
+            // Small delay to let DOM update
+            setTimeout(() => {
+                clearValidationNotices();
+                
+                // Reset form state when switching away from credit card
+                if (event.target.value !== 'moneyspace_creditcard') {
+                    setFormData(prev => ({ ...prev, dirty: false }));
+                    setValidationErrors({});
+                }
+            }, 50);
+        };
+
+        // Listen for payment method changes
+        const paymentRadios = document.querySelectorAll('input[name="radio-control-wc-payment-method-options"]');
+        paymentRadios.forEach(radio => {
+            radio.addEventListener('change', handlePaymentMethodChange);
+        });
+
+        return () => {
+            paymentRadios.forEach(radio => {
+                radio.removeEventListener('change', handlePaymentMethodChange);
+            });
+        };
+    }, []);
 
     // Helper functions for UI validation states
     const getFieldValidationClass = (fieldName) => {

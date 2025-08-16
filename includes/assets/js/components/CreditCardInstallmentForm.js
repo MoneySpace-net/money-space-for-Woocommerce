@@ -291,60 +291,52 @@ const CreditCardInstallmentForm = (props) => {
 
                     // Validate minimum amount for installment
                     if (!checkPrice()) {
-                        return {
-                            errorMessage: "The amount of balance must be 3,000.01 baht or more in order to make the installment payment."
-                        };
+                        console.log('Installment validation failed: Minimum amount not met');
+                        return false;
                     }
 
                     // Validate bank selection
                     if (!paymentData.selectbank || paymentData.selectbank === "") {
-                        return {
-                            errorMessage: "Please choose a bank for installment payment."
-                        };
+                        console.log('Installment validation failed: No bank selected');
+                        return false;
                     }
 
                     // Validate installment months based on selected bank
                     if (paymentData.selectbank === "KTC") {
                         if (!paymentData.KTC_permonths || paymentData.KTC_permonths === "") {
-                            return {
-                                errorMessage: "Please select the number of installment months for KTC."
-                            };
+                            console.log('Installment validation failed: No KTC months selected');
+                            return false;
                         }
                         
                         // Validate KTC minimum amount per month
                         const monthlyAmount = amount_total / parseInt(paymentData.KTC_permonths);
                         if (monthlyAmount < 300) {
-                            return {
-                                errorMessage: "KTC installment requires a minimum of 300 THB per month."
-                            };
+                            console.log('Installment validation failed: KTC monthly amount too low');
+                            return false;
                         }
                     } else if (paymentData.selectbank === "BAY") {
                         if (!paymentData.BAY_permonths || paymentData.BAY_permonths === "") {
-                            return {
-                                errorMessage: "Please select the number of installment months for BAY."
-                            };
+                            console.log('Installment validation failed: No BAY months selected');
+                            return false;
                         }
                         
                         // Validate BAY minimum amount per month
                         const monthlyAmount = amount_total / parseInt(paymentData.BAY_permonths);
                         if (monthlyAmount < 500) {
-                            return {
-                                errorMessage: "BAY installment requires a minimum of 500 THB per month."
-                            };
+                            console.log('Installment validation failed: BAY monthly amount too low');
+                            return false;
                         }
                     } else if (paymentData.selectbank === "FCY") {
                         if (!paymentData.FCY_permonths || paymentData.FCY_permonths === "") {
-                            return {
-                                errorMessage: "Please select the number of installment months for FCY."
-                            };
+                            console.log('Installment validation failed: No FCY months selected');
+                            return false;
                         }
                         
                         // Validate FCY minimum amount per month
                         const monthlyAmount = amount_total / parseInt(paymentData.FCY_permonths);
                         if (monthlyAmount < 300) {
-                            return {
-                                errorMessage: "FCY installment requires a minimum of 300 THB per month."
-                            };
+                            console.log('Installment validation failed: FCY monthly amount too low');
+                            return false;
                         }
                     }
 
@@ -363,18 +355,18 @@ const CreditCardInstallmentForm = (props) => {
                         );
                         
                         if (selectedMonths > maxMonth) {
-                            return {
-                                errorMessage: `Maximum installment period for ${selectedBank} is ${maxMonth} months.`
-                            };
+                            console.log('Installment validation failed: Selected months exceed maximum');
+                            return false;
                         }
                         
                         if (bankObj.months && !bankObj.months.includes(selectedMonths)) {
-                            return {
-                                errorMessage: `${selectedMonths} months installment is not available for ${selectedBank}.`
-                            };
+                            console.log('Installment validation failed: Selected months not available for bank');
+                            return false;
                         }
                     }
 
+                    console.log('Installment validation passed');
+                    
                     // All validation passed
                     return true;
                 });
@@ -388,6 +380,64 @@ const CreditCardInstallmentForm = (props) => {
     };
 
     useValidateCheckout({ paymentData, onCheckoutValidation });
+
+    // Simple notice clearing for installment form - only hide, never remove from DOM
+    useEffect(() => {
+        const clearValidationNotices = () => {
+            try {
+                console.log('Hiding installment validation notices...');
+                
+                // Only hide notices with CSS - no DOM removal
+                const allNotices = document.querySelectorAll([
+                    '.wc-block-components-notice-banner',
+                    '.wc-block-components-validation-error'
+                ].join(', '));
+                
+                allNotices.forEach((notice) => {
+                    if (notice && notice.style) {
+                        notice.style.display = 'none';
+                        notice.setAttribute('aria-hidden', 'true');
+                    }
+                });
+                
+                console.log(`Hidden ${allNotices.length} installment notices`);
+            } catch (error) {
+                console.log('Error hiding installment notices:', error.message);
+            }
+        };
+
+        const handlePaymentMethodChange = (event) => {
+            console.log('Payment method changed (installment):', event.target.value);
+            
+            setTimeout(() => {
+                clearValidationNotices();
+                
+                // Reset installment form when switching away
+                if (event.target.value !== 'moneyspace_creditcard_installment') {
+                    setPaymentData(prev => ({ 
+                        ...prev, 
+                        dirty: false,
+                        selectbank: "",
+                        KTC_permonths: "",
+                        BAY_permonths: "",
+                        FCY_permonths: ""
+                    }));
+                }
+            }, 50);
+        };
+
+        // Listen for payment method changes
+        const paymentRadios = document.querySelectorAll('input[name="radio-control-wc-payment-method-options"]');
+        paymentRadios.forEach(radio => {
+            radio.addEventListener('change', handlePaymentMethodChange);
+        });
+
+        return () => {
+            paymentRadios.forEach(radio => {
+                radio.removeEventListener('change', handlePaymentMethodChange);
+            });
+        };
+    }, []);
 
     const useProcessPayment = ({paymentData, onPaymentSetup}) => {
         useEffect(() => {
