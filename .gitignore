@@ -32,6 +32,11 @@ build/
 *.tgz
 *.tar.gz
 
+# WordPress Plugin Build Files
+assets/js/frontend/*.asset.php
+assets/js/frontend/*.css
+assets/js/frontend/*.js
+
 # IDE and editor files
 .vscode/
 .idea/
