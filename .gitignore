@@ -9,3 +9,41 @@ node_modules
 .vscode/settings.json
 .vscode/settings.json
 .DS_Store
+
+# E2E Test Artifacts
+e2e/test-results/
+e2e/playwright-report/
+e2e/node_modules/
+e2e/package-lock.json
+e2e/.env.local
+e2e/test-results.json
+e2e/screenshots/
+e2e/videos/
+
+# Package manager artifacts
+package-lock.json
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Build artifacts
+dist/
+build/
+*.tgz
+*.tar.gz
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
