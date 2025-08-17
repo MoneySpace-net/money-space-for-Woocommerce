@@ -239,56 +239,111 @@ const CreditCardForm = (props) => {
         onCheckoutValidation
     });
 
-    // Simple notice clearing - only hide notices, never remove them from DOM
+    // Enhanced notice clearing system for WooCommerce Blocks
     useEffect(() => {
         const clearValidationNotices = () => {
             try {
-                console.log('Hiding validation notices...');
+                console.log('Clearing credit card validation notices...');
                 
-                // Just hide the notices with CSS - no DOM manipulation
-                const allNotices = document.querySelectorAll([
+                // Method 1: Hide notices via CSS
+                const noticeSelectors = [
                     '.wc-block-components-notice-banner',
-                    '.wc-block-components-validation-error'
-                ].join(', '));
+                    '.wc-block-components-validation-error',
+                    '.wc-block-components-notices',
+                    '.woocommerce-error',
+                    '.woocommerce-message',
+                    '.woocommerce-info'
+                ];
                 
-                allNotices.forEach((notice) => {
-                    if (notice && notice.style) {
-                        notice.style.display = 'none';
-                        notice.setAttribute('aria-hidden', 'true');
-                    }
+                noticeSelectors.forEach(selector => {
+                    const notices = document.querySelectorAll(selector);
+                    notices.forEach((notice) => {
+                        const text = notice.textContent || '';
+                        // Clear notices related to other payment methods (installment, QR)
+                        if (text.includes('installment') || 
+                            text.includes('3,000') || 
+                            text.includes('bank') ||
+                            text.includes('QR')) {
+                            notice.style.display = 'none';
+                            notice.setAttribute('aria-hidden', 'true');
+                            notice.classList.add('mns-hidden');
+                        }
+                    });
                 });
                 
-                console.log(`Hidden ${allNotices.length} notices`);
+                // Method 2: Try to clear WooCommerce notices container
+                const noticesContainer = document.querySelector('.wc-block-components-notices');
+                if (noticesContainer) {
+                    // Clear inner content if safe to do so
+                    const noticeItems = noticesContainer.querySelectorAll('.wc-block-components-notice-banner');
+                    noticeItems.forEach(item => {
+                        const text = item.textContent || '';
+                        if (text.includes('installment') || text.includes('3,000') || text.includes('bank')) {
+                            item.style.display = 'none';
+                            item.setAttribute('aria-hidden', 'true');
+                        }
+                    });
+                }
+                
+                console.log('Credit card notices cleared successfully');
             } catch (error) {
-                console.log('Error hiding notices:', error.message);
+                console.log('Error clearing credit card notices:', error.message);
             }
         };
 
         const handlePaymentMethodChange = (event) => {
-            console.log('Payment method changed:', event.target.value);
+            console.log('Payment method changed (credit card):', event.target?.value);
             
-            // Small delay to let DOM update
+            // Only process if this is actually a payment method radio button change
+            if (!event.target?.name?.includes('radio-control-wc-payment-method-options')) {
+                return;
+            }
+            
+            // Clear notices immediately when payment method changes
+            clearValidationNotices();
+            
+            // Also clear after a short delay to catch any late-rendered notices
             setTimeout(() => {
                 clearValidationNotices();
                 
                 // Reset form state when switching away from credit card
-                if (event.target.value !== 'moneyspace_creditcard') {
+                if (event.target?.value && event.target.value !== 'moneyspace') {
                     setFormData(prev => ({ ...prev, dirty: false }));
                     setValidationErrors({});
                 }
-            }, 50);
+            }, 100);
         };
 
-        // Listen for payment method changes
-        const paymentRadios = document.querySelectorAll('input[name="radio-control-wc-payment-method-options"]');
-        paymentRadios.forEach(radio => {
-            radio.addEventListener('change', handlePaymentMethodChange);
-        });
+        // Enhanced payment method change detection - but more specific to avoid conflicts
+        const addPaymentMethodListeners = () => {
+            // Only listen for payment method radio button changes - be very specific
+            const paymentRadios = document.querySelectorAll('input[name="radio-control-wc-payment-method-options"]');
+            
+            paymentRadios.forEach(radio => {
+                radio.addEventListener('change', handlePaymentMethodChange);
+                // Remove click listener to avoid conflicts with dropdowns
+            });
+            
+            // DO NOT add listeners to the payment container as it interferes with dropdowns
+            
+            return paymentRadios;
+        };
+
+        const paymentRadios = addPaymentMethodListeners();
+        
+        // Clear notices when component mounts if another payment method is selected
+        const currentSelected = document.querySelector('input[name="radio-control-wc-payment-method-options"]:checked');
+        if (currentSelected && currentSelected.value !== 'moneyspace') {
+            setTimeout(clearValidationNotices, 100);
+        }
 
         return () => {
             paymentRadios.forEach(radio => {
                 radio.removeEventListener('change', handlePaymentMethodChange);
+                // No click listener to remove
             });
+            
+            // No payment container listeners to remove
         };
     }, []);
 

@@ -16,6 +16,111 @@
   }
 }
 
+// Enhanced notice hiding for MoneySpace payment methods
+.mns-hidden {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+}
+
+// Ensure notices are properly hidden when switching payment methods
+.wc-block-components-notices .mns-hidden,
+.wc-block-components-notice-banner.mns-hidden,
+.wc-block-components-validation-error.mns-hidden {
+  display: none !important;
+  position: absolute !important;
+  left: -9999px !important;
+  top: -9999px !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  height: 0 !important;
+  width: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: none !important;
+  outline: none !important;
+}
+
+// Ensure dropdowns work properly in installment forms
+.wc-block-components-credit-card-installment-form {
+  select {
+    pointer-events: auto !important;
+    z-index: 10 !important; // Reduced z-index to avoid checkout conflicts
+    position: relative !important;
+    cursor: pointer !important;
+    background-color: #fff !important;
+    border: 1px solid #50575e !important;
+    
+    // Ensure dropdown arrow is visible and clickable
+    -webkit-appearance: menulist !important;
+    -moz-appearance: menulist !important;
+    appearance: menulist !important;
+    
+    &:hover {
+      cursor: pointer !important;
+      border-color: #007cba !important;
+    }
+    
+    &:focus {
+      outline: 2px solid #007cba !important;
+      outline-offset: 2px !important;
+      border-color: #007cba !important;
+    }
+    
+    &:active {
+      border-color: #007cba !important;
+    }
+  }
+  
+  // Ensure the dropdown containers don't block interactions
+  .wc-block-components-radio-control-accordion-content {
+    pointer-events: auto !important;
+    z-index: 5 !important; // Reduced z-index
+    position: relative !important;
+    
+    &.hide {
+      display: none !important;
+    }
+  }
+  
+  // Ensure installment option containers allow interactions
+  .installment {
+    pointer-events: auto !important;
+    position: relative !important;
+    z-index: 5 !important; // Reduced z-index
+  }
+  
+  // Ensure labels don't interfere with dropdown clicks
+  label[for*="permonths"] {
+    pointer-events: none !important;
+    user-select: none !important;
+    display: block !important;
+    margin-bottom: 5px !important;
+  }
+  
+  // Ensure radio control options don't interfere
+  .wc-block-components-radio-control__option {
+    position: relative !important;
+    z-index: 40 !important;
+  }
+  
+  // Prevent any overlay issues
+  .wc-block-components-radio-control__option-layout {
+    pointer-events: auto !important;
+    position: relative !important;
+  }
+  
+  // Ensure the accordion content is properly positioned
+  .wc-block-components-radio-control-accordion-option {
+    position: relative !important;
+    z-index: 30 !important;
+  }
+}
+
 .is-large .wc-block-components-credit-card-form,
 .is-medium .wc-block-components-credit-card-form,
 .is-small .wc-block-components-credit-card-form {

@@ -4,6 +4,26 @@ import { __ } from '@wordpress/i18n';
 import _, { map } from 'underscore';
 import { useSelect } from '@wordpress/data';
 
+// Debug utility - only active when debug mode is enabled
+const debugLog = (message, data = null) => {
+    // Enable debug logging with any of these conditions:
+    // 1. URL parameter: ?debug=moneyspace
+    // 2. localStorage: localStorage.setItem('moneyspace_debug', 'true')
+    // 3. WordPress constant: define('MONEYSPACE_DEBUG', true) in wp-config.php
+    const debugEnabled = 
+        window.location.search.includes('debug=moneyspace') ||
+        localStorage.getItem('moneyspace_debug') === 'true' ||
+        (window.wp && window.wp.moneyspace_debug);
+    
+    if (debugEnabled) {
+        if (data) {
+            console.log(`[MoneySpace] ${message}`, data);
+        } else {
+            console.log(`[MoneySpace] ${message}`);
+        }
+    }
+};
+
 // Error Boundary Component
 class ErrorBoundary extends Component {
     constructor(props) {
@@ -167,43 +187,62 @@ const CreditCardInstallmentForm = (props) => {
             return <div>Error initializing payment form...</div>;
         }
     
-        const handleChange = (field) => (event) => {
-            try {
-                const value = event.target.value;
+    const handleChange = (field) => (event) => {
+        try {
+            const value = event.target.value;
+            
+            if (field === "selectbank") {
+                // Reset all month selections when bank changes
+                const newData = {
+                    ...paymentData,
+                    selectbank: value,
+                    dirty: true,
+                    KTC_permonths: "",
+                    BAY_permonths: "",
+                    FCY_permonths: ""
+                };
                 
-                if (field === "selectbank") {
-                    // Reset all month selections when bank changes
-                    const newData = {
-                        ...paymentData,
-                        selectbank: value,
-                        dirty: true,
-                        KTC_permonths: "",
-                        BAY_permonths: "",
-                        FCY_permonths: ""
-                    };
-                    
-                    // Set default month for selected bank
-                    if (value === "KTC") {
-                        newData.KTC_permonths = "3";
-                    } else if (value === "BAY") {
-                        newData.BAY_permonths = "3";
-                    } else if (value === "FCY") {
-                        newData.FCY_permonths = "3";
-                    }
-                    
-                    setPaymentData(newData);
-                } else {
-                    // Handle month selection changes
-                    setPaymentData(prev => ({
-                        ...prev,
-                        [field]: value,
-                        dirty: true
-                    }));
+                // Set default month for selected bank
+                if (value === "KTC") {
+                    newData.KTC_permonths = "3";
+                } else if (value === "BAY") {
+                    newData.BAY_permonths = "3";
+                } else if (value === "FCY") {
+                    newData.FCY_permonths = "3";
                 }
-            } catch (changeError) {
-                console.error('Error in handleChange:', changeError);
+                
+                setPaymentData(newData);
+            } else {
+                // Handle month selection changes
+                setPaymentData(prev => ({
+                    ...prev,
+                    [field]: value,
+                    dirty: true
+                }));
             }
-        };
+        } catch (changeError) {
+            console.error('MoneySpace installment handleChange error:', changeError);
+        }
+    };        // Enhanced dropdown interaction handling - simplified approach
+        useEffect(() => {
+            const ensureDropdownsWork = () => {
+                const selects = document.querySelectorAll('.wc-block-components-credit-card-installment-form select');
+                
+                selects.forEach((select) => {
+                    // Only set essential styles without aggressive event handling
+                    select.style.pointerEvents = 'auto';
+                    select.style.position = 'relative';
+                    select.style.zIndex = '10'; // Reduced z-index to avoid conflicts
+                });
+            };
+            
+            // Simple timeout to ensure DOM is ready
+            const timeoutId = setTimeout(ensureDropdownsWork, 50);
+            
+            return () => {
+                clearTimeout(timeoutId);
+            };
+        }, [paymentData.selectbank]);
 
     const findObj = useCallback((key) => {
         try {
@@ -291,51 +330,43 @@ const CreditCardInstallmentForm = (props) => {
 
                     // Validate minimum amount for installment
                     if (!checkPrice()) {
-                        console.log('Installment validation failed: Minimum amount not met');
                         return false;
                     }
 
                     // Validate bank selection
                     if (!paymentData.selectbank || paymentData.selectbank === "") {
-                        console.log('Installment validation failed: No bank selected');
                         return false;
                     }
 
                     // Validate installment months based on selected bank
                     if (paymentData.selectbank === "KTC") {
                         if (!paymentData.KTC_permonths || paymentData.KTC_permonths === "") {
-                            console.log('Installment validation failed: No KTC months selected');
                             return false;
                         }
                         
-                        // Validate KTC minimum amount per month
-                        const monthlyAmount = amount_total / parseInt(paymentData.KTC_permonths);
+                        // Validate KTC minimum amount per month - ensure we parse the string
+                        const monthlyAmount = amount_total / parseInt(String(paymentData.KTC_permonths));
                         if (monthlyAmount < 300) {
-                            console.log('Installment validation failed: KTC monthly amount too low');
                             return false;
                         }
                     } else if (paymentData.selectbank === "BAY") {
                         if (!paymentData.BAY_permonths || paymentData.BAY_permonths === "") {
-                            console.log('Installment validation failed: No BAY months selected');
                             return false;
                         }
                         
-                        // Validate BAY minimum amount per month
-                        const monthlyAmount = amount_total / parseInt(paymentData.BAY_permonths);
+                        // Validate BAY minimum amount per month - ensure we parse the string
+                        const monthlyAmount = amount_total / parseInt(String(paymentData.BAY_permonths));
                         if (monthlyAmount < 500) {
-                            console.log('Installment validation failed: BAY monthly amount too low');
                             return false;
                         }
                     } else if (paymentData.selectbank === "FCY") {
                         if (!paymentData.FCY_permonths || paymentData.FCY_permonths === "") {
-                            console.log('Installment validation failed: No FCY months selected');
                             return false;
                         }
                         
-                        // Validate FCY minimum amount per month
-                        const monthlyAmount = amount_total / parseInt(paymentData.FCY_permonths);
+                        // Validate FCY minimum amount per month - ensure we parse the string
+                        const monthlyAmount = amount_total / parseInt(String(paymentData.FCY_permonths));
                         if (monthlyAmount < 300) {
-                            console.log('Installment validation failed: FCY monthly amount too low');
                             return false;
                         }
                     }
@@ -348,24 +379,20 @@ const CreditCardInstallmentForm = (props) => {
                     
                     if (bankObj) {
                         const maxMonth = parseMaxMonth(bankObj.maxMonth);
-                        const selectedMonths = parseInt(
+                        const selectedMonths = parseInt(String(
                             selectedBank === "KTC" ? paymentData.KTC_permonths :
                             selectedBank === "BAY" ? paymentData.BAY_permonths :
                             selectedBank === "FCY" ? paymentData.FCY_permonths : "0"
-                        );
+                        ));
                         
                         if (selectedMonths > maxMonth) {
-                            console.log('Installment validation failed: Selected months exceed maximum');
                             return false;
                         }
                         
                         if (bankObj.months && !bankObj.months.includes(selectedMonths)) {
-                            console.log('Installment validation failed: Selected months not available for bank');
                             return false;
                         }
                     }
-
-                    console.log('Installment validation passed');
                     
                     // All validation passed
                     return true;
@@ -381,39 +408,68 @@ const CreditCardInstallmentForm = (props) => {
 
     useValidateCheckout({ paymentData, onCheckoutValidation });
 
-    // Simple notice clearing for installment form - only hide, never remove from DOM
+    // Enhanced notice clearing system for WooCommerce Blocks
     useEffect(() => {
         const clearValidationNotices = () => {
             try {
-                console.log('Hiding installment validation notices...');
-                
-                // Only hide notices with CSS - no DOM removal
-                const allNotices = document.querySelectorAll([
+                // Method 1: Hide notices via CSS
+                const noticeSelectors = [
                     '.wc-block-components-notice-banner',
-                    '.wc-block-components-validation-error'
-                ].join(', '));
+                    '.wc-block-components-validation-error',
+                    '.wc-block-components-notices',
+                    '.woocommerce-error',
+                    '.woocommerce-message',
+                    '.woocommerce-info'
+                ];
                 
-                allNotices.forEach((notice) => {
-                    if (notice && notice.style) {
-                        notice.style.display = 'none';
-                        notice.setAttribute('aria-hidden', 'true');
-                    }
+                noticeSelectors.forEach(selector => {
+                    const notices = document.querySelectorAll(selector);
+                    notices.forEach((notice) => {
+                        if (notice && notice.style) {
+                            notice.style.display = 'none';
+                            notice.setAttribute('aria-hidden', 'true');
+                            notice.classList.add('mns-hidden');
+                        }
+                    });
                 });
                 
-                console.log(`Hidden ${allNotices.length} installment notices`);
+                // Method 2: Try to clear WooCommerce notices container
+                const noticesContainer = document.querySelector('.wc-block-components-notices');
+                if (noticesContainer) {
+                    // Clear inner content if safe to do so
+                    const noticeItems = noticesContainer.querySelectorAll('.wc-block-components-notice-banner');
+                    noticeItems.forEach(item => {
+                        item.style.display = 'none';
+                        item.setAttribute('aria-hidden', 'true');
+                    });
+                }
+                
+                // Method 3: Clear specific checkout validation notices
+                const checkoutNotices = document.querySelectorAll('[data-block-name*="checkout"] .wc-block-components-notice-banner');
+                checkoutNotices.forEach(notice => {
+                    notice.style.display = 'none';
+                    notice.setAttribute('aria-hidden', 'true');
+                });
             } catch (error) {
-                console.log('Error hiding installment notices:', error.message);
+                console.error('MoneySpace notice clearing error:', error.message);
             }
         };
 
         const handlePaymentMethodChange = (event) => {
-            console.log('Payment method changed (installment):', event.target.value);
+            // Only process if this is actually a payment method radio button change
+            if (!event.target?.name?.includes('radio-control-wc-payment-method-options')) {
+                return;
+            }
             
+            // Clear notices immediately when payment method changes
+            clearValidationNotices();
+            
+            // Also clear after a short delay to catch any late-rendered notices
             setTimeout(() => {
                 clearValidationNotices();
                 
                 // Reset installment form when switching away
-                if (event.target.value !== 'moneyspace_creditcard_installment') {
+                if (event.target?.value && event.target.value !== 'moneyspace_installment') {
                     setPaymentData(prev => ({ 
                         ...prev, 
                         dirty: false,
@@ -423,20 +479,71 @@ const CreditCardInstallmentForm = (props) => {
                         FCY_permonths: ""
                     }));
                 }
-            }, 50);
+            }, 100);
         };
 
-        // Listen for payment method changes
-        const paymentRadios = document.querySelectorAll('input[name="radio-control-wc-payment-method-options"]');
-        paymentRadios.forEach(radio => {
-            radio.addEventListener('change', handlePaymentMethodChange);
-        });
+        // Enhanced payment method change detection - but more specific to avoid conflicts
+        const addPaymentMethodListeners = () => {
+            // Only listen for payment method radio button changes - be very specific
+            const paymentRadios = document.querySelectorAll('input[name="radio-control-wc-payment-method-options"]');
+            
+            paymentRadios.forEach(radio => {
+                radio.addEventListener('change', handlePaymentMethodChange);
+                // Remove click listener to avoid conflicts with dropdowns
+            });
+            
+            // DO NOT add listeners to the payment container as it interferes with dropdowns
+            
+            return paymentRadios;
+        };
+
+        const paymentRadios = addPaymentMethodListeners();
+        
+        // Clear notices when component mounts if another payment method is selected
+        const currentSelected = document.querySelector('input[name="radio-control-wc-payment-method-options"]:checked');
+        if (currentSelected && currentSelected.value !== 'moneyspace_installment') {
+            setTimeout(clearValidationNotices, 100);
+        }
 
         return () => {
             paymentRadios.forEach(radio => {
                 radio.removeEventListener('change', handlePaymentMethodChange);
+                // No click listener to remove
             });
+            
+            // No payment container listeners to remove
         };
+    }, []);
+
+    // Additional effect to monitor for notice changes and clear them when installment is not selected
+    useEffect(() => {
+        const observer = new MutationObserver(() => {
+            const currentSelected = document.querySelector('input[name="radio-control-wc-payment-method-options"]:checked');
+            if (currentSelected && currentSelected.value !== 'moneyspace_installment') {
+                // Clear any installment-related notices that might have appeared
+                setTimeout(() => {
+                    const notices = document.querySelectorAll('.wc-block-components-notice-banner');
+                    notices.forEach(notice => {
+                        const text = notice.textContent || '';
+                        if (text.includes('installment') || text.includes('3,000') || text.includes('bank')) {
+                            notice.style.display = 'none';
+                            notice.setAttribute('aria-hidden', 'true');
+                        }
+                    });
+                }, 50);
+            }
+        });
+
+        const noticesContainer = document.querySelector('.wc-block-components-notices');
+        if (noticesContainer) {
+            observer.observe(noticesContainer, { 
+                childList: true, 
+                subtree: true,
+                attributes: true 
+            });
+        }
+
+        return () => observer.disconnect();
     }, []);
 
     const useProcessPayment = ({paymentData, onPaymentSetup}) => {
@@ -454,17 +561,21 @@ const CreditCardInstallmentForm = (props) => {
                                          selectedBank === "BAY" ? paymentData.BAY_permonths :
                                          selectedBank === "FCY" ? paymentData.FCY_permonths : "";
                     
+                    // Ensure all values are strings for WooCommerce compatibility
                     const paymentMethodData = {
-                        selectbank: selectedBank,
-                        installment_months: selectedMonths,
-                        // Include individual bank fields for backward compatibility
-                        KTC_permonths: paymentData.KTC_permonths,
-                        BAY_permonths: paymentData.BAY_permonths,
-                        FCY_permonths: paymentData.FCY_permonths,
-                        // Add calculated amounts for reference
-                        total_amount: amount_total,
-                        monthly_amount: selectedMonths ? (amount_total / parseInt(selectedMonths)).toFixed(2) : "0"
+                        selectbank: String(selectedBank || ""),
+                        installment_months: String(selectedMonths || ""),
+                        // Include individual bank fields for backward compatibility - all as strings
+                        KTC_permonths: String(paymentData.KTC_permonths || ""),
+                        BAY_permonths: String(paymentData.BAY_permonths || ""),
+                        FCY_permonths: String(paymentData.FCY_permonths || ""),
+                        // Add calculated amounts for reference - as strings
+                        total_amount: String(amount_total || "0"),
+                        monthly_amount: selectedMonths ? String((amount_total / parseInt(selectedMonths)).toFixed(2)) : "0"
                     };
+
+                    // Debug log only when debug mode is enabled
+                    debugLog('Payment data prepared for submission', paymentMethodData);
 
                     const response = {
                         type: "success",
@@ -521,7 +632,12 @@ const CreditCardInstallmentForm = (props) => {
                     <div className={ `wc-block-components-radio-control-accordion-content ${ paymentData.selectbank == "KTC" ? "": "hide" }`}>
                         <div id="KTC" className="installment wc-block-components-text-input is-active">
                             <label htmlFor="ktc_permonths">{i18n.MNS_CC_INS_MONTH}</label>
-                            <select name="KTC_permonths" id="ktc_permonths" value={paymentData.KTC_permonths} onChange={handleChange('KTC_permonths')}>
+                            <select 
+                                name="KTC_permonths" 
+                                id="ktc_permonths" 
+                                value={paymentData.KTC_permonths} 
+                                onChange={handleChange('KTC_permonths')}
+                            >
                                 {ktcObj && ktcObj.months && ktcObj.months.length > 0 ? (
                                     _.map(ktcObj.months, function(month, index) {
                                         let shouldShow = false;
@@ -572,7 +688,12 @@ const CreditCardInstallmentForm = (props) => {
                     <div className={ `wc-block-components-radio-control-accordion-content ${ paymentData.selectbank == "BAY" ? "": "hide" }`}>
                         <div id="BAY" className="installment wc-block-components-text-input is-active">
                             <label htmlFor="bay_permonths">{i18n.MNS_CC_INS_MONTH}</label>
-                            <select name="BAY_permonths" id="bay_permonths" value={paymentData.BAY_permonths} onChange={handleChange('BAY_permonths')} >
+                            <select 
+                                name="BAY_permonths" 
+                                id="bay_permonths" 
+                                value={paymentData.BAY_permonths} 
+                                onChange={handleChange('BAY_permonths')}
+                            >
                                 {bayObj && bayObj.months ? (
                                     _.map(bayObj.months, function(month, index) {
                                         let shouldShow = false;
@@ -619,7 +740,12 @@ const CreditCardInstallmentForm = (props) => {
                     <div className={ `wc-block-components-radio-control-accordion-content ${ paymentData.selectbank == "FCY" ? "": "hide" }`}>
                         <div id="FCY" className="installment wc-block-components-text-input is-active">
                             <label htmlFor="fcy_permonths">{i18n.MNS_CC_INS_MONTH}</label>
-                            <select name="FCY_permonths" id="fcy_permonths" value={paymentData.FCY_permonths} onChange={handleChange('FCY_permonths')} >
+                            <select 
+                                name="FCY_permonths" 
+                                id="fcy_permonths" 
+                                value={paymentData.FCY_permonths} 
+                                onChange={handleChange('FCY_permonths')}
+                            >
                                 {fcyObj && fcyObj.months ? (
                                     _.map(fcyObj.months, function(month, index) {
                                         let shouldShow = false;
