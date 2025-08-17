@@ -31,6 +31,7 @@ module.exports = {
 		'frontend/blocks-ms-creditcard': '/includes/assets/js/payment-method/creditcard.js',
 		'frontend/blocks-ms-qr': '/includes/assets/js/payment-method/qrcode.js',
 		'frontend/blocks-ms-creditcard-installment': '/includes/assets/js/payment-method/creditcard-installment.js',
+		'frontend/moneyspace-notice-clearing': '/includes/assets/js/moneyspace-notice-clearing.js',
 	},
 	output: {
 		path: path.resolve( __dirname, 'assets/js' ),

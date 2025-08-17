@@ -179,6 +179,17 @@ class MoneySpacePayment {
             add_action('wp_enqueue_scripts', function() {
                 wp_register_style( 'moneyspace-block-style', plugin_dir_url( __FILE__ )."assets/js/frontend/blocks-ms-creditcard.css", array(), "1.0.0", "");
                 wp_enqueue_style('moneyspace-block-style');
+                
+                // Enqueue notice clearing utility on checkout page
+                if ( is_checkout() || is_wc_endpoint_url('order-pay') ) {
+                    wp_enqueue_script(
+                        'moneyspace-notice-clearing',
+                        plugin_dir_url( __FILE__ ) . 'assets/js/frontend/moneyspace-notice-clearing.js',
+                        array(),
+                        '1.0.0',
+                        true
+                    );
+                }
             });
 
 			MoneySpacePayment::Import('includes/blocks/moneyspace-creditcard.php');
