@@ -1,4 +1,13 @@
 == Changelog ==
+
+= 2.13.5 - 2025-08-18 =
+
+* 2025-08-18 : Fix payment validation to block checkout on error (WooCommerce Blocks)
+* 2025-08-18 : Prevent DOM removeChild errors by using CSS-only notice hiding
+* 2025-08-18 : Improve payment method switching and validation state reset
+* 2025-08-18 : Enhance error logging and debugging for payment forms
+* 2025-08-18 : Update compatibility for WooCommerce 9.7.0+
+
 = 2.13.4 - 2025-08-13 =
 
 * 2025-08-13 : Major WooCommerce compatibility update for v9.7.0+

@@ -117,6 +117,5 @@ function createCreditCard() {
     
 }
 
-console.log('5555', typeof(createCreditCard));
 createCreditCard();
 

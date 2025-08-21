@@ -1,28 +1,15 @@
 // MoneySpace Notice Clearing Utility
 // Global function to clear installment validation notices from any payment method
 
+// Import debug utility
+import { debugLog, debugError } from './utils/debug';
+
 window.MoneySpaceNoticeClearing = window.MoneySpaceNoticeClearing || {
     
-    // Debug utility
-    debugLog: (message, data = null) => {
-        const debugEnabled = 
-            window.location.search.includes('debug=moneyspace') ||
-            localStorage.getItem('moneyspace_debug') === 'true' ||
-            (window.wp && window.wp.moneyspace_debug);
-        
-        if (debugEnabled) {
-            if (data) {
-                console.log(`[MoneySpace Notice] ${message}`, data);
-            } else {
-                console.log(`[MoneySpace Notice] ${message}`);
-            }
-        }
-    },
-
     // Clear installment validation notices specifically
     clearInstallmentNotices: () => {
         try {
-            window.MoneySpaceNoticeClearing.debugLog('🧹 Clearing installment validation notices...');
+            debugLog('🧹 Clearing installment validation notices...');
             
             const noticeSelectors = [
                 '.wc-block-components-notice-banner',
@@ -66,7 +53,7 @@ window.MoneySpaceNoticeClearing = window.MoneySpaceNoticeClearing || {
                             notice.setAttribute('aria-hidden', 'true');
                             notice.classList.add('mns-hidden-installment');
                             clearedCount++;
-                            window.MoneySpaceNoticeClearing.debugLog(`🗑️ Cleared: "${text.substring(0, 60)}..."`);
+                            debugLog(`🗑️ Cleared: "${text.substring(0, 60)}..."`);
                         }
                     }
                 });
@@ -98,25 +85,25 @@ window.MoneySpaceNoticeClearing = window.MoneySpaceNoticeClearing || {
                 }
             });
             
-            window.MoneySpaceNoticeClearing.debugLog(`✅ Cleared ${clearedCount} installment notices`);
+            debugLog(`✅ Cleared ${clearedCount} installment notices`);
             return clearedCount;
             
         } catch (error) {
-            console.error('MoneySpace installment notice clearing error:', error);
+            debugError('MoneySpace installment notice clearing error:', error);
             return 0;
         }
     },
 
     // Initialize payment method change listeners
     initPaymentMethodListeners: () => {
-        window.MoneySpaceNoticeClearing.debugLog('🎧 Initializing payment method change listeners...');
+        debugLog('🎧 Initializing payment method change listeners...');
         
         const handlePaymentMethodChange = (event) => {
             if (!event.target?.name?.includes('radio-control-wc-payment-method-options')) {
                 return;
             }
             
-            window.MoneySpaceNoticeClearing.debugLog('💳 Payment method changed', { 
+            debugLog('💳 Payment method changed', { 
                 from: event.target?.previousValue, 
                 to: event.target?.value 
             });
@@ -140,7 +127,7 @@ window.MoneySpaceNoticeClearing = window.MoneySpaceNoticeClearing || {
             radio.addEventListener('change', handlePaymentMethodChange);
         });
         
-        window.MoneySpaceNoticeClearing.debugLog(`✅ Added listeners to ${paymentRadios.length} payment method radios`);
+        debugLog(`✅ Added listeners to ${paymentRadios.length} payment method radios`);
         
         return paymentRadios.length;
     },
@@ -167,7 +154,7 @@ window.MoneySpaceNoticeClearing = window.MoneySpaceNoticeClearing || {
             });
             
             if (hasPaymentMethods) {
-                window.MoneySpaceNoticeClearing.debugLog('🔄 Payment methods detected, reinitializing...');
+                debugLog('🔄 Payment methods detected, reinitializing...');
                 setTimeout(window.MoneySpaceNoticeClearing.initPaymentMethodListeners, 200);
             }
         });

@@ -8,7 +8,7 @@
 - **[Transaction Failure Analysis](TRANSACTION-FAILURE-ANALYSIS.md)** - Understanding payment failures
 
 ### Developer Guides  
-- **[Technical Debug Guide](DEBUG-GUIDE.md)** - Technical debugging and development
+- **[Complete Debug Guide](../DEBUG.md)** - Comprehensive debugging and development guide
 - **[Contributing Guidelines](CONTRIBUTING.md)** - Development standards and contribution process
 - **[Plugin Architecture](readme.md)** - Main plugin documentation
 

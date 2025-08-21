@@ -29,6 +29,9 @@ define('MNS_METHOD_TITLE', 'Money Space for WooCommerce');
 define('MNS_CANCEL_TRANSACTION', 'https://a.moneyspace.net/merchantapi/cancelpayment');
 define('MNS_CHECK_PAYMENT', 'https://a.moneyspace.net/CheckPayment');
 define('MNS_CHECK_PAYMENT_STATUS', '/ms/check-payment/');
+
+// Load debug security configuration
+require_once plugin_dir_path(__FILE__) . 'includes/debug-config.php';
 define("MNS_ROOT", __DIR__."/");
 define("MNS_ROOT_URL", plugin_dir_url(__FILE__));
 define("MNS_PAYMENT_TYPE_CARD", "card");

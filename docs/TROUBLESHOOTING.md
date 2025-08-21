@@ -116,7 +116,7 @@ A PHP debugging tool is available for analyzing failed transactions:
 ### For Developers
 1. Enable debug mode and check console logs
 2. Review this troubleshooting guide
-3. Check the main `DEBUG-GUIDE.md` for technical details
+3. Check the main `DEBUG.md` for comprehensive technical details
 
 ### For Users
 1. Contact website administrator

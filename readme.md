@@ -6,6 +6,7 @@
 [![Build Status](https://img.shields.io/badge/build-passing-brightgreen.svg)](https://github.com/MoneySpace-net/money-space-for-woocommerce/actions)
 [![License](https://img.shields.io/badge/License-GPL--2.0+-red.svg)](LICENSE)
 [![Version](https://img.shields.io/badge/version-2.13.4-blue.svg)](https://github.com/MoneySpace-net/money-space-for-woocommerce/releases)
+A comprehensive WordPress/WooCommerce payment gateway plugin that enables secure online payments through **credit cards**, **QR codes (PromptPay)**, and **installment plans**. This plugin integrates with MoneySpace Payment Gateway to provide Thai businesses with a complete, PCI DSS-compliant payment solution.
 
 A comprehensive WordPress/WooCommerce payment gateway plugin that enables secure online payments through **credit cards**, **QR codes (PromptPay)**, and **installment plans**. This plugin integrates with MoneySpace Payment Gateway to provide Thai businesses with a complete, PCI DSS-compliant payment solution.
 
@@ -465,6 +466,12 @@ A comprehensive WordPress/WooCommerce payment gateway plugin that enables secure
 ****
 
 # Changelog
+
+- 2025-08-18 : fix: payment validation now blocks checkout on error (WooCommerce Blocks)
+- 2025-08-18 : fix: prevent DOM removeChild errors by using CSS-only notice hiding
+- 2025-08-18 : improve: payment method switching and validation state reset
+- 2025-08-18 : enhance: error logging and debugging for payment forms
+- 2025-08-18 : update: compatibility for WooCommerce 9.7.0+
 
 - 2025-08-13 : Major WooCommerce compatibility update for v9.7.0+
 - 2025-08-13 : Replace deprecated onCheckoutValidationBeforeProcessing with onCheckoutValidation

@@ -2,6 +2,7 @@ import { getSetting } from '@woocommerce/settings';
 import { decodeEntities } from '@wordpress/html-entities';
 import { registerPaymentMethod  } from '@woocommerce/blocks-registry';
 import { useEffect } from '@wordpress/element';
+import { debugLog, debugError } from '../utils/debug';
 import './styles.scss';
 
 const id = "moneyspace_qrprom";
@@ -16,7 +17,7 @@ const Content = () => {
     useEffect(() => {
         const clearValidationNotices = () => {
             try {
-                console.log('Clearing validation notices for QR payment...');
+                debugLog('Clearing validation notices for QR payment...');
                 
                 // Clear notices that might be left from other payment methods
                 const noticeSelectors = [
@@ -46,9 +47,9 @@ const Content = () => {
                     });
                 });
                 
-                console.log('QR payment notices cleared');
+                debugLog('QR payment notices cleared');
             } catch (error) {
-                console.log('Error clearing QR payment notices:', error.message);
+                debugError('Error clearing QR payment notices:', error.message);
             }
         };
 

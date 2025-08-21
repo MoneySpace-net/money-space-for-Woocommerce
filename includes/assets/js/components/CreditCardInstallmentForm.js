@@ -3,26 +3,7 @@ import '../payment-method/styles.scss';
 import { __ } from '@wordpress/i18n';
 import _, { map } from 'underscore';
 import { useSelect } from '@wordpress/data';
-
-// Debug utility - only active when debug mode is enabled
-const debugLog = (message, data = null) => {
-    // Enable debug logging with any of these conditions:
-    // 1. URL parameter: ?debug=moneyspace
-    // 2. localStorage: localStorage.setItem('moneyspace_debug', 'true')
-    // 3. WordPress constant: define('MONEYSPACE_DEBUG', true) in wp-config.php
-    const debugEnabled = 
-        window.location.search.includes('debug=moneyspace') ||
-        localStorage.getItem('moneyspace_debug') === 'true' ||
-        (window.wp && window.wp.moneyspace_debug);
-    
-    if (debugEnabled) {
-        if (data) {
-            console.log(`[MoneySpace] ${message}`, data);
-        } else {
-            console.log(`[MoneySpace] ${message}`);
-        }
-    }
-};
+import { debugLog, debugWarn, debugError } from '../utils/debug';
 
 // Error Boundary Component
 class ErrorBoundary extends Component {
@@ -36,7 +17,7 @@ class ErrorBoundary extends Component {
     }
 
     componentDidCatch(error, errorInfo) {
-        console.error('CreditCardInstallmentForm Error Boundary Caught:', {
+        debugError('CreditCardInstallmentForm Error Boundary Caught:', {
             error: error,
             errorMessage: error.message,
             errorStack: error.stack,
@@ -221,7 +202,7 @@ const CreditCardInstallmentForm = (props) => {
                 }));
             }
         } catch (changeError) {
-            console.error('MoneySpace installment handleChange error:', changeError);
+            debugError('MoneySpace installment handleChange error:', changeError);
         }
     };        // Enhanced dropdown interaction handling - simplified approach
         useEffect(() => {
@@ -400,7 +381,7 @@ const CreditCardInstallmentForm = (props) => {
 
                 return unsubscribe;
             } catch (validateError) {
-                console.error('Error in useValidateCheckout:', validateError);
+                debugError('Error in useValidateCheckout:', validateError);
                 return () => {}; // Return empty cleanup function
             }
         }, [paymentData, onCheckoutValidation, checkPrice, amount_total, ktcObj, bayObj, fcyObj, parseMaxMonth]);
@@ -451,7 +432,7 @@ const CreditCardInstallmentForm = (props) => {
                     notice.setAttribute('aria-hidden', 'true');
                 });
             } catch (error) {
-                console.error('MoneySpace notice clearing error:', error.message);
+                debugError('MoneySpace notice clearing error:', error.message);
             }
         };
 
@@ -591,7 +572,7 @@ const CreditCardInstallmentForm = (props) => {
 
                 return unsubscribe;
             } catch (processError) {
-                console.error('Error in useProcessPayment:', processError);
+                debugError('Error in useProcessPayment:', processError);
                 return () => {}; // Return empty cleanup function
             }
         }, [paymentData, onPaymentSetup, amount_total]);
@@ -779,7 +760,7 @@ const CreditCardInstallmentForm = (props) => {
         return jsxResult;
         
         } catch (renderError) {
-            console.error('Error in renderView:', renderError);
+            debugError('Error in renderView:', renderError);
             return <div>Error rendering installment options. Please try again.</div>;
         }
     }, [ktcObj, bayObj, fcyObj, i18n, paymentData, amount_total, msfee, parseMaxMonth, formatNum]);
@@ -794,7 +775,7 @@ const CreditCardInstallmentForm = (props) => {
     }
 
     } catch (error) {
-        console.error('CreditCardInstallmentForm Runtime Error:', {
+        debugError('CreditCardInstallmentForm Runtime Error:', {
             error: error,
             errorMessage: error.message,
             errorStack: error.stack,

@@ -1,6 +1,7 @@
 import {useState, useEffect, useRef, useCallback} from '@wordpress/element';
 import '../payment-method/styles.scss';
 import {__} from '@wordpress/i18n';
+import { debugLog, debugWarn, debugError } from '../utils/debug';
 
 const CreditCardForm = (props) => {
     const model = {
@@ -27,25 +28,25 @@ const CreditCardForm = (props) => {
         const radioElement = document.querySelector('input[name="radio-control-wc-payment-method-options"]:checked');
         if (radioElement) {
             const isSelected = radioElement.value === 'moneyspace_creditcard' || radioElement.value === 'moneyspace';
-            console.log('Payment method selection check via radio:', radioElement.value, '-> selected:', isSelected);
+            debugLog('Payment method selection check via radio:', `${radioElement.value} -> selected: ${isSelected}`);
             return isSelected;
         }
         
         // Fallback to direct ID check
         const directRadio = document.getElementById('radio-control-wc-payment-method-options-moneyspace_creditcard');
         if (directRadio && directRadio.checked) {
-            console.log('Payment method selection check via direct ID -> selected: true');
+            debugLog('Payment method selection check via direct ID -> selected: true');
             return true;
         }
         
         // Another fallback
         const legacyRadio = document.getElementById('radio-control-wc-payment-method-options-moneyspace');
         if (legacyRadio && legacyRadio.checked) {
-            console.log('Payment method selection check via legacy ID -> selected: true');
+            debugLog('Payment method selection check via legacy ID -> selected: true');
             return true;
         }
         
-        console.log('⚠️ Warning: Could not determine if credit card payment method is selected');
+        debugWarn('Could not determine if credit card payment method is selected');
         return false;
     };
 
@@ -112,9 +113,9 @@ const CreditCardForm = (props) => {
         // CVV validation
         if (!formData.ccCVV) {
             errors.ccCVV = i18n.MNS_CC_WARN_CVV_1 || 'CVV is required';
-        } else if (formData.ccCVV.length < 3) {
-            errors.ccCVV = i18n.MNS_CC_WARN_CVV_2 || 'CVV must be 3 digits';
-        } else if (!/^\d{3,4}$/.test(formData.ccCVV)) {
+        } else if (formData.ccCVV.length !== 3) {
+            errors.ccCVV = i18n.MNS_CC_WARN_CVV_2 || 'CVV must be exactly 3 digits';
+        } else if (!/^\d{3}$/.test(formData.ccCVV)) {
             errors.ccCVV = 'CVV must contain only digits';
         }
 
@@ -129,7 +130,7 @@ const CreditCardForm = (props) => {
             
             // If this payment method is selected and there are errors, show them immediately
             if (isPaymentMethodSelected() && Object.keys(errors).length > 0) {
-                console.log('Credit Card Form Validation Errors:', errors);
+                debugLog('Credit Card Form Validation Errors:', errors);
             }
         }
     }, [formData, validateFormData]);
@@ -145,11 +146,11 @@ const CreditCardForm = (props) => {
             const unsubscribe = onCheckoutValidation(() => {
                 // Only validate if this payment method is selected
                 if (!isPaymentMethodSelected()) {
-                    console.log('Credit Card validation skipped - payment method not selected');
+                    debugLog('Credit Card validation skipped - payment method not selected');
                     return true;
                 }
 
-                console.log('Credit Card validation running - payment method IS selected');
+                debugLog('Credit Card validation running - payment method IS selected');
 
                 // Mark form as dirty to show validation errors
                 if (!formData.dirty) {
@@ -159,7 +160,7 @@ const CreditCardForm = (props) => {
                 // Perform comprehensive validation
                 const errors = validateFormData();
                 
-                console.log('Credit Card validation errors:', errors);
+                debugLog('Credit Card validation errors:', errors);
                 
                 if (Object.keys(errors).length > 0) {
                     // Update validation errors state
@@ -168,8 +169,8 @@ const CreditCardForm = (props) => {
                     // Get the first error message
                     const firstError = Object.values(errors)[0];
                     
-                    console.error('🚨 Credit Card Validation Failed - BLOCKING CHECKOUT:', firstError);
-                    console.error('🚨 Full validation errors:', errors);
+                    debugError('Credit Card Validation Failed - BLOCKING CHECKOUT:', firstError);
+                    debugLog('Full validation errors:', errors);
                     
                     // Return validation error object that WooCommerce Blocks expects
                     return {
@@ -179,7 +180,7 @@ const CreditCardForm = (props) => {
                     };
                 }
 
-                console.log('✅ Credit Card Validation Passed - allowing checkout');
+                debugLog('Credit Card Validation Passed - allowing checkout');
                 
                 // All validation passed
                 return true;
@@ -243,75 +244,29 @@ const CreditCardForm = (props) => {
     useEffect(() => {
         const clearValidationNotices = () => {
             try {
-                console.log('Clearing credit card validation notices...');
+                debugLog('Hiding validation notices...');
                 
-                // Method 1: Hide notices via CSS
-                const noticeSelectors = [
+                // Just hide the notices with CSS - no DOM manipulation
+                const allNotices = document.querySelectorAll([
                     '.wc-block-components-notice-banner',
-                    '.wc-block-components-validation-error',
-                    '.wc-block-components-notices',
-                    '.woocommerce-error',
-                    '.woocommerce-message',
-                    '.woocommerce-info'
-                ];
+                    '.wc-block-components-validation-error'
+                ].join(', '));
                 
-                noticeSelectors.forEach(selector => {
-                    const notices = document.querySelectorAll(selector);
-                    notices.forEach((notice) => {
-                        const text = notice.textContent || '';
-                        // Clear notices related to other payment methods (installment, QR)
-                        if (text.includes('installment') || 
-                            text.includes('3,000') || 
-                            text.includes('bank') ||
-                            text.includes('QR')) {
-                            notice.style.display = 'none';
-                            notice.setAttribute('aria-hidden', 'true');
-                            notice.classList.add('mns-hidden');
-                        }
-                    });
+                allNotices.forEach((notice) => {
+                    if (notice && notice.style) {
+                        notice.style.display = 'none';
+                        notice.setAttribute('aria-hidden', 'true');
+                    }
                 });
                 
-                // Method 2: Try to clear WooCommerce notices container
-                const noticesContainer = document.querySelector('.wc-block-components-notices');
-                if (noticesContainer) {
-                    // Clear inner content if safe to do so
-                    const noticeItems = noticesContainer.querySelectorAll('.wc-block-components-notice-banner');
-                    noticeItems.forEach(item => {
-                        const text = item.textContent || '';
-                        if (text.includes('installment') || text.includes('3,000') || text.includes('bank')) {
-                            item.style.display = 'none';
-                            item.setAttribute('aria-hidden', 'true');
-                        }
-                    });
-                }
-                
-                console.log('Credit card notices cleared successfully');
+                debugLog(`Hidden ${allNotices.length} notices`);
             } catch (error) {
-                console.log('Error clearing credit card notices:', error.message);
+                debugError('Error hiding notices:', error.message);
             }
         };
 
         const handlePaymentMethodChange = (event) => {
-            console.log('Payment method changed (credit card):', event.target?.value);
-            
-            // Only process if this is actually a payment method radio button change
-            if (!event.target?.name?.includes('radio-control-wc-payment-method-options')) {
-                return;
-            }
-            
-            // Clear notices immediately when payment method changes
-            clearValidationNotices();
-            
-            // Also clear after a short delay to catch any late-rendered notices
-            setTimeout(() => {
-                clearValidationNotices();
-                
-                // Reset form state when switching away from credit card
-                if (event.target?.value && event.target.value !== 'moneyspace') {
-                    setFormData(prev => ({ ...prev, dirty: false }));
-                    setValidationErrors({});
-                }
-            }, 100);
+            debugLog('Payment method changed:', event.target.value);
         };
 
         // Enhanced payment method change detection - but more specific to avoid conflicts
@@ -394,8 +349,8 @@ const CreditCardForm = (props) => {
             return event.preventDefault();
         }
         
-        // Limit CVV to 4 digits max
-        if (formData.ccCVV.length >= 4 && ![8, 67, 86, 88].includes(event.keyCode)) {
+        // Limit CVV to 3 digits max
+        if (formData.ccCVV.length >= 3 && ![8, 67, 86, 88].includes(event.keyCode)) {
             return event.preventDefault();
         }
     };
@@ -518,7 +473,7 @@ const CreditCardForm = (props) => {
                     onChange={handleChange('ccCVV')} 
                     id="txtCVV" 
                     name="cardCVV" 
-                    maxLength="4" 
+                    maxLength="3" 
                     onKeyDown={checkCVV} 
                     placeholder="000" 
                     required={validateCardCVV()}
