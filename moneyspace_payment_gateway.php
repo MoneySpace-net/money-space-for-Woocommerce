@@ -112,8 +112,8 @@ class MoneySpacePayment {
             MoneySpacePayment::Import('includes/helper.php');
             MoneySpacePayment::Import('includes/ms_log.php');
             
-            // Load debug hooks for WooCommerce Blocks (temporary for debugging)
-            if (defined('WP_DEBUG') && WP_DEBUG) {
+            // Load debug hooks for WooCommerce Blocks (only in debug mode and if file exists)
+            if (defined('WP_DEBUG') && WP_DEBUG && file_exists(plugin_dir_path(__FILE__) . 'includes/blocks-debug-hook.php')) {
                 MoneySpacePayment::Import('includes/blocks-debug-hook.php');
             }
 
