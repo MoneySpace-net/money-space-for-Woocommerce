@@ -1,5 +1,12 @@
 == Changelog ==
 
+= 2.13.6 - 2025-08-24 =
+
+* 2025-08-24 : Fix production compatibility by making debug file includes conditional
+* 2025-08-24 : Prevent fatal errors when debug-config.php is missing in production package
+* 2025-08-24 : Ensure blocks-debug-hook.php is only loaded when file exists and WP_DEBUG is enabled
+* 2025-08-24 : Improve plugin stability in production environments without development files
+
 = 2.13.5 - 2025-08-18 =
 
 * 2025-08-18 : Fix payment validation to block checkout on error (WooCommerce Blocks)
