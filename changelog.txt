@@ -1,5 +1,13 @@
 == Changelog ==
 
+= 2.13.7 - 2025-08-25 =
+
+* 2025-08-25 : Clean up development and test files for production deployment
+* 2025-08-25 : Remove 11 development documentation files (DEBUG*.md, CONTRIBUTING.md, etc.)
+* 2025-08-25 : Remove test utility files (test-*.php, debug-transaction.php, test-debug-utility.html)
+* 2025-08-25 : Optimize plugin package size by removing non-essential development files
+* 2025-08-25 : Maintain core functionality while reducing codebase complexity
+
 = 2.13.6 - 2025-08-24 =
 
 * 2025-08-24 : Fix production compatibility by making debug file includes conditional
