@@ -5,7 +5,7 @@
 [![PHP](https://img.shields.io/badge/PHP-8.0+-777BB4.svg)](https://php.net/)
 [![Build Status](https://img.shields.io/badge/build-passing-brightgreen.svg)](https://github.com/MoneySpace-net/money-space-for-woocommerce/actions)
 [![License](https://img.shields.io/badge/License-GPL--2.0+-red.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-2.13.7-blue.svg)](https://github.com/MoneySpace-net/money-space-for-woocommerce/releases)
+[![Version](https://img.shields.io/badge/version-2.13.8-blue.svg)](https://github.com/MoneySpace-net/money-space-for-woocommerce/releases)
 A comprehensive WordPress/WooCommerce payment gateway plugin that enables secure online payments through **credit cards**, **QR codes (PromptPay)**, and **installment plans**. This plugin integrates with MoneySpace Payment Gateway to provide Thai businesses with a complete, PCI DSS-compliant payment solution.
 
 A comprehensive WordPress/WooCommerce payment gateway plugin that enables secure online payments through **credit cards**, **QR codes (PromptPay)**, and **installment plans**. This plugin integrates with MoneySpace Payment Gateway to provide Thai businesses with a complete, PCI DSS-compliant payment solution.
@@ -466,6 +466,13 @@ A comprehensive WordPress/WooCommerce payment gateway plugin that enables secure
 ****
 
 # Changelog
+
+- 2025-10-11 : Enhanced WooCommerce Blocks compatibility and payment method icons
+- 2025-10-11 : Improved installment form validation and notice clearing system
+- 2025-10-11 : Fixed payment method label display and icon rendering issues
+- 2025-10-11 : Enhanced React component error handling and debugging capabilities
+- 2025-10-11 : Streamlined build process with improved webpack configuration
+- 2025-10-11 : Updated documentation structure for better developer onboarding
 
 - 2025-08-25 : clean: remove development and test files for production deployment  
 - 2025-08-25 : clean: remove 11 development documentation files (DEBUG*.md, CONTRIBUTING.md, etc.)

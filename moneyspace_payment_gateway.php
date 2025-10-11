@@ -4,7 +4,7 @@
  * Plugin Name:       Money Space
  * Plugin URI:        https://github.com/MoneySpace-net/money-space-for-Woocommerce/releases
  * Description:       Would you like to provide a streamlined and secure checkout experience for your customer? Every business does. Payment process is vital to the success eCommerce businesses. While WooCommerce merchants maximize their online products, we can help you take care of  payments and deliver a better overall customer experience for your online customers. By integrating your Magento website to your MoneySpace Payment Gateway account, your customer can pay for their products securely through credit card online. MoneySpace also supports up to 27 foreign currencies and Alipay/ WechatPay payments so you can begin receiving payment and expand your customer base worldwide. MoneySpace is PCI DSS certified and had been approved by Bank of Thailand as a payment method. To get to know more about MoneySpace payment gateway, visit our website at https://www.moneyspace.net
- * Version:           2.13.7
+ * Version:           2.13.8
  * Author:            Money Space
  * Author URI:        https://moneyspace.net
  * 
@@ -111,11 +111,6 @@ class MoneySpacePayment {
             MoneySpacePayment::Import('router/check-payment.php');
             MoneySpacePayment::Import('includes/helper.php');
             MoneySpacePayment::Import('includes/ms_log.php');
-            
-            // Load debug hooks for WooCommerce Blocks (only in debug mode and if file exists)
-            if (defined('WP_DEBUG') && WP_DEBUG && file_exists(plugin_dir_path(__FILE__) . 'includes/blocks-debug-hook.php')) {
-                MoneySpacePayment::Import('includes/blocks-debug-hook.php');
-            }
 
             add_action('init', array(MNS_Router_Utility::class, 'init'), -100, 0);
             add_action(MNS_Router_Utility::PLUGIN_INIT_HOOK, array(MNS_Router_Page::class, 'init'), 0, 0);
