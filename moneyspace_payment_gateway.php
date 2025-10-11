@@ -111,11 +111,6 @@ class MoneySpacePayment {
             MoneySpacePayment::Import('router/check-payment.php');
             MoneySpacePayment::Import('includes/helper.php');
             MoneySpacePayment::Import('includes/ms_log.php');
-            
-            // Load debug hooks for WooCommerce Blocks (only in debug mode and if file exists)
-            if (defined('WP_DEBUG') && WP_DEBUG && file_exists(plugin_dir_path(__FILE__) . 'includes/blocks-debug-hook.php')) {
-                MoneySpacePayment::Import('includes/blocks-debug-hook.php');
-            }
 
             add_action('init', array(MNS_Router_Utility::class, 'init'), -100, 0);
             add_action(MNS_Router_Utility::PLUGIN_INIT_HOOK, array(MNS_Router_Page::class, 'init'), 0, 0);
