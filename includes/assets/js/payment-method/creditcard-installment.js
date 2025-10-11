@@ -3,12 +3,22 @@ import { decodeEntities } from '@wordpress/html-entities';
 import { registerPaymentMethod  } from '@woocommerce/blocks-registry';
 import { memo, useMemo } from '@wordpress/element';
 import CreditCardInstallmentForm from './../components/CreditCardInstallmentForm';
+import PaymentMethodLabel from '../components/PaymentMethodLabel';
 import './styles.scss';
 
 const id = "moneyspace_installment";
 
 const settings = getSetting( `${id}_data`, {} );
 const label = decodeEntities( settings.i18n.MNS_PAY_INS );
+
+const Label = ( props ) => {
+    return <PaymentMethodLabel
+        components={ props.components }
+        title={ label }
+        icons={ settings.icons }
+        id={ id }
+    />
+}
 
 /**
  * Content component - This receives WooCommerce blocks context
@@ -42,7 +52,7 @@ const Edit = () => {
 
 const options = {
 	name: 'moneyspace_installment',
-	label: label,
+	label: <Label />,
 	content: <Content />,
 	edit: <Edit />,
 	ariaLabel: label,
