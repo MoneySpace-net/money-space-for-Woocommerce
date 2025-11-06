@@ -120,3 +120,6 @@ define('MNS_CC_INS_BAY', 'บัตรกรุงศรีฯ วีซ่า ,
 define('MNS_CC_INS_FCY', 'บัตรกรุงศรีเฟิร์สช้อยส์ , บัตรโฮมโปร , บัตรเมกาโฮม');
 
 define('MNS_ORDER_STATUS_COMPLETED', 'ชำระเงินเรียบร้อยแล้ว');
+
+define('MNS_FORM_FIELD_AUTO_CHECK_QR_RESULT_TIME', 'ตั้งค่าเวลาเช็คผล QR Code อัตโนมัติ');
+define('MNS_FORM_FIELD_SECONDS', 'วินาที');
