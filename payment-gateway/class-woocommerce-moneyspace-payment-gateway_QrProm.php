@@ -153,7 +153,7 @@ class MNS_Payment_Gateway_QR extends WC_Payment_Gateway
                 'class' => 'wc-enhanced-select',
                 'default' => 5000,
                 'desc_tip' => true,
-                'options' => [5000 => "5 ".MNS_FORM_FIELD_SECONDS,10000 => "10 ".MNS_FORM_FIELD_SECONDS,15000 => "15 ".MNS_FORM_FIELD_SECONDS,18000 => "30 ".MNS_FORM_FIELD_SECONDS]
+                'options' => [5000 => "5 ".MNS_FORM_FIELD_SECONDS,10000 => "10 ".MNS_FORM_FIELD_SECONDS,15000 => "15 ".MNS_FORM_FIELD_SECONDS, 30000 => "30 ".MNS_FORM_FIELD_SECONDS]
             ),
             'enable_auto_check_result' => array(
                 'title' => __(MNS_FORM_FIELD_ENABLE_AUTO_CHECK_QR, $this->domain),
