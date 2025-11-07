@@ -6,6 +6,9 @@ $dt = new DateTime("now", new DateTimeZone($tz));
 
 
 $auto_cancel = $payment_gateway_qr->settings['auto_cancel'];
+$ms_auto_check_result_time = ! empty( $payment_gateway_qr->settings['auto_check_result_time'] )
+    ? (int) $payment_gateway_qr->settings['auto_check_result_time']
+    : 2000;
 $enable_auto_check_result = $payment_gateway_qr->settings['enable_auto_check_result'];
 
 _e('<div style="text-align: center;">
@@ -26,7 +29,7 @@ $dt->setTimestamp($MNS_QR_TIME + $limit_time);
 
 wc_enqueue_js('
 let timeZone = "Asia/Bangkok";
-
+var autoCheckIntervalMs = ' . $ms_auto_check_result_time . ';
 function startTimer(duration) {
     var countDownDate = new Date();
     countDownDate.setMinutes(countDownDate.getMinutes() + Math.round(duration/60000));
@@ -70,7 +73,7 @@ function checkPayment(duration, pid) {
                 window.location = "'.wc_get_order($order_id)->get_checkout_order_received_url().'";
             }
         });        
-    }, 2000);
+    }, autoCheckIntervalMs);
 }
 
 var endDate = new Date(Date.parse("'.$dt->format('Y/m/d H:i').'")).getTime();

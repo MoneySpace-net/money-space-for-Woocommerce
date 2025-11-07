@@ -3,7 +3,7 @@ Contributors: moneyspace
 Tags: credit card, moneyspace, payment request, thaibank, woocommerce, automattic, bay, ktc, fcy, installment
 Requires at least: 4.9
 Tested up to: 6.8
-Stable tag: 2.13.8
+Stable tag: 2.13.9
 Requires PHP: 7.0
 Requires WordPress: 4.9
 License: GPLv3
@@ -61,6 +61,14 @@ Yes! In Live Mode, an SSL certificate must be installed on your site to use Mone
 3. Pay with a saved payment method, a new card, and allow customers to save the payment card for future transactions.
 
 == Changelog ==
+= 2.13.9 - 2025-11-07 =
+
+* 2025-11-07 : Added configurable auto-check interval for QR Code payments
+* 2025-11-07 : Improved QR payment user experience with customizable check intervals (5/10/15/30 seconds)
+* 2025-11-07 : Fixed bitwise OR operator bug in QR payment status checking
+* 2025-11-07 : Enhanced admin settings with auto-check result time option for QR payments
+* 2025-11-07 : Improved internationalization for QR payment settings (Thai/English)
+
 = 2.13.8 - 2025-10-11 =
 
 * 2025-10-11 : Enhanced WooCommerce Blocks compatibility and payment method icons

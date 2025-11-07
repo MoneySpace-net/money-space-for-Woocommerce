@@ -122,3 +122,6 @@ define('MNS_CC_INS_BAY', 'Krungsri Visa Card , Central Credit Card , Lotus Credi
 define('MNS_CC_INS_FCY', 'First Choice Card , HomePro Credit Card , MegaHome Credit Card');
 
 define('MNS_ORDER_STATUS_COMPLETED', 'Completed');
+
+define('MNS_FORM_FIELD_AUTO_CHECK_QR_RESULT_TIME', 'Set auto check QR Code Result time');
+define('MNS_FORM_FIELD_SECONDS', 'Seconds');
