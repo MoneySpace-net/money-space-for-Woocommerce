@@ -1,5 +1,11 @@
 == Changelog ==
 
+= 2.13.10 - 2025-12-23 =
+
+* 2025-12-23 : Update WooCommerce Blocks credit card UI to respect fee setting
+* 2025-12-23 : Adjust checkout validation to allow redirect flow when fee setting is not "include"
+* 2025-12-23 : Improve inline script enqueue for credit card template compatibility
+
 = 2.13.9 - 2025-11-07 =
 
 * 2025-11-07 : Added configurable auto-check interval for QR Code payments

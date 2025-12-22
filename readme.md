@@ -5,7 +5,7 @@
 [![PHP](https://img.shields.io/badge/PHP-8.0+-777BB4.svg)](https://php.net/)
 [![Build Status](https://img.shields.io/badge/build-passing-brightgreen.svg)](https://github.com/MoneySpace-net/money-space-for-woocommerce/actions)
 [![License](https://img.shields.io/badge/License-GPL--2.0+-red.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-2.13.9-blue.svg)](https://github.com/MoneySpace-net/money-space-for-woocommerce/releases)
+[![Version](https://img.shields.io/badge/version-2.13.10-blue.svg)](https://github.com/MoneySpace-net/money-space-for-woocommerce/releases)
 A comprehensive WordPress/WooCommerce payment gateway plugin that enables secure online payments through **credit cards**, **QR codes (PromptPay)**, and **installment plans**. This plugin integrates with MoneySpace Payment Gateway to provide Thai businesses with a complete, PCI DSS-compliant payment solution.
 
 A comprehensive WordPress/WooCommerce payment gateway plugin that enables secure online payments through **credit cards**, **QR codes (PromptPay)**, and **installment plans**. This plugin integrates with MoneySpace Payment Gateway to provide Thai businesses with a complete, PCI DSS-compliant payment solution.
@@ -466,6 +466,10 @@ A comprehensive WordPress/WooCommerce payment gateway plugin that enables secure
 ****
 
 # Changelog
+
+- 2025-12-23 : Update WooCommerce Blocks credit card UI to respect fee setting
+- 2025-12-23 : Adjust checkout validation to allow redirect flow when fee setting is not "include"
+- 2025-12-23 : Improve inline script enqueue for credit card template compatibility
 
 - 2025-11-07 : Added configurable auto-check interval for QR Code payments
 - 2025-11-07 : Improved QR payment user experience with customizable check intervals (5/10/15/30 seconds)
