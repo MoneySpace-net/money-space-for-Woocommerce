@@ -10,6 +10,7 @@ const id = 'moneyspace';
 const settings = getSetting( `${id}_data`, {} );
 const label = decodeEntities( settings.title );
 const template_payment = settings.ms_template_payment;
+const ms_fees = settings.ms_fees;
 
 const Label = ( props ) => {
     return <PaymentMethodLabel
@@ -36,7 +37,7 @@ const Content = (props) => {
         ...props
     }), [props]);
 
-    return template_payment == 1 ? <CreditCardForm {...formProps} /> : decodeEntities( settings.description || '' );
+    return template_payment == 1 && ms_fees == "include" ? <CreditCardForm {...formProps} /> : decodeEntities( settings.description || '' );
 };
 
 const options = {

@@ -114,6 +114,10 @@ class MoneySpace_CreditCard extends AbstractPaymentMethodType {
 				? $gateways[$payment_gateway_id]->settings['ms_template_payment'] 
 				: 1;
 		}
+
+		$ms_fees = isset($gateways[$payment_gateway_id]->settings['fee_setting']) 
+			? $gateways[$payment_gateway_id]->settings['fee_setting'] 
+			: 'exclude';
 		
 		// Define fallback translations in case constants are not loaded
 		$fallback_translations = array(
@@ -144,6 +148,7 @@ class MoneySpace_CreditCard extends AbstractPaymentMethodType {
 			'description' => $this->get_setting( 'description' ),
 			'icons'		  => [$this->get_payment_method_icons()],
 			'ms_template_payment' => $ms_template_payment,
+			'ms_fees' => $ms_fees,
 			'i18n' => $cc_i18n,
 			'supports'    => array_filter( $this->gateway->supports, [ $this->gateway, 'supports' ] )
 		];

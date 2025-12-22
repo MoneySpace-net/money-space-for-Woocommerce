@@ -441,11 +441,9 @@ class MNS_Payment_Gateway extends WC_Payment_Gateway
                 wp_register_style( "moneyspace-style", MNS_PAYMENT_FORM_CSS, array(), "1.0.0", "");
                 wp_enqueue_style( "moneyspace-style", MNS_PAYMENT_FORM_CSS, array(), "1.0.0", "");
             });
-
             require_once MNS_ROOT . '/templates/credit-cards/mns-cc-tpl-1.php';
         }
     }
-    
 
     /**
      * Process the payment and return the result.
@@ -495,26 +493,20 @@ class MNS_Payment_Gateway extends WC_Payment_Gateway
                 error_log('MoneySpace Payment Debug - Using traditional POST data (card data extracted safely)');
             }
             
-            // Log the extracted card data (SAFELY - PCI DSS compliant)
-            if (defined('WP_DEBUG') && WP_DEBUG) {
-                $safe_card_data = moneyspace_mask_card_data([
-                    'cardNumber' => $cardNumber,
-                    'cardHolder' => $cardHolder,
-                    'cardExpDate' => $cardExpDate, 
-                    'cardExpDateYear' => $cardExpDateYear,
-                    'cardCVV' => $cardCVV
-                ]);
-                error_log('MoneySpace Payment Debug - Card data extracted: ' . json_encode($safe_card_data));
-            }
-            
+            $gateways = WC()->payment_gateways->get_available_payment_gateways();
+            $ms_template_payment = $gateways['moneyspace']->settings['ms_template_payment'];
+            $ms_fees = $gateways['moneyspace']->settings['fee_setting'];
+
             // Validate card data
-            if (empty($cardNumber) || empty($cardHolder) || empty($cardExpDate) || empty($cardExpDateYear) || empty($cardCVV)) {
-                moneyspace_debug_log('Payment Error: Missing credit card information', true); // Always log errors
-                wc_add_notice(__('Error: Missing credit card information. Please check your card details.', $this->domain), 'error');
-                return array(
-                    'result' => 'failure',
-                    'messages' => __('Error: Missing credit card information. Please check your card details.', $this->domain)
-                );
+            if ($ms_template_payment == "1" && $ms_fees == "include") {
+                if (empty($cardNumber) || empty($cardHolder) || empty($cardExpDate) || empty($cardExpDateYear) || empty($cardCVV)) {
+                    moneyspace_debug_log('Payment Error: Missing credit card information', true); // Always log errors
+                    wc_add_notice(__('Error: Missing credit card information. Please check your card details.', $this->domain), 'error');
+                    return array(
+                        'result' => 'failure',
+                        'messages' => __('Error: Missing credit card information. Please check your card details.', $this->domain)
+                    );
+                }
             }
             
             $MNS_CARD = $cardNumber."|".$cardHolder."|".$cardExpDate."|".$cardExpDateYear."|".$cardCVV;

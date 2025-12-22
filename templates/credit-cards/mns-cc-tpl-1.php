@@ -1,5 +1,5 @@
 <?php
-wc_enqueue_js("
+wp_add_inline_script( "creditcard", "
 if (document.getElementsByName('checkout')[0] !== undefined) {
     document.getElementsByName('checkout')[0].noValidate = false;
 }
@@ -8,6 +8,15 @@ if (document.getElementById('order_review') !== null) {
     document.getElementById('order_review').noValidate = false;
 }
 ");
+// wc_enqueue_js("
+// if (document.getElementsByName('checkout')[0] !== undefined) {
+//     document.getElementsByName('checkout')[0].noValidate = false;
+// }
+
+// if (document.getElementById('order_review') !== null) {
+//     document.getElementById('order_review').noValidate = false;
+// }
+// ");
 
 function render_creditcard() {
 ?>
@@ -72,8 +81,8 @@ function add_script() {
     wp_enqueue_script( "moneyspace-util", MNS_ROOT_URL ."includes/libs/moneyspace/moneyspace_util.js", array(), "1.0.0", true);
     wp_enqueue_script( "creditcard", MNS_ROOT_URL ."includes/js/creditcard.min.js", array("bootstrap-4", "vue-2", "moneyspace-util"), "1.0.1", true);
     wp_enqueue_style( "mns-01", MNS_ROOT_URL ."includes/themes/mns-01/css/mns-01.css", array(), "1.0.0", "all" );
-    wc_enqueue_js("if (typeof createCreditCard === 'function') { createCreditCard(); }");
-
+    // wc_enqueue_js("if (typeof createCreditCard === 'function') { createCreditCard(); }");
+    wp_add_inline_script( "creditcard", "if (typeof createCreditCard === 'function') { createCreditCard(); }" );
     return;
 }
 do_action( 'mns_credit_card_add_script' );
