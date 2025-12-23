@@ -125,13 +125,13 @@ function set_req_message($ms_secret_id, $ms_secret_key, $body_post, $payment_typ
         "agreement" => 1,
     );
 
-    if (strtolower($body_post["feeType"]) == "exclude") {
-        unset($ms_body['payment_type']);
-        $ms_body['currency'] = $body_post["currency"];
-        $ms_body['gatewayType'] = $body_post["gatewayType"];
-        $ms_body['timeHash'] = $body_post["timeHash"];
-        $ms_body['hash'] = $hash_body;
-    }
+    // if (strtolower($body_post["feeType"]) == "exclude") {
+    //     unset($ms_body['payment_type']);
+    //     $ms_body['currency'] = $body_post["currency"];
+    //     $ms_body['gatewayType'] = $body_post["gatewayType"];
+    //     $ms_body['timeHash'] = $body_post["timeHash"];
+    //     $ms_body['hash'] = $hash_body;
+    // }
 
     return $ms_body;
 }

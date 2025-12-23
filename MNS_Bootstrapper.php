@@ -21,8 +21,6 @@ define('MNS_API_URL_CREATE_INSTALLMENT', 'https://a.moneyspace.net/payment/Creat
 define('MNS_LOGO', MNS_STATIC_URL_ENDPOINT . '/img/type/Master_VISA_JCB_UNION_180.png');
 define('MNS_LOGO_QR', MNS_STATIC_URL_ENDPOINT. '/img/type/QRCode_160.png');
 define('MNS_LOGO_INSTALLMENT', MNS_STATIC_URL_ENDPOINT . '/img/type/Installment_220.png');
-define('MNS_PAYMENT_JS', plugins_url( "includes/moneyspace_payment.js", __FILE__ )); // MNS_STATIC_URL_ENDPOINT . '/moneyspace_payment.js'); //
-define('MNS_PAYMENT_FORM_JS', plugins_url( "includes/moneyspace_payment_form.js", __FILE__ ) );
 define('MNS_PAYMENT_FORM_CSS', plugins_url( "includes/css/moneyspace.css", __FILE__ ) );
 define('MNS_METHOD_TITLE', 'Money Space for WooCommerce');
 // define('MNS_TIME_ZONE', "Asia/Bangkok");

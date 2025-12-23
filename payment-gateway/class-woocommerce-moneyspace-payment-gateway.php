@@ -34,241 +34,40 @@ class MNS_Payment_Gateway extends WC_Payment_Gateway
         add_action('woocommerce_update_options_payment_gateways_' . $this->id, array($this, 'process_admin_options'));
         add_action('woocommerce_thankyou_custom', array($this, 'thankyou_page'));
         add_filter('woocommerce_thankyou_order_received_text', array($this, 'avia_thank_you'), 10, 2 );
-        add_action('woocommerce_after_checkout_validation', array($this, 'after_checkout_validation'), 10, 3 );
     }
 
 
-    public function create_payment_transaction_v3($order_id, $ms_body, $ms_template_payment, $gateways) {
-        if ($ms_template_payment == 1) {
-            if (defined('WP_DEBUG') && WP_DEBUG) {
-                error_log('MoneySpace API: Creating payment transaction for order ' . $order_id);
-                error_log('MoneySpace API: Request body: ' . json_encode($ms_body));
-            }
-            
-            $response = wp_remote_post(MNS_API_URL_CREATE, array(
+    public function create_payment_transaction_v3($order_id, $ms_body) {
+
+        $response = wp_remote_post(MNS_API_URL_CREATE_LINK_PAYMENT, array(
                 'method' => 'POST',
                 'timeout' => 120,
                 'body' => $ms_body
             ));
 
-            // Handle HTTP errors before accessing body
-            if (is_wp_error($response)) {
-                $error_message = $response->get_error_message();
-                if (defined('WP_DEBUG') && WP_DEBUG) {
-                    error_log('MoneySpace API: HTTP Error - ' . $error_message);
-                }
-                (new Mslogs())->insert($error_message, 1, 'Create Transaction Card (HTTP error)', date("Y-m-d H:i:s"), json_encode($ms_body));
-                wc_add_notice(__('Error : ' . MNS_NOTICE_ERROR_SETUP, $this->domain), 'error');
-                return;
-            }
-
-            $body = wp_remote_retrieve_body($response);
-            $http_code = wp_remote_retrieve_response_code($response);
-            
-            if (defined('WP_DEBUG') && WP_DEBUG) {
-                error_log('MoneySpace API: HTTP Response Code - ' . $http_code);
-                error_log('MoneySpace API: Response Body - ' . $body);
-            }
-            
-            (new Mslogs())->insert($body, 1, 'Create Transaction Card', date("Y-m-d H:i:s"), json_encode($ms_body));
-
-            $data_status = json_decode($body);
-            if (empty($data_status) || !isset($data_status[0]->status)) {
-                if (defined('WP_DEBUG') && WP_DEBUG) {
-                    error_log('MoneySpace API: Invalid response format - no status field');
-                }
-                wc_add_notice(__('Error ms101 : Invalid response from payment gateway', $this->domain), 'error');
-                return;
-            }
-            
-            if ($data_status[0]->status != "success") {
-                $error_msg = isset($data_status[0]->message) ? $data_status[0]->message : 'Unknown error';
-                if (defined('WP_DEBUG') && WP_DEBUG) {
-                    error_log('MoneySpace API: Transaction failed - Status: ' . $data_status[0]->status . ', Message: ' . $error_msg);
-                }
-                wc_add_notice(__('Error ms102 : ' . $error_msg, $this->domain), 'error');
-                return;
-            }
-
-            // Note: MSKey is supposed to be long for security - it's an encrypted payment token
-            // Removed incorrect length validation that was preventing successful payments
-
-            $tranId = $data_status[0]->transaction_ID ?? '';
-            $mskey = $data_status[0]->mskey ?? '';
-            
-            if (defined('WP_DEBUG') && WP_DEBUG) {
-                error_log('MoneySpace API: Transaction created successfully - ID: ' . $tranId);
-            }
-            
-            update_post_meta($order_id, 'MNS_transaction_orderid', $ms_body['order_id'] ?? '');
-            update_post_meta($order_id, 'MNS_transaction', $tranId);
-            update_post_meta($order_id, 'MNS_PAYMENT_KEY', $mskey);
-
-            wp_redirect(get_site_url() . "/mspaylink/" . $order_id);
-            exit;
-
-        } else {
-            $response = wp_remote_post(MNS_API_URL_CREATE_LINK_PAYMENT, array(
-                'method' => 'POST',
-                'timeout' => 120,
-                'body' => $ms_body
-            ));
-
-            if (is_wp_error($response)) {
-                (new Mslogs())->insert($response->get_error_message(), 1, 'Create Link Payment (HTTP error)', date("Y-m-d H:i:s"), json_encode($ms_body));
-                wc_add_notice(__('Error : ' . MNS_NOTICE_ERROR_SETUP, $this->domain), 'error');
-                return;
-            }
-
-            $body = wp_remote_retrieve_body($response);
-
-            $data_status = json_decode($body);
-            if (empty($data_status) || !isset($data_status[0]->status) || $data_status[0]->status != "success") {
-                wc_add_notice(__('Error ms102 : ' . MNS_NOTICE_CHECK_TRANSACTION, $this->domain), 'error');
-                return;
-            }
-
-            // Note: MSKey is supposed to be long for security - it's an encrypted payment token
-            // Removed incorrect length validation that was preventing successful payments
-
-            $tranId = $data_status[0]->transaction_ID ?? '';
-            $linkPayment = $data_status[0]->link_payment ?? '';
-
-            update_post_meta($order_id, 'MNS_transaction_orderid', $ms_body['order_id'] ?? '');
-            update_post_meta($order_id, 'MNS_transaction', $tranId);
-            wp_redirect($linkPayment);
-            exit; 
-        }
-    }
-
-    public function create_payment_transaction($order_id, $ms_body, $ms_template_payment, $gateways) {
-        
-        $response = wp_remote_post(MNS_API_URL_CREATE, array(
-            'method' => 'POST',
-            'timeout' => 120,
-            'body' => $ms_body
-        ));
-        
         if (is_wp_error($response)) {
+            (new Mslogs())->insert($response->get_error_message(), 1, 'Create Link Payment (HTTP error)', date("Y-m-d H:i:s"), json_encode($ms_body));
             wc_add_notice(__('Error : ' . MNS_NOTICE_ERROR_SETUP, $this->domain), 'error');
             return;
         }
-
+        
         $body = wp_remote_retrieve_body($response);
+
         $data_status = json_decode($body);
         if (empty($data_status) || !isset($data_status[0]->status) || $data_status[0]->status != "success") {
             wc_add_notice(__('Error ms102 : ' . MNS_NOTICE_CHECK_TRANSACTION, $this->domain), 'error');
             return;
         }
-
+        
         // Note: MSKey is supposed to be long for security - it's an encrypted payment token
         // Removed incorrect length validation that was preventing successful payments
 
         $tranId = $data_status[0]->transaction_ID ?? '';
-        $mskey = $data_status[0]->mskey ?? '';
-        
+        $linkPayment = $data_status[0]->link_payment ?? '';
+
         update_post_meta($order_id, 'MNS_transaction_orderid', $ms_body['order_id'] ?? '');
         update_post_meta($order_id, 'MNS_transaction', $tranId);
-        update_post_meta($order_id, 'MNS_PAYMENT_KEY', $mskey);
-        
-        if ($ms_template_payment == "1") {
-            wp_redirect(get_site_url() . "/mspaylink/" . $order_id);
-            exit;
-        }
-        
-        if ($ms_template_payment == "2") {
-            
-            _e('<div align="center">
-            <div id="moneyspace-payment" 
-                    template="2"
-                    lang="eng"
-                    ms-title="' . $gateways['moneyspace']->settings['title'] . '" 
-                    ms-key="' . $mskey . '" 
-                    description="false">
-            </div>
-            </div>');
-            wp_register_script('cc_mspayment', MNS_PAYMENT_FORM_JS, array(), false, true);
-            wp_enqueue_script('cc_mspayment', MNS_PAYMENT_FORM_JS, array(), false, true);
-            $customStyle = ("
-            input[type=text]{
-                box-sizing: content-box !important;
-                background-color: transparent !important;
-            }
-
-            .MuiOutlinedInput-notchedOutline {
-                background: transparent !important;
-            }
-
-            .MuiInputLabel-outlined.MuiInputLabel-shrink {
-                left: -0.6em !important;
-            }
-
-            .MuiInput-underline:before, .MuiInput-underline:after {
-                border-bottom: 0px !important;
-            }
-
-            .MuiSelect-select:focus {
-                background-color: transparent !important;
-            }
-
-            .MuiGrid-root.MuiGrid-container.MuiGrid-justify-xs-center > div > img {
-                width: 10em !important;
-                height: auto !important;
-            }
-
-            .MuiGrid-root.MuiGrid-container.MuiGrid-justify-xs-center {
-                padding-bottom: 10px !important;
-            }
-
-            .MuiContainer-maxWidthXs {
-                max-width: 100%;
-            }");    
-            
-            add_action('wp_enqueue_scripts', function() use ($customStyle) {
-                wp_register_style( 'custom-css-handle', false );
-                wp_enqueue_style( 'custom-css-handle' );
-                wp_add_inline_style( 'custom-css-handle', $customStyle );
-            });
-        } else {
-            wp_redirect(get_site_url() . "/mspaylink/" . $order_id);
-            exit;
-        }
-    }
-
-    public function create_payment_transaction_v2($order_id, $ms_secret_key, $ms_body, $ms_template_payment, $gateways) {
-        $response = wp_remote_post(MNS_API_URL_V2_CREATE_PAYMENT, array(
-            'method' => 'POST',
-            'timeout' => 120,
-            'body' => $ms_body
-        ));
-
-        if (is_wp_error($response)) {
-            (new Mslogs())->insert($response->get_error_message(), 1, 'Create Transaction Card (HTTP error)', date("Y-m-d H:i:s"), json_encode($ms_body));
-            wc_add_notice(__(MNS_NOTICE_ERROR_SETUP, $this->domain), 'error');
-            return;
-        }
-
-        $body = wp_remote_retrieve_body($response);
-        (new Mslogs())->insert($body, 1, 'Create Transaction Card', date("Y-m-d H:i:s"), json_encode($ms_body));
-
-        $json_tranId_status = json_decode($body);
-        if (empty($json_tranId_status) || (isset($json_tranId_status[0]->status) && $json_tranId_status[0]->status == "NotFound")) {
-            wc_add_notice(__(MNS_NOTICE_ERROR_SETUP, $this->domain), 'error');
-            return;
-        } 
-        $trans_ID = "Transaction ID";
-        $json_tranId = json_decode($body);
-        $tranId = $json_tranId[0]->$trans_ID ?? '';
-        $ms_time = $ms_body['timeHash'] ?? '';
-        $ms_secret_id = $ms_body['secreteID'] ?? '';
-        $hash_link = hash_hmac('sha256', $tranId . $ms_time, $ms_secret_key);
-        $link = "https://www.moneyspace.net/merchantapi/makepayment/linkpaymentcard?transactionID=" . $tranId . "&timehash=" . $ms_time . "&secreteID=" . $ms_secret_id . "&hash=" . $hash_link;
-        update_post_meta($order_id, 'MNS_transaction', $tranId);
-        update_post_meta($order_id, 'MNS_transaction_orderid', $ms_body["customer_order_id"] ?? '');
-        update_post_meta($order_id, 'MNS_LINK', $link);
-        WC()->cart->empty_cart();
-        wp_redirect($link);
-        exit;
+        wp_redirect($linkPayment);
     }
 
     public function init_form_fields()
@@ -354,15 +153,6 @@ class MNS_Payment_Gateway extends WC_Payment_Gateway
                 'desc_tip' => true,
                 'options' => ["Disable" => MNS_STOCKSETTING_DISABLE, "Enable" => MNS_STOCKSETTING_ENABLE]
             ),
-            'ms_template_payment' => array(
-                'title' => __("เลือกรูปแบบ UI", $this->domain),
-                'description' => __('', $this->domain),
-                'type' => 'select',
-                'class' => 'wc-enhanced-select',
-                'default' => "1",
-                'desc_tip' => true,
-                'options' => ["1" => "รูปแบบที่ 1", "2" => "รูปแบบที่ 2"]
-            ),
             'header_setting_QRPROM' => array(
                 'title' => __(set_title_html(MNS_FORM_FIELD_HEADER_SETTING_MS . " ( " . MNS_TYPE_PAYMENT_QR . " )"), $this->domain),
                 'type' => 'title'
@@ -429,19 +219,8 @@ class MNS_Payment_Gateway extends WC_Payment_Gateway
 
     public function payment_fields()
     {
-        $gateways = WC()->payment_gateways->get_available_payment_gateways();
-        $ms_template_payment = $gateways['moneyspace']->settings['ms_template_payment'];
-        $ms_fees = $gateways['moneyspace']->settings['fee_setting'];
-
         if ($description = $this->get_description()) {
             _e(wpautop(wptexturize($description)));
-        }
-        if ($ms_template_payment == "1" && $ms_fees == "include") {
-            add_action('wp_enqueue_scripts', function() {
-                wp_register_style( "moneyspace-style", MNS_PAYMENT_FORM_CSS, array(), "1.0.0", "");
-                wp_enqueue_style( "moneyspace-style", MNS_PAYMENT_FORM_CSS, array(), "1.0.0", "");
-            });
-            require_once MNS_ROOT . '/templates/credit-cards/mns-cc-tpl-1.php';
         }
     }
 
@@ -456,61 +235,6 @@ class MNS_Payment_Gateway extends WC_Payment_Gateway
         if (get_woocommerce_currency() == "THB") {
             update_post_meta($order_id, 'MNS_PAYMENT_TYPE', "Card");
             delete_post_meta($order_id, 'MNS_transaction');
-
-            // Debug logging for payment data (SAFE - no sensitive card data)
-            if (defined('WP_DEBUG') && WP_DEBUG) {
-                $safe_post_data = moneyspace_filter_sensitive_data($_POST);
-                error_log('MoneySpace Payment Debug - POST data (sensitive data removed): ' . print_r($safe_post_data, true));
-            }
-            
-            // Handle WooCommerce Blocks payment data
-            $cardNumber = '';
-            $cardHolder = '';
-            $cardExpDate = '';
-            $cardExpDateYear = '';
-            $cardCVV = '';
-            
-            // Check if payment data comes from WooCommerce Blocks
-            if (isset($_POST['payment_data']) && is_array($_POST['payment_data'])) {
-                $payment_data = $_POST['payment_data'];
-                $cardNumber = sanitize_text_field($payment_data['cardNumber'] ?? '');
-                $cardHolder = sanitize_text_field($payment_data['cardHolder'] ?? '');
-                $cardExpDate = sanitize_text_field($payment_data['cardExpDate'] ?? '');
-                $cardExpDateYear = sanitize_text_field($payment_data['cardExpDateYear'] ?? '');
-                $cardCVV = sanitize_text_field($payment_data['cardCVV'] ?? '');
-                
-                error_log('MoneySpace Payment Debug - Using Blocks payment data');
-            }
-            
-            // Fallback to traditional POST fields if Blocks data not available
-            if (empty($cardNumber)) {
-                $cardNumber = sanitize_text_field($_POST["cardNumber"] ?? $_POST["cardnumber"] ?? '');
-                $cardHolder = sanitize_text_field($_POST["cardHolder"] ?? $_POST["cardholder"] ?? '');
-                $cardExpDate = sanitize_text_field($_POST["cardExpDate"] ?? $_POST["cardexpdate"] ?? '');
-                $cardExpDateYear = sanitize_text_field($_POST["cardExpDateYear"] ?? $_POST["cardexpdateyear"] ?? '');
-                $cardCVV = sanitize_text_field($_POST["cardCVV"] ?? $_POST["cardcvv"] ?? '');
-                
-                error_log('MoneySpace Payment Debug - Using traditional POST data (card data extracted safely)');
-            }
-            
-            $gateways = WC()->payment_gateways->get_available_payment_gateways();
-            $ms_template_payment = $gateways['moneyspace']->settings['ms_template_payment'];
-            $ms_fees = $gateways['moneyspace']->settings['fee_setting'];
-
-            // Validate card data
-            if ($ms_template_payment == "1" && $ms_fees == "include") {
-                if (empty($cardNumber) || empty($cardHolder) || empty($cardExpDate) || empty($cardExpDateYear) || empty($cardCVV)) {
-                    moneyspace_debug_log('Payment Error: Missing credit card information', true); // Always log errors
-                    wc_add_notice(__('Error: Missing credit card information. Please check your card details.', $this->domain), 'error');
-                    return array(
-                        'result' => 'failure',
-                        'messages' => __('Error: Missing credit card information. Please check your card details.', $this->domain)
-                    );
-                }
-            }
-            
-            $MNS_CARD = $cardNumber."|".$cardHolder."|".$cardExpDate."|".$cardExpDateYear."|".$cardCVV;
-            update_post_meta($order_id, 'MNS_CARD', base64_encode($MNS_CARD));
 
             $order = wc_get_order($order_id);
             return $this->_process_external_payment($order);
@@ -535,7 +259,6 @@ class MNS_Payment_Gateway extends WC_Payment_Gateway
         $ms_secret_id = $payment_gateway->settings['secret_id'];
         $ms_secret_key = $payment_gateway->settings['secret_key'];
         $ms_fee = $payment_gateway->settings['fee_setting'];
-        $ms_template_payment = $gateways['moneyspace']->settings['ms_template_payment'];
 
         $ms_time = date("YmdHis");
         $items = $order->get_items();
@@ -548,40 +271,9 @@ class MNS_Payment_Gateway extends WC_Payment_Gateway
         }
 
         $body_post = set_body($order_id, $order, $gateways, $order_amount, $items_msg, "", $ms_fee, $ms_time);
-            
-        if ($ms_fee == "include") {
-            $ms_body = set_req_message($ms_secret_id, $ms_secret_key, $body_post, "card", $return_url);
-            return $this->create_payment_transaction_v3($order_id, $ms_body, $ms_template_payment, $gateways);
-        }
-
-        if ($ms_fee == "exclude") {
-            $body_post["message"] = "Order ID#".$order_id;
-            $body_post["successUrl"] = $return_url;
-            $body_post["failUrl"] = $return_url;
-            $body_post["cancelUrl"] = $return_url;
-            $hash_data = $body_post["firstname"] . $body_post["lastname"] . $body_post["email"] . $body_post["phone"] 
-            . $body_post["amount"] . $body_post["currency"] . preg_replace( "/<br>|\n/", "", $body_post["description"] ) 
-            . $body_post["address"] . $body_post["message"] . $body_post["feeType"] . $body_post["timeHash"] . $body_post["customer_order_id"] 
-            . $body_post["gatewayType"] . $body_post["successUrl"] . $body_post["failUrl"] . $body_post["cancelUrl"];
-            $hash_body = hash_hmac('sha256', $hash_data, $ms_secret_key);
-            $ms_body = array('secreteID' => $ms_secret_id, 'firstname' => $body_post["firstname"], 'lastname' => $body_post["lastname"], 'email' => $body_post["email"], 'phone' => $body_post["phone"], 'amount' => $body_post["amount"], 'currency' => $body_post["currency"], 'description' => preg_replace( "/<br>|\n/", "", $body_post["description"] ), 'address' => $body_post["address"], 'message' => $body_post["message"], 'feeType' => $body_post["feeType"], 'customer_order_id' => $body_post["customer_order_id"], 'gatewayType' => $body_post["gatewayType"], 'timeHash' => $body_post["timeHash"], 'hash' => $hash_body, 'successUrl' => $body_post["successUrl"], 'failUrl' => $body_post["failUrl"], 'cancelUrl' => $body_post["cancelUrl"]);
-            return $this->create_payment_transaction_v2($order_id, $ms_secret_key, $ms_body, $ms_template_payment, $gateways);
-        }
-    }
-
-    public function custom_order_pay($order_id)
-    {
-        // TODO: Show payment form in here
-        $order = new WC_Order($order_id);
-        if (strtolower($order->get_status()) != "cancelled")
-        {
-            add_action('wp_enqueue_scripts', function() {
-                wp_register_style( "bootstrap-style", MNS_ROOT_URL ."includes/libs/bootstrap-4.6.0-dist/css/bootstrap.css", array(), "4.6.0", "all" );
-                wp_enqueue_style( "bootstrap-style", MNS_ROOT_URL ."includes/libs/bootstrap-4.6.0-dist/css/bootstrap.css", array(), "4.6.0", "all");
-            });
-            require_once MNS_ROOT . '/templates/credit-cards/mns-cc-tpl-1.php';
-            
-        }
+        
+        $ms_body = set_req_message($ms_secret_id, $ms_secret_key, $body_post, "card", $return_url);
+        return $this->create_payment_transaction_v3($order_id, $ms_body);
     }
 
     protected function _process_external_payment($order)
@@ -591,24 +283,6 @@ class MNS_Payment_Gateway extends WC_Payment_Gateway
             'result' => 'success',
             'redirect' => $order->get_checkout_payment_url(true)
         );
-    }
-
-    public function after_checkout_validation($data, $errors)
-    {
-        if($_POST["cardNumber"] == "" && $data["payment_method"] == "moneyspace" && $data["ms_template_payment"] == "1")
-            $errors->add( 'validation', __( 'Please input Card Number.' ));
-
-        if($_POST["cardHolder"] == "" && $data["payment_method"] == "moneyspace" && $data["ms_template_payment"] == "1")
-            $errors->add( 'validation', __( 'Please input Card Holder.' ));
-
-        if($_POST["cardExpDate"] == "" && $data["payment_method"] == "moneyspace" && $data["ms_template_payment"] == "1")
-            $errors->add( 'validation', __( 'Please input Card Exp Date.' ));
-
-        if($_POST["cardExpDateYear"] == "" && $data["payment_method"] == "moneyspace" && $data["ms_template_payment"] == "1")
-            $errors->add( 'validation', __( 'Please input Card Exp Year.' ));
-
-        if($_POST["cardCVV"] == "" && $data["payment_method"] == "moneyspace" && $data["ms_template_payment"] == "1")
-            $errors->add( 'validation', __( 'Please input Card CVV.' ));
     }
     
     public function avia_thank_you($thank_you_text, $order)

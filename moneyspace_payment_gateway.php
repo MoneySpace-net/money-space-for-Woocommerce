@@ -18,8 +18,6 @@ use MoneySpace\MNS_Router_Page;
 use MoneySpace\MNS_Router;
 use MoneySpace\MNS_Processpayment;
 use MoneySpace\MNS_Webhook;
-use MoneySpace\MNS_Paylink;
-use MoneySpace\MNS_Payform;
 use MoneySpace\MNS_Cancel;
 use MoneySpace\MNS_Info;
 use MoneySpace\MNS_CheckPayment;
@@ -104,8 +102,6 @@ class MoneySpacePayment {
             MoneySpacePayment::Import('includes/MNS_Router_Page.class.php');
             MoneySpacePayment::Import('router/processpayment.php');
             MoneySpacePayment::Import('router/webhook.php');
-            MoneySpacePayment::Import('router/mspaylink.php');
-            MoneySpacePayment::Import('router/payform.php');
             MoneySpacePayment::Import('router/cancel.php');
             MoneySpacePayment::Import('router/info.php');
             MoneySpacePayment::Import('router/check-payment.php');
@@ -117,8 +113,6 @@ class MoneySpacePayment {
             add_action(MNS_Router_Utility::PLUGIN_INIT_HOOK, array(MNS_Router::class, 'init'), 1, 0);
             add_action(MNS_Router_Utility::PLUGIN_INIT_HOOK, array(MNS_Processpayment::class, 'init'), 1, 0);
             add_action(MNS_Router_Utility::PLUGIN_INIT_HOOK, array(MNS_Webhook::class, 'init'), 1, 0);
-            add_action(MNS_Router_Utility::PLUGIN_INIT_HOOK, array(MNS_Paylink::class, 'init'), 1, 0);
-            add_action(MNS_Router_Utility::PLUGIN_INIT_HOOK, array(MNS_Payform::class, 'init'), 1, 0);
             add_action(MNS_Router_Utility::PLUGIN_INIT_HOOK, array(MNS_Cancel::class, 'init'), 1, 0);
             add_action(MNS_Router_Utility::PLUGIN_INIT_HOOK, array(MNS_Info::class, 'init'), 1, 0);
             add_action(MNS_Router_Utility::PLUGIN_INIT_HOOK, array(MNS_CheckPayment::class, 'init'), 1, 0);

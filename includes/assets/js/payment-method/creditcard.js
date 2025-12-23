@@ -2,7 +2,6 @@ import { getSetting } from '@woocommerce/settings';
 import { decodeEntities } from '@wordpress/html-entities';
 import { registerPaymentMethod  } from '@woocommerce/blocks-registry';
 import { useMemo } from '@wordpress/element';
-import CreditCardForm from './../components/CreditCardForm';
 import PaymentMethodLabel from '../components/PaymentMethodLabel';
 import './styles.scss';
 
@@ -37,7 +36,7 @@ const Content = (props) => {
         ...props
     }), [props]);
 
-    return template_payment == 1 && ms_fees == "include" ? <CreditCardForm {...formProps} /> : decodeEntities( settings.description || '' );
+    return decodeEntities( settings.description || '' );
 };
 
 const options = {
