@@ -46,7 +46,8 @@ class MNS_Payment_Gateway extends WC_Payment_Gateway
             ));
 
         if (is_wp_error($response)) {
-            (new Mslogs())->insert($response->get_error_message(), 1, 'Create Link Payment (HTTP error)', date("Y-m-d H:i:s"), json_encode($ms_body));
+            $log_body = function_exists('moneyspace_filter_sensitive_data') ? moneyspace_filter_sensitive_data($ms_body) : $ms_body;
+            (new Mslogs())->insert($response->get_error_message(), 1, 'Create Link Payment (HTTP error)', date("Y-m-d H:i:s"), json_encode($log_body));
             wc_add_notice(__('Error : ' . MNS_NOTICE_ERROR_SETUP, $this->domain), 'error');
             return;
         }
@@ -263,7 +264,11 @@ class MNS_Payment_Gateway extends WC_Payment_Gateway
         $ms_time = date("YmdHis");
         $items = $order->get_items();
         $items_msg = set_item_message($items);
-        $return_url = get_site_url() . "/process/payment/" . $order_id;
+        $return_url = add_query_arg(
+            'key',
+            $order->get_order_key(),
+            trailingslashit(get_site_url()) . 'process/payment/' . $order_id
+        );
         
         $error_list = array("wc-failed", "wc-cancelled", "wc-refunded");
         if (in_array($ms_order_select, $error_list)) {

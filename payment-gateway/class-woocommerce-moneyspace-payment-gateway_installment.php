@@ -540,7 +540,11 @@ class MNS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
         $order_amount = $order->get_total();
 
         $items_msg = set_item_message($items);
-        $return_url = get_site_url() . "/process/payment/" . $order_id;
+        $return_url = add_query_arg(
+            'key',
+            $order->get_order_key(),
+            trailingslashit(get_site_url()) . 'process/payment/' . $order_id
+        );
 
         $error_list = array("wc-failed", "wc-cancelled", "wc-refunded");
         if (in_array($ms_order_select, $error_list)) {
@@ -570,8 +574,9 @@ class MNS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
         , "endTerm" => $endTerm);
         
         if (defined('WP_DEBUG') && WP_DEBUG) {
+            $log_body = function_exists('moneyspace_filter_sensitive_data') ? moneyspace_filter_sensitive_data($payment_data) : $payment_data;
             error_log('MoneySpace Installment API: Creating payment transaction for order ' . $order_id);
-            error_log('MoneySpace Installment API: Request body: ' . json_encode($payment_data));
+            error_log('MoneySpace Installment API: Request body: ' . json_encode($log_body));
         }
         
         $response = wp_remote_post(MNS_API_URL_CREATE_INSTALLMENT, 
@@ -584,7 +589,8 @@ class MNS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
         );
         
         if (is_wp_error($response)) {
-            (new Mslogs())->insert($response->get_error_message(), 4, 'Create Transaction Installment (HTTP error)', date("Y-m-d H:i:s"), json_encode($payment_data));
+            $log_body = function_exists('moneyspace_filter_sensitive_data') ? moneyspace_filter_sensitive_data($payment_data) : $payment_data;
+            (new Mslogs())->insert($response->get_error_message(), 4, 'Create Transaction Installment (HTTP error)', date("Y-m-d H:i:s"), json_encode($log_body));
             wc_add_notice(__(json_encode($response), $this->domain), 'error');
             return;
         }
@@ -597,7 +603,8 @@ class MNS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
             error_log('MoneySpace Installment API: Response Body - ' . $body);
         }
         
-        (new Mslogs())->insert($body, 4, 'Create Transaction Installment', date("Y-m-d H:i:s"), json_encode($payment_data));
+        $log_body = function_exists('moneyspace_filter_sensitive_data') ? moneyspace_filter_sensitive_data($payment_data) : $payment_data;
+        (new Mslogs())->insert($body, 4, 'Create Transaction Installment', date("Y-m-d H:i:s"), json_encode($log_body));
 
         $json_tranId_status = json_decode($body);
                                     

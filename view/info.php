@@ -9,10 +9,11 @@ $gateways = WC()->payment_gateways->get_available_payment_gateways();
 $ms_secret_id = $gateways['moneyspace']->settings['secret_id'];
 $ms_secret_key = $gateways['moneyspace']->settings['secret_key'];
 
-$datetime = $_GET['datetime'];
+$datetime = isset($_GET['datetime']) ? sanitize_text_field(wp_unslash($_GET['datetime'])) : '';
 $hash = hash_hmac("sha256", $datetime . $ms_secret_id, $ms_secret_key);
 
-if ($hash == $_GET['hash']) {
+$provided_hash = isset($_GET['hash']) ? sanitize_text_field(wp_unslash($_GET['hash'])) : '';
+if ($hash && $provided_hash && hash_equals($hash, $provided_hash)) {
 
 
     $request = wp_remote_get('https://www.moneyspace.net/merchantapi/v1/store/obj?timeHash=' . $datetime . '&secreteID=' . $ms_secret_id . '&hash=' . $hash, array());
@@ -175,15 +176,15 @@ function ca_get_woo_version_number()
                                     <?= $data->m_func_type ?>
                             <?php } ?>
                         </td>
-                        <td><?= $data->m_datetime ?></td>
-                        <td><?= $data->m_func_desc ?></td>
+                        <td><?= esc_html($data->m_datetime) ?></td>
+                        <td><?= esc_html($data->m_func_desc) ?></td>
                         <td>
                         <a class="btn btn-primary" data-bs-toggle="collapse" href="#ms_response<?=$data->id?>" role="button" aria-expanded="false" aria-controls="collapseExample">
                                 ดู
                             </a>
                             <div class="collapse" id="ms_response<?=$data->id?>">
                                 <div class="card card-body">
-                                    <?= $data->response ?>
+                                    <?= esc_html($data->response) ?>
                                 </div>
                             </div>
                         </td>
@@ -193,7 +194,7 @@ function ca_get_woo_version_number()
                             </a>
                             <div class="collapse" id="ms_other<?=$data->id?>">
                                 <div class="card card-body">
-                                    <?= $data->m_other ?>
+                                    <?= esc_html($data->m_other) ?>
                                 </div>
                             </div>
                         </td>

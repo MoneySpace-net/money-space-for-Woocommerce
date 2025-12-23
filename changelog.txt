@@ -1,5 +1,10 @@
 == Changelog ==
 
+= 2.14.0 - 2025-12-23 =
+
+* 2025-12-23 : Security - Improve access control for payment callback/status endpoints
+* 2025-12-23 : Security - Harden sensitive data handling (avoid logging secrets)
+
 = 2.13.10 - 2025-12-23 =
 
 * 2025-12-23 : Update WooCommerce Blocks credit card UI to respect fee setting

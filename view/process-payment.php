@@ -3,7 +3,15 @@
 global $wpdb;
 
 global $woocommerce;
+$pid = absint($pid);
 $order = wc_get_order($pid);
+$provided_key = isset($_GET['key']) ? sanitize_text_field(wp_unslash($_GET['key'])) : '';
+
+if (!$order || (function_exists('moneyspace_can_access_order') && !moneyspace_can_access_order($order, $provided_key))) {
+    status_header(404);
+    nocache_headers();
+    exit;
+}
 
 if ($order && $pid) {
 
