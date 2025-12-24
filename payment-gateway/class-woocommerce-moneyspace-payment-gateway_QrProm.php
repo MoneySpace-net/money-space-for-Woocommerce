@@ -53,7 +53,8 @@ class MNS_Payment_Gateway_QR extends WC_Payment_Gateway
 
         if (is_wp_error($response)) {
             if (defined('WP_DEBUG') && WP_DEBUG) {
-                (new Mslogs())->insert($response->get_error_message(), 3, 'Create Transaction QR (HTTP error)', $dt->format("Y-m-d H:i:s"), json_encode($ms_body));
+                $log_body = function_exists('moneyspace_filter_sensitive_data') ? moneyspace_filter_sensitive_data($ms_body) : $ms_body;
+                (new Mslogs())->insert($response->get_error_message(), 3, 'Create Transaction QR (HTTP error)', $dt->format("Y-m-d H:i:s"), json_encode($log_body));
             }
             wc_add_notice(__(MNS_NOTICE_ERROR_SETUP, $this->domain), 'error');
             return;
@@ -61,7 +62,8 @@ class MNS_Payment_Gateway_QR extends WC_Payment_Gateway
 
         $body = wp_remote_retrieve_body($response);
         if (defined('WP_DEBUG') && WP_DEBUG) {
-            (new Mslogs())->insert($body, 3, 'Create Transaction QR', $dt->format("Y-m-d H:i:s"), json_encode($ms_body));
+            $log_body = function_exists('moneyspace_filter_sensitive_data') ? moneyspace_filter_sensitive_data($ms_body) : $ms_body;
+            (new Mslogs())->insert($body, 3, 'Create Transaction QR', $dt->format("Y-m-d H:i:s"), json_encode($log_body));
         }
 
         $data_status = json_decode($body);
@@ -254,7 +256,11 @@ class MNS_Payment_Gateway_QR extends WC_Payment_Gateway
         $items_order = new WC_Order($order_id);
         $items = $order->get_items();
         $items_msg = set_item_message($items);
-        $return_url = get_site_url() . "/process/payment/" . $order_id;
+        $return_url = add_query_arg(
+            'key',
+            $order->get_order_key(),
+            trailingslashit(get_site_url()) . 'process/payment/' . $order_id
+        );
         $ms_fee = "include";
         
         $error_list = array("wc-failed", "wc-cancelled", "wc-refunded");

@@ -50,10 +50,42 @@ function moneyspace_filter_sensitive_data($data) {
     $sensitive_keys = [
         'cardNumber', 'cardnumber', 'card_number',
         'cardCVV', 'cardcvv', 'cvv', 'cvc', 'security_code',
-        'card_cvv', 'card_cvc'
+        'card_cvv', 'card_cvc',
+        'secret_id', 'secret_key'
     ];
     
     return array_diff_key($data, array_flip($sensitive_keys));
+}
+
+/**
+ * Verify whether current request can access an order context.
+ *
+ * Allows:
+ * - Admins with manage_woocommerce
+ * - The customer who owns the order (logged-in)
+ * - Guests when a valid WooCommerce order key is provided
+ */
+function moneyspace_can_access_order($order, $provided_key = '') {
+    if (!$order || !is_object($order) || !method_exists($order, 'get_id')) {
+        return false;
+    }
+
+    if (function_exists('current_user_can') && current_user_can('manage_woocommerce')) {
+        return true;
+    }
+
+    $current_user_id = function_exists('get_current_user_id') ? (int) get_current_user_id() : 0;
+    if ($current_user_id && method_exists($order, 'get_user_id') && (int) $order->get_user_id() === $current_user_id) {
+        return true;
+    }
+
+    $order_key = method_exists($order, 'get_order_key') ? (string) $order->get_order_key() : '';
+    $provided_key = (string) $provided_key;
+    if ($order_key && $provided_key && function_exists('hash_equals') && hash_equals($order_key, $provided_key)) {
+        return true;
+    }
+
+    return false;
 }
 
 function set_title_html($title) {
@@ -125,13 +157,13 @@ function set_req_message($ms_secret_id, $ms_secret_key, $body_post, $payment_typ
         "agreement" => 1,
     );
 
-    if (strtolower($body_post["feeType"]) == "exclude") {
-        unset($ms_body['payment_type']);
-        $ms_body['currency'] = $body_post["currency"];
-        $ms_body['gatewayType'] = $body_post["gatewayType"];
-        $ms_body['timeHash'] = $body_post["timeHash"];
-        $ms_body['hash'] = $hash_body;
-    }
+    // if (strtolower($body_post["feeType"]) == "exclude") {
+    //     unset($ms_body['payment_type']);
+    //     $ms_body['currency'] = $body_post["currency"];
+    //     $ms_body['gatewayType'] = $body_post["gatewayType"];
+    //     $ms_body['timeHash'] = $body_post["timeHash"];
+    //     $ms_body['hash'] = $hash_body;
+    // }
 
     return $ms_body;
 }
