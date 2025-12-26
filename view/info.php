@@ -37,7 +37,8 @@ if ($hash && $provided_hash && hash_equals($hash, $provided_hash)) {
 
 } else {
     $shop_page_url = get_permalink(wc_get_page_id('shop'));
-    wp_redirect($shop_page_url);
+    wp_safe_redirect(esc_url_raw($shop_page_url));
+    exit;
 }
 
 
@@ -69,12 +70,12 @@ function ca_get_woo_version_number()
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
     <title>wp_info</title>
-    <link rel="stylesheet" href="<?php _e(MNS_ROOT_URL . "includes/assets/bootstrap/css/bootstrap.min.css"); ?>">
-    <link rel="stylesheet" href="<?php _e(MNS_ROOT_URL . "includes/assets/fonts/font-awesome.min.css"); ?>">
-    <link rel="stylesheet" href="<?php _e(MNS_ROOT_URL . "includes/assets/css/Forum---Thread-listing-1.css"); ?>">
-    <link rel="stylesheet" href="<?php _e(MNS_ROOT_URL . "includes/assets/css/Forum---Thread-listing.css"); ?>">
-    <link rel="stylesheet" href="<?php _e(MNS_ROOT_URL . "includes/assets/css/Pricing-Table---EspacioBinariocom.css"); ?>">
-    <link rel="stylesheet" href="<?php _e(MNS_ROOT_URL . "includes/assets/css/styles.css"); ?>">
+    <link rel="stylesheet" href="<?php echo esc_url(MNS_ROOT_URL . "includes/assets/bootstrap/css/bootstrap.min.css"); ?>">
+    <link rel="stylesheet" href="<?php echo esc_url(MNS_ROOT_URL . "includes/assets/fonts/font-awesome.min.css"); ?>">
+    <link rel="stylesheet" href="<?php echo esc_url(MNS_ROOT_URL . "includes/assets/css/Forum---Thread-listing-1.css"); ?>">
+    <link rel="stylesheet" href="<?php echo esc_url(MNS_ROOT_URL . "includes/assets/css/Forum---Thread-listing.css"); ?>">
+    <link rel="stylesheet" href="<?php echo esc_url(MNS_ROOT_URL . "includes/assets/css/Pricing-Table---EspacioBinariocom.css"); ?>">
+    <link rel="stylesheet" href="<?php echo esc_url(MNS_ROOT_URL . "includes/assets/css/styles.css"); ?>">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.13.0/css/all.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css">
 
@@ -91,8 +92,8 @@ function ca_get_woo_version_number()
                             <h6 class="text-center card-subtitle mb-2 card-price"></h6>
                             <hr>
                             <ul class="fa-ul">
-                                <li><?= PHP_VERSION ?><span class="fa-li"><i class="fab fa-php" style="color: rgb(27 105 241);"></i></span></li>
-                                <li><?= $wp_version ?><span class="fa-li"><i class="fab fa-wordpress" style="color: rgb(27 105 241);"></i></span></li>
+                                <li><?php echo esc_html(PHP_VERSION); ?><span class="fa-li"><i class="fab fa-php" style="color: rgb(27 105 241);"></i></span></li>
+                                <li><?php echo esc_html($wp_version); ?><span class="fa-li"><i class="fab fa-wordpress" style="color: rgb(27 105 241);"></i></span></li>
                             </ul>
                         </div>
                     </div>
@@ -104,7 +105,7 @@ function ca_get_woo_version_number()
                             <h6 class="text-center card-subtitle mb-2 card-price"></h6>
                             <hr>
                             <ul class="fa-ul">
-                                <li><?= ca_get_woo_version_number() ?><span class="fa-li"><i class="fas fa-info-circle" style="color: rgb(27 105 241);"></i></span></li>
+                                <li><?php echo esc_html(ca_get_woo_version_number()); ?><span class="fa-li"><i class="fas fa-info-circle" style="color: rgb(27 105 241);"></i></span></li>
                             </ul>
                         </div>
                     </div>
@@ -147,54 +148,57 @@ function ca_get_woo_version_number()
                 <?php foreach ($logs as $data) { ?>
                     <tr>
                         <td>
-                            <?php switch ($data->m_func_type) {
+                            <?php
+                            switch ((int) $data->m_func_type) {
                                 case 1:
-                                    echo "CreditCard 1";
+                                    echo esc_html('CreditCard 1');
                                     break;
                                 case 2:
-                                    echo "CreditCard 2";
+                                    echo esc_html('CreditCard 2');
                                     break;
                                 case 3:
-                                    echo "QR Code";
+                                    echo esc_html('QR Code');
                                     break;
                                 case 4:
-                                    echo "Installment";
+                                    echo esc_html('Installment');
                                     break;
                                 case 5:
-                                    echo "Check order";
+                                    echo esc_html('Check order');
                                     break;
                                 case 6:
-                                    echo "Update order";
+                                    echo esc_html('Update order');
                                     break;
                                 case 7:
-                                    echo "Cancel QR Code";
+                                    echo esc_html('Cancel QR Code');
                                     break;
                                 case 8:
-                                    echo "Webhook";
+                                    echo esc_html('Webhook');
                                     break;
+                                default:
+                                    echo esc_html($data->m_func_type);
+                                    break;
+                            }
                             ?>
-                                    <?= $data->m_func_type ?>
-                            <?php } ?>
                         </td>
-                        <td><?= esc_html($data->m_datetime) ?></td>
-                        <td><?= esc_html($data->m_func_desc) ?></td>
+                        <td><?php echo esc_html($data->m_datetime); ?></td>
+                        <td><?php echo esc_html($data->m_func_desc); ?></td>
                         <td>
-                        <a class="btn btn-primary" data-bs-toggle="collapse" href="#ms_response<?=$data->id?>" role="button" aria-expanded="false" aria-controls="collapseExample">
+                        <a class="btn btn-primary" data-bs-toggle="collapse" href="#ms_response<?php echo esc_attr($data->id); ?>" role="button" aria-expanded="false" aria-controls="collapseExample">
                                 ดู
                             </a>
-                            <div class="collapse" id="ms_response<?=$data->id?>">
+                            <div class="collapse" id="ms_response<?php echo esc_attr($data->id); ?>">
                                 <div class="card card-body">
-                                    <?= esc_html($data->response) ?>
+                                    <?php echo esc_html($data->response); ?>
                                 </div>
                             </div>
                         </td>
                         <td>
-                            <a class="btn btn-primary" data-bs-toggle="collapse" href="#ms_other<?=$data->id?>" role="button" aria-expanded="false" aria-controls="collapseExample">
+                            <a class="btn btn-primary" data-bs-toggle="collapse" href="#ms_other<?php echo esc_attr($data->id); ?>" role="button" aria-expanded="false" aria-controls="collapseExample">
                                 ดู
                             </a>
-                            <div class="collapse" id="ms_other<?=$data->id?>">
+                            <div class="collapse" id="ms_other<?php echo esc_attr($data->id); ?>">
                                 <div class="card card-body">
-                                    <?= esc_html($data->m_other) ?>
+                                    <?php echo esc_html($data->m_other); ?>
                                 </div>
                             </div>
                         </td>
@@ -213,7 +217,7 @@ function ca_get_woo_version_number()
         });
     </script>
 
-    <script src="<?php _e(MNS_ROOT_URL . "includes/assets/bootstrap/js/bootstrap.min.js"); ?>"></script>
+    <script src="<?php echo esc_url(MNS_ROOT_URL . "includes/assets/bootstrap/js/bootstrap.min.js"); ?>"></script>
 
 </body>
 

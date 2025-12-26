@@ -67,7 +67,8 @@ if (!empty(sanitize_text_field($_POST["transectionID"]))) {
                 $order->update_status("wc-processing");
             }else{
                 $order->update_status($ms_order_select_qr);
-                wp_redirect($order->get_checkout_order_received_url());
+                wp_safe_redirect(esc_url_raw($order->get_checkout_order_received_url()));
+                exit;
             }
         } else if($MNS_PAYMENT_TYPE == "Installment"){
 

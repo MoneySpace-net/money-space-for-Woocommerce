@@ -227,8 +227,8 @@ class MNS_Router extends MNS_Router_Utility
         // we'll only get a 'MNS_Router_page' query var when visiting
         // the page for a WP Router post, and there's only one of those
         if (!empty($query->query_vars[MNS_Router_Page::POST_TYPE])) {
-            wp_redirect(home_url(), 303);
-            exit();
+            wp_safe_redirect(esc_url_raw(home_url()), 303);
+            exit;
         }
     }
 

@@ -75,7 +75,8 @@ if ($order && $pid) {
                     $force_cancelling = true;
                 } 
             } else {
-                wp_redirect($order->get_checkout_order_received_url());
+                wp_safe_redirect(esc_url_raw($order->get_checkout_order_received_url()));
+                exit;
             }
         }else{
             $force_cancelling = true;
@@ -90,7 +91,8 @@ if ($order && $pid) {
 if ($force_cancelling) {
     do_action( 'woocommerce_cancelled_order', $order_id);
     $order->update_status("wc-cancelled");
-    wp_redirect($order->get_cancel_order_url());
+    wp_safe_redirect(esc_url_raw($order->get_cancel_order_url()));
+    exit;
 }
 
 function checkPaymentStatus($ms_secret_id, $ms_secret_key, $MNS_transaction) {

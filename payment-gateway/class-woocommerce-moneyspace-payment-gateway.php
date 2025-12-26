@@ -68,7 +68,21 @@ class MNS_Payment_Gateway extends WC_Payment_Gateway
 
         update_post_meta($order_id, 'MNS_transaction_orderid', $ms_body['order_id'] ?? '');
         update_post_meta($order_id, 'MNS_transaction', $tranId);
-        wp_redirect($linkPayment);
+
+        $allowed_host = wp_parse_url($linkPayment, PHP_URL_HOST);
+        if (!empty($allowed_host)) {
+            $allowed_redirect_filter = static function ($hosts) use ($allowed_host) {
+                $hosts[] = $allowed_host;
+                return array_unique($hosts);
+            };
+            add_filter('allowed_redirect_hosts', $allowed_redirect_filter);
+            wp_safe_redirect(esc_url_raw($linkPayment));
+            remove_filter('allowed_redirect_hosts', $allowed_redirect_filter);
+            exit;
+        }
+
+        wp_safe_redirect(esc_url_raw($linkPayment));
+        exit;
     }
 
     public function init_form_fields()
@@ -105,11 +119,11 @@ class MNS_Payment_Gateway extends WC_Payment_Gateway
                 'description' => MNS_DOMAIN_WEBHOOK
             ),
             'ms_domain' => array(
-                'title' => __(MNS_YOUR_DOMAIN . " : <code>" . get_site_url() . "</code>", $this->domain),
+                'title' => __(MNS_YOUR_DOMAIN . " : <code>" . esc_html(get_site_url()) . "</code>", $this->domain),
                 'type' => 'title'
             ),
             'ms_webhook' => array(
-                'title' => __(MNS_YOUR_WEBHOOK . " : <code>" . get_site_url() . "/ms/webhook" . "</code>", $this->domain),
+                'title' => __(MNS_YOUR_WEBHOOK . " : <code>" . esc_html(get_site_url()) . "/ms/webhook" . "</code>", $this->domain),
                 'type' => 'title'
             ),
             'header_setting_ms' => array(
@@ -159,7 +173,7 @@ class MNS_Payment_Gateway extends WC_Payment_Gateway
                 'type' => 'title'
             ),
             'header_setting_QRPROM_Link' => array(
-                'title' => __('<a href="admin.php?page=wc-settings&tab=checkout&section=moneyspace_qrprom">' . MNS_SETTING_LINK . '</a>', $this->domain),
+                'title' => __('<a href="admin.php?page=wc-settings&tab=checkout&section=moneyspace_qrprom">' . esc_html(MNS_SETTING_LINK) . '</a>', $this->domain),
                 'type' => 'title'
             ),
             'header_setting_INSTALLMENT' => array(
@@ -167,7 +181,7 @@ class MNS_Payment_Gateway extends WC_Payment_Gateway
                 'type' => 'title'
             ),
             'header_setting_installment_Link' => array(
-                'title' => __('<a href="admin.php?page=wc-settings&tab=checkout&section=moneyspace_installment">' . MNS_SETTING_LINK . '</a>', $this->domain),
+                'title' => __('<a href="admin.php?page=wc-settings&tab=checkout&section=moneyspace_installment">' . esc_html(MNS_SETTING_LINK) . '</a>', $this->domain),
                 'type' => 'title'
             ),
             'header_setting_ui' => array(
@@ -214,14 +228,14 @@ class MNS_Payment_Gateway extends WC_Payment_Gateway
     public function thankyou_page()
     {
         if ($this->instructions) {
-            _e(wpautop(wptexturize($this->instructions)));
+            echo wp_kses_post(wpautop(wptexturize($this->instructions)));
         }
     }
 
     public function payment_fields()
     {
         if ($description = $this->get_description()) {
-            _e(wpautop(wptexturize($description)));
+            echo wp_kses_post(wpautop(wptexturize($description)));
         }
     }
 
@@ -272,7 +286,7 @@ class MNS_Payment_Gateway extends WC_Payment_Gateway
         
         $error_list = array("wc-failed", "wc-cancelled", "wc-refunded");
         if (in_array($ms_order_select, $error_list)) {
-            _e("Error : " . MNS_NOTICE_ERROR_CONTINUE);
+            echo esc_html("Error : " . MNS_NOTICE_ERROR_CONTINUE);
         }
 
         $body_post = set_body($order_id, $order, $gateways, $order_amount, $items_msg, "", $ms_fee, $ms_time);

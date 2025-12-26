@@ -11,14 +11,28 @@ $ms_auto_check_result_time = ! empty( $payment_gateway_qr->settings['auto_check_
     : 2000;
 $enable_auto_check_result = $payment_gateway_qr->settings['enable_auto_check_result'];
 
-_e('<div style="text-align: center;">
-    <img type="image/jpeg" style="display: initial" src="data:image/png;base64,'.$image_qrprom.'"/>
+$order_key = $order ? (string) $order->get_order_key() : '';
+$cancel_url = add_query_arg(
+    'key',
+    $order_key,
+    trailingslashit(get_site_url()) . 'ms/cancel/' . $order_id
+);
+$check_url = add_query_arg(
+    'key',
+    $order_key,
+    get_site_url() . MNS_CHECK_PAYMENT_STATUS . $order_id
+);
+
+?>
+<div style="text-align: center;">
+    <img type="image/jpeg" style="display: initial" src="data:image/png;base64,<?php echo esc_attr($image_qrprom); ?>"/>
     <br />
-    <a id="qrnone1" href="data:image/png;base64,'.$image_qrprom.'" download="qrcode.png" target="_blank">
-    Download QR
+    <a id="qrnone1" href="data:image/png;base64,<?php echo esc_attr($image_qrprom); ?>" download="qrcode.png" target="_blank" rel="noopener">
+        <?php echo esc_html('Download QR'); ?>
     </a>
-    </div>
-');
+</div>
+
+<?php
 
 if(empty($auto_cancel)){
     $limit_time = 1200;
@@ -30,6 +44,8 @@ $dt->setTimestamp($MNS_QR_TIME + $limit_time);
 wc_enqueue_js('
 let timeZone = "Asia/Bangkok";
 var autoCheckIntervalMs = ' . $ms_auto_check_result_time . ';
+var cancelUrl = ' . wp_json_encode($cancel_url) . ';
+var checkUrl = ' . wp_json_encode($check_url) . ';
 function startTimer(duration) {
     var countDownDate = new Date();
     countDownDate.setMinutes(countDownDate.getMinutes() + Math.round(duration/60000));
@@ -38,7 +54,7 @@ function startTimer(duration) {
         var distance = countDownDate - now;
 
         if (countDownDate.getTime() <=  now) {
-            window.location="'.(get_site_url() . "/ms/cancel/" . $order_id).'", true; 
+            window.location = cancelUrl;
             clearInterval(refreshId);
         } else {
             // Time calculations for days, hours, minutes and seconds
@@ -63,7 +79,7 @@ function checkPayment(duration, pid) {
         if (countDownDate.getTime() <=  now) {
             clearInterval(refreshIdOfChechPayment);
         }
-        fetch("'.(get_site_url() . MNS_CHECK_PAYMENT_STATUS . $order_id).'")
+        fetch(checkUrl)
         .then(function(res) {
             return res.json();
         })

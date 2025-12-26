@@ -68,9 +68,9 @@ $text_align = is_rtl() ? 'right' : 'left';
 
 include_once 'qrnone_form.php';
 
-_e('<div style="text-align: center;">
-    <h3 id="showTime"></h3>
-    </div>
-');
-
 ?>
+
+<div style="text-align: center;">
+	<h3 id="showTime"></h3>
+</div>
+

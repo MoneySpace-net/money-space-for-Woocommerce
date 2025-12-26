@@ -170,8 +170,9 @@ class MNS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
 
     public function thankyou_page()
     {
-        if ($this->instructions)
-        _e(wpautop(wptexturize($this->instructions)));
+        if ($this->instructions) {
+            echo wp_kses_post(wpautop(wptexturize($this->instructions)));
+        }
     }
 
     public function payment_fields()
@@ -205,7 +206,7 @@ class MNS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
         }
 
         if ($description = $this->get_description()) {
-            _e(wpautop(wptexturize($description)));
+            echo wp_kses_post(wpautop(wptexturize($description)));
         }
         ?>
 
@@ -291,7 +292,7 @@ class MNS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
                     <input class="form-check-input" type="radio" style="width: 0px" name="selectbank" id="selectbank-ktc" value="KTC" onclick="KTC();">
                     <label class="form-check-label" for="selectbank-ktc">
                     เคทีซี (KTC)
-                    <img src="<?php _e(MNS_ROOT_URL . 'includes/images/installment/ktc-logo.png'); ?>">
+                    <img src="<?php echo esc_url(MNS_ROOT_URL . 'includes/images/installment/ktc-logo.png'); ?>" alt="KTC">
                     </label>
                 </div>
                 <?php if ($ms_fee == "include") { ?>
@@ -299,7 +300,7 @@ class MNS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
                     <select name="KTC_permonths" id="permonths" class="form-control">
                         <?php foreach($KTC as $months){ ?>
                             <?php if(round($amount_total / $months,2) >= 300 && $months <= $ktc_max_months_setting){ ?>
-                            <option value="<?php _e($months); ?>">ผ่อน <?php _e($months); ?> เดือน ( <?php _e(number_format($amount_total / $months,2)); ?> บาท / เดือน )</option>
+                            <option value="<?php echo esc_attr($months); ?>">ผ่อน <?php echo esc_html($months); ?> เดือน ( <?php echo esc_html(number_format($amount_total / $months, 2)); ?> บาท / เดือน )</option>
                             <?php } ?>
                         <?php } ?>
                     </select>
@@ -310,7 +311,7 @@ class MNS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
                     <select name="KTC_permonths" id="permonths" class="form-control">
                         <?php foreach($KTC as $months){ ?>
                             <?php if(round($amount_total / $months,2) >= 300 && $months <= $ktc_max_months_setting){ $ex_ktc_bay = $amount_total / 100 * 0.8 * $months + $amount_total; ?>
-                            <option value="<?php _e($months); ?>">ผ่อน <?php _e($months); ?> เดือน ( <?php _e(number_format($ex_ktc_bay / $months,2)); ?> บาท / เดือน )</option>
+                            <option value="<?php echo esc_attr($months); ?>">ผ่อน <?php echo esc_html($months); ?> เดือน ( <?php echo esc_html(number_format($ex_ktc_bay / $months, 2)); ?> บาท / เดือน )</option>
                             <?php } ?>
                         <?php } ?>
                     </select>
@@ -325,7 +326,7 @@ class MNS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
                     <input class="form-check-input" type="radio" style="width: 0px" name="selectbank" id="selectbank-bay" value="BAY" onclick="BAY();">
                     <label class="form-check-label" for="selectbank-bay">
                     กรุงศรีฯ วีซ่า , เซ็นทรัล , เทสโก้โลตัส
-                    <img src="<?php _e(MNS_ROOT_URL . 'includes/images/installment/bay_central_lotus.png'); ?>">
+                    <img src="<?php echo esc_url(MNS_ROOT_URL . 'includes/images/installment/bay_central_lotus.png'); ?>" alt="BAY">
                     </label>
                 </div>
                 <?php if ($ms_fee == "include") { ?>
@@ -333,7 +334,7 @@ class MNS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
                     <select name="BAY_permonths" id="permonths" class="form-control">
                         <?php foreach($BAY as $months){ ?>
                             <?php if(round($amount_total / $months,2) >= 500 && $months <= $bay_max_months_setting){ ?>
-                            <option value="<?php _e($months); ?>">ผ่อน <?php _e($months); ?> เดือน ( <?php _e(number_format($amount_total / $months,2)); ?> บาท / เดือน )</option>
+                            <option value="<?php echo esc_attr($months); ?>">ผ่อน <?php echo esc_html($months); ?> เดือน ( <?php echo esc_html(number_format($amount_total / $months, 2)); ?> บาท / เดือน )</option>
                             <?php } ?>
                         <?php } ?>
                     </select>
@@ -344,7 +345,7 @@ class MNS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
                     <select name="BAY_permonths" id="permonths" class="form-control">
                         <?php foreach($BAY as $months){ ?>
                             <?php if(round($amount_total / $months,2) >= 500 && $months <= $bay_max_months_setting){ $ex_ktc_bay = $amount_total / 100 * 0.8 * $months + $amount_total;?>
-                            <option value="<?php _e($months); ?>">ผ่อน <?php _e($months); ?> เดือน ( <?php _e(number_format($ex_ktc_bay / $months,2)); ?> บาท / เดือน )</option>
+                            <option value="<?php echo esc_attr($months); ?>">ผ่อน <?php echo esc_html($months); ?> เดือน ( <?php echo esc_html(number_format($ex_ktc_bay / $months, 2)); ?> บาท / เดือน )</option>
                             <?php } ?>
                         <?php } ?>
                     </select>
@@ -359,7 +360,7 @@ class MNS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
                     <input class="form-check-input" type="radio" style="width: 0px" name="selectbank" id="selectbank-fcy" value="FCY" onclick="FCY();">
                     <label class="form-check-label" for="selectbank-fcy">
                     กรุงศรีเฟิร์สช้อยส์ , โฮมโปร , เมกาโฮม
-                    <img src="<?php _e(MNS_ROOT_URL . 'includes/images/installment/fcy-logo.png'); ?>">
+                    <img src="<?php echo esc_url(MNS_ROOT_URL . 'includes/images/installment/fcy-logo.png'); ?>" alt="FCY">
                     </label>
                 </div>
                 <?php if ($ms_fee == "include") { ?>
@@ -367,7 +368,7 @@ class MNS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
                     <select name="FCY_permonths" id="permonths" class="form-control">
                         <?php foreach($FCY as $months){ ?>
                             <?php if(round($amount_total / $months,2) >= 300 && $months <= $fcy_max_months_setting){ ?>
-                            <option value="<?php _e($months); ?>">ผ่อน <?php _e($months); ?> เดือน ( <?php _e(number_format($amount_total / $months,2)); ?> บาท / เดือน )</option>
+                            <option value="<?php echo esc_attr($months); ?>">ผ่อน <?php echo esc_html($months); ?> เดือน ( <?php echo esc_html(number_format($amount_total / $months, 2)); ?> บาท / เดือน )</option>
                             <?php } ?>
                         <?php } ?>
                     </select>
@@ -378,7 +379,7 @@ class MNS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
                     <select name="FCY_permonths" id="permonths" class="form-control">
                         <?php foreach($FCY as $months){ ?>
                             <?php if(round($amount_total / $months,2) >= 300 && $months <= $fcy_max_months_setting){ $ex_fcy = $amount_total / 100 * 1 * $months + $amount_total; ?>
-                            <option value="<?php _e($months); ?>">ผ่อน <?php _e($months); ?> เดือน ( <?php _e(number_format($ex_fcy / $months,2)); ?> บาท / เดือน )</option>
+                            <option value="<?php echo esc_attr($months); ?>">ผ่อน <?php echo esc_html($months); ?> เดือน ( <?php echo esc_html(number_format($ex_fcy / $months, 2)); ?> บาท / เดือน )</option>
                             <?php } ?>
                         <?php } ?>
                     </select>
@@ -390,7 +391,7 @@ class MNS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
             <br>
 
         <?php } else if ($amount_total < 3000.01){ ?>
-            <h5 style="color:red; font-size: inherit;"><?php _e(MNS_INS_MESSAGE_WARNING); ?></h5>
+            <h5 style="color:red; font-size: inherit;"><?php echo esc_html(MNS_INS_MESSAGE_WARNING); ?></h5>
         <?php } ?>
         <?php
 
@@ -548,7 +549,7 @@ class MNS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
 
         $error_list = array("wc-failed", "wc-cancelled", "wc-refunded");
         if (in_array($ms_order_select, $error_list)) {
-            _e("Error : " . MNS_NOTICE_ERROR_CONTINUE);
+            echo esc_html("Error : " . MNS_NOTICE_ERROR_CONTINUE);
             return;
         }
 
@@ -644,11 +645,11 @@ class MNS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
 
         ?>
         <h3 style="text-decoration: underline;">ยืนยันการชำระเงิน</h3>
-        <p><h5>จำนวนเดือน : <?php _e($endTerm."  เดือน"); ?></h5></p>
+        <p><h5>จำนวนเดือน : <?php echo esc_html($endTerm . "  เดือน"); ?></h5></p>
         <?php if($bankType == "KTC" || $bankType == "BAY"){ ?>
-        <p><h5>จำนวนเงินชำระต่อเดือน : <?php _e(round($ex_ktc_bay / $endTerm,2).get_woocommerce_currency()." / เดือน"); ?></h5></p>
+        <p><h5>จำนวนเงินชำระต่อเดือน : <?php echo esc_html(round($ex_ktc_bay / $endTerm, 2) . get_woocommerce_currency() . " / เดือน"); ?></h5></p>
         <?php }if($bankType == "FCY"){ ?>
-        <p><h5>จำนวนเงินชำระต่อเดือน : <?php _e(round($ex_fcy / $endTerm,2).get_woocommerce_currency()." / เดือน"); ?></h5></p>
+        <p><h5>จำนวนเงินชำระต่อเดือน : <?php echo esc_html(round($ex_fcy / $endTerm, 2) . get_woocommerce_currency() . " / เดือน"); ?></h5></p>
         <?php } ?>
         <?php 
         if($bankType == "KTC"){
@@ -667,16 +668,16 @@ class MNS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
         }
         ?>
         <div style="display: none;">
-            <form  id="mainform"  method="post" action="<?php _e($actionUrl); ?>">
+            <form  id="mainform"  method="post" action="<?php echo esc_url($actionUrl); ?>">
                     <div class="row">
                         <div class="col-12 col-sm-12 col-12 mt-3">
-                            <input type="hidden" name="transactionID" value="<?php _e($tranId); ?>"/>
+                            <input type="hidden" name="transactionID" value="<?php echo esc_attr($tranId); ?>"/>
                             <input type="hidden" id="pay_type" name="pay_type" value=""/>
                             <input type="hidden" id="locale" name="locale" value=""/>
-                             <input type="hidden" id="term" name="term" value="<?php _e($endTerm); ?>"/>
-                            <input type="hidden" id="payForMonth" name="paymonth" value="<?php _e($paymonth); ?>"/>
+                             <input type="hidden" id="term" name="term" value="<?php echo esc_attr($endTerm); ?>"/>
+                            <input type="hidden" id="payForMonth" name="paymonth" value="<?php echo esc_attr($paymonth); ?>"/>
                             <input type="hidden" id="interest" name="interest" value="0.0"/>
-                            <input type="hidden" id="bankType" name="bankType" value="<?php _e($bankType); ?>"/>
+                            <input type="hidden" id="bankType" name="bankType" value="<?php echo esc_attr($bankType); ?>"/>
                         </div>
                      </div>
                  <button class="button" type="submit">ชำระเงิน</button>

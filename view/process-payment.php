@@ -73,8 +73,8 @@ if ($order && $pid) {
         if (empty($json_status) || !is_array($json_status) || !isset($json_status[0])) {
             error_log('MoneySpace API: Invalid response format in process-payment.php - Response: ' . $response_body);
             $order->update_status("wc-failed");
-            wp_redirect($order->get_checkout_order_received_url());
-            return;
+            wp_safe_redirect(esc_url_raw($order->get_checkout_order_received_url()));
+            exit;
         }
         
         if (defined('WP_DEBUG') && WP_DEBUG) {
@@ -94,8 +94,8 @@ if ($order && $pid) {
             error_log('MoneySpace API: No order status found in response in process-payment.php');
             error_log('MoneySpace API: Available properties: ' . json_encode(array_keys((array)$response_data)));
             $order->update_status("wc-failed");
-            wp_redirect($order->get_checkout_order_received_url());
-            return;
+            wp_safe_redirect(esc_url_raw($order->get_checkout_order_received_url()));
+            exit;
         }
 
         cancel_payment($order_id, $payment_gateway);
@@ -131,7 +131,8 @@ if ($order && $pid) {
                     $order->update_status($ms_order_select_qr);
 
                     if($enable_auto_check_result == "yes" || $enable_auto_check_result == "") {
-                        wp_redirect($order->get_checkout_order_received_url());
+                        wp_safe_redirect(esc_url_raw($order->get_checkout_order_received_url()));
+                        exit;
                     }
                 }
             } else if($MNS_PAYMENT_TYPE == "Installment"){
@@ -148,10 +149,12 @@ if ($order && $pid) {
             }
             update_post_meta($order_id, 'MNS_PAYMENT_PAID', $ms_status->amount);
             update_post_meta($order_id, 'MNS_PAYMENT_STATUS', $ms_status->status);
-            wp_redirect($order->get_checkout_order_received_url());
+            wp_safe_redirect(esc_url_raw($order->get_checkout_order_received_url()));
+            exit;
         } else if (isset($ms_status->status) && $ms_status->status == "Cancel") {
             $order->update_status("wc-cancelled");
-            wp_redirect($order->get_cancel_order_url());
+            wp_safe_redirect(esc_url_raw($order->get_cancel_order_url()));
+            exit;
         } else if (isset($ms_status->status) && $ms_status->status == "Pending") {
             // Handle pending payments - keep order in pending status and redirect to payment page
             if (defined('WP_DEBUG') && WP_DEBUG) {
@@ -165,14 +168,29 @@ if ($order && $pid) {
                 // Check if we have a payment link in the transaction data
                 $payment_link = get_post_meta($order_id, 'MNS_PAYMENT_LINK', true);
                 if (!empty($payment_link)) {
-                    wp_redirect($payment_link);
+                    $allowed_host = wp_parse_url($payment_link, PHP_URL_HOST);
+                    if (!empty($allowed_host)) {
+                        $allowed_redirect_filter = static function ($hosts) use ($allowed_host) {
+                            $hosts[] = $allowed_host;
+                            return array_unique($hosts);
+                        };
+                        add_filter('allowed_redirect_hosts', $allowed_redirect_filter);
+                        wp_safe_redirect(esc_url_raw($payment_link));
+                        remove_filter('allowed_redirect_hosts', $allowed_redirect_filter);
+                        exit;
+                    }
+
+                    wp_safe_redirect(esc_url_raw($payment_link));
+                    exit;
                 } else {
                     // Redirect to a pending payment page or back to checkout
                     wc_add_notice(__('Your payment is pending. Please complete the payment process.', 'woocommerce'), 'notice');
-                    wp_redirect($order->get_checkout_payment_url(true));
+                    wp_safe_redirect(esc_url_raw($order->get_checkout_payment_url(true)));
+                    exit;
                 }
             } else {
-                wp_redirect($order->get_checkout_order_received_url());
+                wp_safe_redirect(esc_url_raw($order->get_checkout_order_received_url()));
+                exit;
             }
         } else {
             # Fail case - log the received status for debugging
@@ -192,17 +210,21 @@ if ($order && $pid) {
             $order->add_order_note($failure_reason);
             
             $order->update_status("wc-failed");
-            wp_redirect($order->get_checkout_order_received_url());
+            wp_safe_redirect(esc_url_raw($order->get_checkout_order_received_url()));
+            exit;
         }
     } else {
         $order->update_status("wc-failed");
-        wp_redirect($order->get_checkout_order_received_url());
+        wp_safe_redirect(esc_url_raw($order->get_checkout_order_received_url()));
+        exit;
     }
     WC()->cart->empty_cart();
 } else {
     if ($order) {
-        wp_redirect($order->get_checkout_order_received_url());
+        wp_safe_redirect(esc_url_raw($order->get_checkout_order_received_url()));
+        exit;
     } else {
-        wp_redirect(wc_get_cart_url());
+        wp_safe_redirect(esc_url_raw(wc_get_cart_url()));
+        exit;
     }
 }

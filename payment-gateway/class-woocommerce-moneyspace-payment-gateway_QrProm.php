@@ -183,14 +183,14 @@ class MNS_Payment_Gateway_QR extends WC_Payment_Gateway
     public function thankyou_page()
     {
         if ($this->instructions) {
-            _e(wpautop(wptexturize($this->instructions)));
+            echo wp_kses_post(wpautop(wptexturize($this->instructions)));
         }
     }
 
     public function payment_fields()
     {
         if ($description = $this->get_description()) {
-            _e(wpautop(wptexturize($description)));
+            echo wp_kses_post(wpautop(wptexturize($description)));
         }
     }
 
