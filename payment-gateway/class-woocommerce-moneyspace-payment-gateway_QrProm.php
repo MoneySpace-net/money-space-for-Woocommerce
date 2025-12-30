@@ -18,13 +18,13 @@ class MNS_Payment_Gateway_QR extends WC_Payment_Gateway
 
     public function __construct()
     {
-        $this->domain = 'ms_payment_qrprom';
+        $this->domain = 'money-space';
 
-        $this->id = MNS_ID_QRPROM;
+        $this->id = MONEYSPACE_ID_QRPROM;
         $this->title = $this->get_option('title');
-        $this->icon = apply_filters('woocommerce_custom_gateway_icon', MNS_LOGO_QR, '');
-        $this->method_title = MNS_METHOD_TITLE . "( " . MNS_TYPE_PAYMENT_QR . " )";
-        $this->method_description = MNS_DESCRIPTION_QR;
+        $this->icon = apply_filters('moneyspace_gateway_icon', MONEYSPACE_LOGO_QR, '');
+        $this->method_title = MONEYSPACE_METHOD_TITLE . "( " . MONEYSPACE_TYPE_PAYMENT_QR . " )";
+        $this->method_description = MONEYSPACE_DESCRIPTION_QR;
         $this->has_fields = true;
 
         $this->init_form_fields();
@@ -45,7 +45,7 @@ class MNS_Payment_Gateway_QR extends WC_Payment_Gateway
         $tz = 'Asia/Bangkok';
         $dt = new DateTime("now", new DateTimeZone($tz));
 
-        $response = wp_remote_post(MNS_API_URL_CREATE_LINK_PAYMENT, array(
+        $response = wp_remote_post(MONEYSPACE_API_URL_CREATE_LINK_PAYMENT, array(
             'method' => 'POST',
             'timeout' => 120,
             'body' => $ms_body
@@ -56,7 +56,7 @@ class MNS_Payment_Gateway_QR extends WC_Payment_Gateway
                 $log_body = function_exists('moneyspace_filter_sensitive_data') ? moneyspace_filter_sensitive_data($ms_body) : $ms_body;
                 (new Mslogs())->insert($response->get_error_message(), 3, 'Create Transaction QR (HTTP error)', $dt->format("Y-m-d H:i:s"), json_encode($log_body));
             }
-            wc_add_notice(MNS_NOTICE_ERROR_SETUP, 'error');
+            wc_add_notice(MONEYSPACE_NOTICE_ERROR_SETUP, 'error');
             return;
         }
 
@@ -68,7 +68,7 @@ class MNS_Payment_Gateway_QR extends WC_Payment_Gateway
 
         $data_status = json_decode($body);
         if (empty($data_status) || !isset($data_status[0]->status) || $data_status[0]->status != "success") {
-            wc_add_notice("Error ms102 : " . MNS_NOTICE_CHECK_TRANSACTION, 'error');
+            wc_add_notice("Error ms102 : " . MONEYSPACE_NOTICE_CHECK_TRANSACTION, 'error');
             return;
         }
 
@@ -79,7 +79,7 @@ class MNS_Payment_Gateway_QR extends WC_Payment_Gateway
         $image_qrprom = $data_status[0]->image_qrprom ?? '';
         $response_qr = wp_remote_get($image_qrprom, array('timeout' => 120));
         if (is_wp_error($response_qr)) {
-            wc_add_notice(MNS_NOTICE_ERROR_LOAD_QR, 'error');
+            wc_add_notice(MONEYSPACE_NOTICE_ERROR_LOAD_QR, 'error');
             return;
         }
         
@@ -109,24 +109,24 @@ class MNS_Payment_Gateway_QR extends WC_Payment_Gateway
     {
         $this->form_fields = array(
             'header_setting' => array(
-                'title' => MNS_FORM_FIELD_HEADER_SETTING,
+                'title' => moneyspace_set_title_html(MONEYSPACE_FORM_FIELD_HEADER_SETTING),
                 'type' => 'title'
             ),
             'enabled' => array(
-                'title' => MNS_FORM_FIELD_ENABLE,
+                'title' => MONEYSPACE_FORM_FIELD_ENABLE,
                 'type' => 'checkbox',
-                'label' => MNS_FORM_FIELD_ENABLE_LABEL,
+                'label' => MONEYSPACE_FORM_FIELD_ENABLE_LABEL,
                 'default' => 'no'
             ),
             'title' => array(
-                'title' => __('Title', 'ms_payment_qrprom'),
+                'title' => __('Title', 'money-space'),
                 'type' => 'text',
-                'description' => __('This controls the title which the user sees during checkout.', 'ms_payment_qrprom'),
-                'default' => __('QR Code PromptPay', 'ms_payment_qrprom'),
+                'description' => __('This controls the title which the user sees during checkout.', 'money-space'),
+                'default' => __('QR Code PromptPay', 'money-space'),
                 'desc_tip' => true,
             ),
             'order_status_if_success' => array(
-                'title' => MNS_FORM_FIELD_SET_ORDER_STATUS,
+                'title' => MONEYSPACE_FORM_FIELD_SET_ORDER_STATUS,
                 'type' => 'select',
                 'class' => 'wc-enhanced-select',
                 'default' => 'wc-completed',
@@ -134,15 +134,15 @@ class MNS_Payment_Gateway_QR extends WC_Payment_Gateway
                 'options' => wc_get_order_statuses()
             ),
             'ms_stock_setting' => array(
-                'title' => MNS_STOCKSETTING_HEAD,
+                'title' => MONEYSPACE_STOCKSETTING_HEAD,
                 'type' => 'select',
                 'class' => 'wc-enhanced-select',
                 'default' => 'Enable',
                 'desc_tip' => true,
-                'options' => ["Disable" => MNS_STOCKSETTING_DISABLE, "Enable" => MNS_STOCKSETTING_ENABLE]
+                'options' => ["Disable" => MONEYSPACE_STOCKSETTING_DISABLE, "Enable" => MONEYSPACE_STOCKSETTING_ENABLE]
             ),
             'auto_cancel' => array(
-                'title' => MNS_FORM_FIELD_SET_QRNONE_TIMEOUT,
+                'title' => MONEYSPACE_FORM_FIELD_SET_QRNONE_TIMEOUT,
                 'type' => 'select',
                 'class' => 'wc-enhanced-select',
                 'default' => 1200,
@@ -150,21 +150,21 @@ class MNS_Payment_Gateway_QR extends WC_Payment_Gateway
                 'options' => [900 => "15 นาที",1200 => "20 นาที",1500 => "25 นาที",1800 => "30 นาที"]
             ),
             'auto_check_result_time' => array(
-                'title' => MNS_FORM_FIELD_AUTO_CHECK_QR_RESULT_TIME,
+                'title' => MONEYSPACE_FORM_FIELD_AUTO_CHECK_QR_RESULT_TIME,
                 'type' => 'select',
                 'class' => 'wc-enhanced-select',
                 'default' => 5000,
                 'desc_tip' => true,
-                'options' => [5000 => "5 ".MNS_FORM_FIELD_SECONDS,10000 => "10 ".MNS_FORM_FIELD_SECONDS,15000 => "15 ".MNS_FORM_FIELD_SECONDS, 30000 => "30 ".MNS_FORM_FIELD_SECONDS]
+                'options' => [5000 => "5 ".MONEYSPACE_FORM_FIELD_SECONDS,10000 => "10 ".MONEYSPACE_FORM_FIELD_SECONDS,15000 => "15 ".MONEYSPACE_FORM_FIELD_SECONDS, 30000 => "30 ".MONEYSPACE_FORM_FIELD_SECONDS]
             ),
             'enable_auto_check_result' => array(
-                'title' => MNS_FORM_FIELD_ENABLE_AUTO_CHECK_QR,
+                'title' => MONEYSPACE_FORM_FIELD_ENABLE_AUTO_CHECK_QR,
                 'type' => 'checkbox',
-                'label' => MNS_FORM_FIELD_ENABLE_LABEL,
+                'label' => MONEYSPACE_FORM_FIELD_ENABLE_LABEL,
                 'default' => 'yes'
             ),
             'template' => array(
-                'title' => MNS_FORM_FIELD_TEMPLATE,
+                'title' => MONEYSPACE_FORM_FIELD_TEMPLATE,
                 'type' => 'select',
                 'class' => 'wc-enhanced-select',
                 'default' => 'template_1',
@@ -172,7 +172,7 @@ class MNS_Payment_Gateway_QR extends WC_Payment_Gateway
                 'options' => ['template_1' => 'Template 1', 'template_2' => 'Template 2']
             ),
             'description' => array(
-                'title' => MNS_FORM_FIELD_DESCRIPTION,
+                'title' => MONEYSPACE_FORM_FIELD_DESCRIPTION,
                 'type' => 'textarea',
                 'default' => '',
                 'desc_tip' => true,
@@ -212,10 +212,10 @@ class MNS_Payment_Gateway_QR extends WC_Payment_Gateway
                 $order = wc_get_order($order_id);
                 return $this->_process_external_payment($order);
             } else {
-                wc_add_notice(MNS_NOTICE_CURRENCY, 'error');
+                wc_add_notice(MONEYSPACE_NOTICE_CURRENCY, 'error');
                 return array(
                     'result' => 'failure',
-                    'messages' => MNS_NOTICE_CURRENCY
+                    'messages' => MONEYSPACE_NOTICE_CURRENCY
                 );
             }
         } else {
@@ -236,8 +236,8 @@ class MNS_Payment_Gateway_QR extends WC_Payment_Gateway
         $order = wc_get_order($order_id);
         $order_amount = $order->get_total();
 
-        $payment_gateway_id = MNS_ID;
-        $payment_gateway_qr_id = MNS_ID_QRPROM;
+        $payment_gateway_id = MONEYSPACE_ID;
+        $payment_gateway_qr_id = MONEYSPACE_ID_QRPROM;
 
         $payment_gateways = WC_Payment_Gateways::instance();
 
@@ -255,7 +255,7 @@ class MNS_Payment_Gateway_QR extends WC_Payment_Gateway
 
         $items_order = new WC_Order($order_id);
         $items = $order->get_items();
-        $items_msg = set_item_message($items);
+        $items_msg = moneyspace_set_item_message($items);
         $return_url = add_query_arg(
             'key',
             $order->get_order_key(),
@@ -265,11 +265,11 @@ class MNS_Payment_Gateway_QR extends WC_Payment_Gateway
         
         $error_list = array("wc-failed", "wc-cancelled", "wc-refunded");
         if (in_array($ms_order_select, $error_list)) {
-            wc_add_notice(MNS_NOTICE_ERROR_CONTINUE, 'error');
+            wc_add_notice(MONEYSPACE_NOTICE_ERROR_CONTINUE, 'error');
         }
 
-        $body_post = set_body($order_id, $order, $gateways, $order_amount, $items_msg, $MNS_special_instructions_to_merchant, $ms_fee, $ms_time);
-        $ms_body = set_req_message($ms_secret_id, $ms_secret_key, $body_post, "qrnone", $return_url);
+        $body_post = moneyspace_set_body($order_id, $order, $gateways, $order_amount, $items_msg, $MNS_special_instructions_to_merchant, $ms_fee, $ms_time);
+        $ms_body = moneyspace_set_req_message($ms_secret_id, $ms_secret_key, $body_post, "qrnone", $return_url);
         unset($ms_body["agreement"]);
         return $this->create_payment_transaction($order_id, $ms_body, $ms_template_payment, $gateways, $payment_gateway_qr);
     }
@@ -285,7 +285,7 @@ class MNS_Payment_Gateway_QR extends WC_Payment_Gateway
 
     public function avia_thank_you_qr($thank_you_text, $order)
     {
-        update_order_status($order);
+        moneyspace_update_order_status($order);
         return $thank_you_text;
     }
 }

@@ -230,7 +230,7 @@ class MNS_Router_Page extends MNS_Router_Utility
                 $this->meta = array(
                     '_yoast_wpseo_title' => array($this->get_title('', $post_id)),
                 );
-                $this->meta = apply_filters('MNS_Router_placeholder_postmeta', $this->meta);
+                $this->meta = apply_filters('moneyspace_router_placeholder_postmeta', $this->meta);
             }
             if ($meta_key) {
                 if (empty($this->meta[$meta_key])) {

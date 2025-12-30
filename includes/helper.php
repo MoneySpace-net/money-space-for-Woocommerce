@@ -88,11 +88,11 @@ function moneyspace_can_access_order($order, $provided_key = '') {
     return false;
 }
 
-function set_title_html($title) {
+function moneyspace_set_title_html($title) {
     return $title; //  '<h1><b>'.$title.'</b></h1>';
 }
 
-function set_item_message($items) {
+function moneyspace_set_item_message($items) {
     $items_msg = "";
     $prefix = "";
 
@@ -107,7 +107,7 @@ function set_item_message($items) {
     return $items_msg;
 }
 
-function set_body($order_id, $order, $gateways, $amount, $items_msg, $message, $feeType, $ms_time, $gatewayType = "card") {
+function moneyspace_set_body($order_id, $order, $gateways, $amount, $items_msg, $message, $feeType, $ms_time, $gatewayType = "card") {
     $order_firstname = "";
     $order_lastname = "";
     $order_email = "";
@@ -136,7 +136,7 @@ function set_body($order_id, $order, $gateways, $amount, $items_msg, $message, $
             , "gatewayType" => $gatewayType);
 }
 
-function set_req_message($ms_secret_id, $ms_secret_key, $body_post, $payment_type, $return_url, $hash_body = "") {
+function moneyspace_set_req_message($ms_secret_id, $ms_secret_key, $body_post, $payment_type, $return_url, $hash_body = "") {
     $ms_body = array(
         "secret_id" => $ms_secret_id,
         "secret_key" => $ms_secret_key,
@@ -168,7 +168,7 @@ function set_req_message($ms_secret_id, $ms_secret_key, $body_post, $payment_typ
     return $ms_body;
 }
 
-function array_select_keys(array $select_keys, array $array_source) {
+function moneyspace_array_select_keys(array $select_keys, array $array_source) {
     $result = array();
     foreach ($array_source as $key => $value) {
         if (in_array($key, $select_keys)) {
@@ -179,21 +179,21 @@ function array_select_keys(array $select_keys, array $array_source) {
     return $result;
 }
 
-function wc_renaming_order_status( $order_statuses ) {
+function moneyspace_wc_renaming_order_status( $order_statuses ) {
     foreach ( $order_statuses as $key => $status ) {
         if ( 'wc-completed' === $key ) {
-            $order_statuses['wc-completed'] = MNS_ORDER_STATUS_COMPLETED;
+            $order_statuses['wc-completed'] = MONEYSPACE_ORDER_STATUS_COMPLETED;
         }
     }
     return $order_statuses;
 }
 
-function update_order_status($order) {
+function moneyspace_update_order_status($order) {
 
     if ($order) {
-        $payment_gateway_id = MNS_ID;
-        $payment_gateway_qr_id = MNS_ID_QRPROM;
-        $payment_gateway_installment_id = MNS_ID_INSTALLMENT;
+        $payment_gateway_id = MONEYSPACE_ID;
+        $payment_gateway_qr_id = MONEYSPACE_ID_QRPROM;
+        $payment_gateway_installment_id = MONEYSPACE_ID_INSTALLMENT;
     
         $payment_gateways = WC_Payment_Gateways::instance();
         $payment_gateway = $payment_gateways->payment_gateways()[$payment_gateway_id];
@@ -210,7 +210,7 @@ function update_order_status($order) {
 
         $MNS_transaction_orderid = get_post_meta($order->get_id(), 'MNS_transaction_orderid', true);
         $MNS_PAYMENT_TYPE = get_post_meta($order->get_id(), 'MNS_PAYMENT_TYPE', true);
-        $check_orderid = wp_remote_post(MNS_API_URL_CHECK, array(
+        $check_orderid = wp_remote_post(MONEYSPACE_API_URL_CHECK, array(
             'method' => 'POST',
             'timeout' => 120,
             'body' => array(
@@ -239,7 +239,7 @@ function update_order_status($order) {
                 return false;
             }
     
-            cancel_payment($order->get_id(), $payment_gateway);
+            moneyspace_cancel_payment($order->get_id(), $payment_gateway);
     
             if (isset($ms_status->status) && $ms_status->status == "Pay Success") {
     
@@ -282,14 +282,14 @@ function update_order_status($order) {
     }
 }
 
-function cancel_payment($order_id, $payment_gateway)
+function moneyspace_cancel_payment($order_id, $payment_gateway)
 {
     $MNS_transaction = get_post_meta($order_id, 'MNS_transaction', true);
 
     $ms_secret_id = $payment_gateway->settings['secret_id'];
     $ms_secret_key = $payment_gateway->settings['secret_key'];
     // trigger kill transaction id
-    $call_cancel = wp_remote_post(MNS_CANCEL_TRANSACTION, array(
+    $call_cancel = wp_remote_post(MONEYSPACE_CANCEL_TRANSACTION, array(
         'method' => 'POST',
         'timeout' => 120,
         'body' => array(

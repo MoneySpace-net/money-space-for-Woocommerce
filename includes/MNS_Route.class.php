@@ -289,14 +289,14 @@ class MNS_Route extends MNS_Router_Utility
     protected function error_403()
     {
         $message = apply_filters(
-            'MNS_Router_access_denied_message',
+            'moneyspace_router_access_denied_message',
             esc_html__('You are not authorized to access this page', 'money-space')
         );
         $title = apply_filters(
-            'MNS_Router_access_denied_title',
+            'moneyspace_router_access_denied_title',
             esc_html__('Access Denied', 'money-space')
         );
-        $args = apply_filters('MNS_Router_access_denied_args', array('response' => 403));
+        $args = apply_filters('moneyspace_router_access_denied_args', array('response' => 403));
 
         $message = wp_kses_post((string) $message);
         $title = esc_html((string) $title);

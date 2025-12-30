@@ -1,13 +1,13 @@
-=== Plugin Name ===
+=== Money Space ===
 Contributors: moneyspace
-Tags: credit card, moneyspace, payment request, thaibank, woocommerce, automattic, bay, ktc, fcy, installment
+Tags: woocommerce, moneyspace, payment gateway, credit card, installment
 Requires at least: 4.9
 Tested up to: 6.9
 Stable tag: 2.14.0
 Requires PHP: 7.0
 Requires WordPress: 4.9
-License: GPLv3
-License URI: https://www.gnu.org/licenses/gpl-3.0.html
+License: GPL-2.0+
+License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
 Payment Gateway รับชำระด้วยบัตรเครดิตออนไลน์ได้ สามารถรองรับสกุลเงินต่างประเทศได้ถึง 27 สกุลเงิน ขยายฐานลูกค้าของคุณไปทั่วโลก
 

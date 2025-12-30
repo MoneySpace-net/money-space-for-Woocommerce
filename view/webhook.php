@@ -4,87 +4,87 @@ global $wpdb;
 
 global $woocommerce;
 
-if (!empty(sanitize_text_field($_POST["transectionID"]))) {
+if (!empty(sanitize_text_field(wp_unslash($_POST["transectionID"] ?? '')))) {
 
-    $getorderid = sanitize_text_field($_POST["orderid"]);
-    preg_match_all('!\d+!', $getorderid, $arroid);
-    $order = wc_get_order($arroid[0][0]);
+    $moneyspace_getorderid = sanitize_text_field(wp_unslash($_POST["orderid"] ?? ''));
+    preg_match_all('!\d+!', $moneyspace_getorderid, $moneyspace_arroid);
+    $moneyspace_order = wc_get_order($moneyspace_arroid[0][0] ?? 0);
     
-    $payment_gateway_id = MNS_ID;
-    $payment_gateway_qr_id = MNS_ID_QRPROM;
-    $payment_gateway_installment_id = MNS_ID_INSTALLMENT;
+    $moneyspace_payment_gateway_id = defined('MONEYSPACE_ID_CREDITCARD') ? MONEYSPACE_ID_CREDITCARD : (defined('MNS_ID') ? MNS_ID : 'moneyspace');
+    $moneyspace_payment_gateway_qr_id = defined('MONEYSPACE_ID_QRPROM') ? MONEYSPACE_ID_QRPROM : (defined('MNS_ID_QRPROM') ? MNS_ID_QRPROM : 'moneyspace_qrnone');
+    $moneyspace_payment_gateway_installment_id = defined('MONEYSPACE_ID_INSTALLMENT') ? MONEYSPACE_ID_INSTALLMENT : (defined('MNS_ID_INSTALLMENT') ? MNS_ID_INSTALLMENT : 'moneyspace_installment');
 
-    $payment_gateways = WC_Payment_Gateways::instance();
-    $payment_gateway = $payment_gateways->payment_gateways()[$payment_gateway_id];
-    $payment_gateway_qr = $payment_gateways->payment_gateways()[$payment_gateway_qr_id];
-    $payment_gateway_installment = $payment_gateways->payment_gateways()[$payment_gateway_installment_id];
+    $moneyspace_payment_gateways = WC_Payment_Gateways::instance();
+    $moneyspace_payment_gateway = $moneyspace_payment_gateways->payment_gateways()[$moneyspace_payment_gateway_id] ?? null;
+    $moneyspace_payment_gateway_qr = $moneyspace_payment_gateways->payment_gateways()[$moneyspace_payment_gateway_qr_id] ?? null;
+    $moneyspace_payment_gateway_installment = $moneyspace_payment_gateways->payment_gateways()[$moneyspace_payment_gateway_installment_id] ?? null;
 
-    $gateways = WC()->payment_gateways->get_available_payment_gateways();
+    $moneyspace_gateways = WC()->payment_gateways->get_available_payment_gateways();
 
-    $ms_secret_id = $payment_gateway->settings['secret_id'];
-    $ms_secret_key = $payment_gateway->settings['secret_key'];
+    $moneyspace_secret_id = $moneyspace_payment_gateway->settings['secret_id'] ?? '';
+    $moneyspace_secret_key = $moneyspace_payment_gateway->settings['secret_key'] ?? '';
     
-    $ms_stock_setting = $payment_gateway->settings['ms_stock_setting']; // credit card mode stock reduce
-    $ms_qr_stock_setting = $payment_gateway_qr->settings['ms_stock_setting']; // qrnone mode stock reduce
-    $ms_install_stock_setting = $payment_gateway_installment->settings['ms_stock_setting']; // installment mode stock reduce
+    $moneyspace_stock_setting = $moneyspace_payment_gateway->settings['ms_stock_setting'] ?? ''; // credit card mode stock reduce
+    $moneyspace_qr_stock_setting = $moneyspace_payment_gateway_qr->settings['ms_stock_setting'] ?? ''; // qrnone mode stock reduce
+    $moneyspace_install_stock_setting = $moneyspace_payment_gateway_installment->settings['ms_stock_setting'] ?? ''; // installment mode stock reduce
 
-    $ms_time = date("YmdHis");
-    $order_id = $order->get_id();
+    $moneyspace_time = date("YmdHis");
+    $moneyspace_order_id = $moneyspace_order ? $moneyspace_order->get_id() : 0;
 
-    $MNS_transaction_orderid = get_post_meta($order_id, 'MNS_transaction_orderid', true);
-    $MNS_PAYMENT_TYPE = get_post_meta($order_id, 'MNS_PAYMENT_TYPE', true);
-    $order_amount = $order->get_total();
+    $moneyspace_transaction_orderid = get_post_meta($moneyspace_order_id, 'MNS_transaction_orderid', true);
+    $moneyspace_payment_type = get_post_meta($moneyspace_order_id, 'MNS_PAYMENT_TYPE', true);
+    $moneyspace_order_amount = $moneyspace_order ? $moneyspace_order->get_total() : 0;
 
-    $ms_order_select = $payment_gateway->settings['order_status_if_success'];
-    $ms_order_select_qr = $payment_gateway_qr->settings['order_status_if_success'];
-    $ms_order_select_installment = $payment_gateway_installment->settings['order_status_if_success'];
+    $moneyspace_order_select = $moneyspace_payment_gateway->settings['order_status_if_success'] ?? '';
+    $moneyspace_order_select_qr = $moneyspace_payment_gateway_qr->settings['order_status_if_success'] ?? '';
+    $moneyspace_order_select_installment = $moneyspace_payment_gateway_installment->settings['order_status_if_success'] ?? '';
 
-    $process_transactionID = sanitize_text_field($_POST["transectionID"]); 
-    $amount = sanitize_text_field($_POST["amount"]);
-    $status = sanitize_text_field($_POST["status"]);
-    $hash = sanitize_text_field($_POST["hash"]);
-    $process_payment_hash = hash_hmac('sha256', $process_transactionID.$amount.$status.$getorderid, $ms_secret_key);
+    $moneyspace_process_transactionID = sanitize_text_field(wp_unslash($_POST["transectionID"] ?? '')); 
+    $moneyspace_amount = sanitize_text_field(wp_unslash($_POST["amount"] ?? ''));
+    $moneyspace_status = sanitize_text_field(wp_unslash($_POST["status"] ?? ''));
+    $moneyspace_hash = sanitize_text_field(wp_unslash($_POST["hash"] ?? ''));
+    $moneyspace_process_payment_hash = hash_hmac('sha256', $moneyspace_process_transactionID.$moneyspace_amount.$moneyspace_status.$moneyspace_getorderid, $moneyspace_secret_key);
 
-    if ($hash == $process_payment_hash && $status == "paysuccess"){
-        if($MNS_PAYMENT_TYPE == "Card"){
+    if ($moneyspace_hash === $moneyspace_process_payment_hash && $moneyspace_status === "paysuccess"){
+        if($moneyspace_payment_type === "Card"){
 
-            if ($ms_stock_setting != "Disable") {
-                wc_reduce_stock_levels($order_id);
+            if ($moneyspace_stock_setting !== "Disable") {
+                wc_reduce_stock_levels($moneyspace_order_id);
             }
 
-            if(empty($ms_order_select)){
-                $order->update_status("wc-processing");
+            if(empty($moneyspace_order_select)){
+                $moneyspace_order->update_status("wc-processing");
             }else{
-                $order->update_status($ms_order_select);
+                $moneyspace_order->update_status($moneyspace_order_select);
             }
-        } else if($MNS_PAYMENT_TYPE == "Qrnone"){
+        } else if($moneyspace_payment_type === "Qrnone"){
 
-            if ($ms_qr_stock_setting != "Disable") {
-                wc_reduce_stock_levels($order_id);
+            if ($moneyspace_qr_stock_setting !== "Disable") {
+                wc_reduce_stock_levels($moneyspace_order_id);
             }
 
-            if(empty($ms_order_select_qr)){
-                $order->update_status("wc-processing");
+            if(empty($moneyspace_order_select_qr)){
+                $moneyspace_order->update_status("wc-processing");
             }else{
-                $order->update_status($ms_order_select_qr);
-                wp_safe_redirect(esc_url_raw($order->get_checkout_order_received_url()));
+                $moneyspace_order->update_status($moneyspace_order_select_qr);
+                wp_safe_redirect(esc_url_raw($moneyspace_order->get_checkout_order_received_url()));
                 exit;
             }
-        } else if($MNS_PAYMENT_TYPE == "Installment"){
+        } else if($moneyspace_payment_type === "Installment"){
 
-            if ($ms_install_stock_setting != "Disable") {
-                wc_reduce_stock_levels($order_id);
+            if ($moneyspace_install_stock_setting !== "Disable") {
+                wc_reduce_stock_levels($moneyspace_order_id);
             }
 
-            if(empty($ms_order_select_installment)){
-                $order->update_status("wc-processing");
+            if(empty($moneyspace_order_select_installment)){
+                $moneyspace_order->update_status("wc-processing");
             }else{
-                $order->update_status($ms_order_select_installment);
+                $moneyspace_order->update_status($moneyspace_order_select_installment);
             }
         }
         
     } else {
-        $order->update_status("wc-failed");
+        $moneyspace_order->update_status("wc-failed");
     }
 }
 

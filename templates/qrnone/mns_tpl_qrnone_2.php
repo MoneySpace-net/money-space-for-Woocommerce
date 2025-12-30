@@ -1,11 +1,11 @@
 <?php
-$order_id = $args['order_id'];
-$payment_gateway_qr = $args['payment_gateway_qr'];
-$image_qrprom = $args['image_qrprom'];
+$moneyspace_order_id = $args['order_id'];
+$moneyspace_payment_gateway_qr = $args['payment_gateway_qr'];
+$moneyspace_image_qrprom = $args['image_qrprom'];
 
-$order = wc_get_order($order_id);
+$moneyspace_order = wc_get_order($moneyspace_order_id);
 
-$text_align = is_rtl() ? 'right' : 'left';
+$moneyspace_text_align = is_rtl() ? 'right' : 'left';
 ?>
 <style>
   .money-space img, .money-space-page img {
@@ -16,46 +16,46 @@ $text_align = is_rtl() ? 'right' : 'left';
 	<table class="td" cellspacing="0" cellpadding="6" style="width: 100%; font-family: 'Helvetica Neue', Helvetica, Roboto, Arial, sans-serif;" border="1">
 		<thead>
 			<tr>
-				<th class="td" scope="col" style="text-align:<?php echo esc_attr( $text_align ); ?>;"><?php esc_html_e( 'Product', 'money-space' ); ?></th>
-				<th class="td" scope="col" style="text-align:<?php echo esc_attr( $text_align ); ?>;"><?php esc_html_e( 'Quantity', 'money-space' ); ?></th>
-				<th class="td" scope="col" style="text-align:<?php echo esc_attr( $text_align ); ?>;"><?php esc_html_e( 'Price', 'money-space' ); ?></th>
+				<th class="td" scope="col" style="text-align:<?php echo esc_attr( $moneyspace_text_align ); ?>;"><?php esc_html_e( 'Product', 'money-space' ); ?></th>
+				<th class="td" scope="col" style="text-align:<?php echo esc_attr( $moneyspace_text_align ); ?>;"><?php esc_html_e( 'Quantity', 'money-space' ); ?></th>
+				<th class="td" scope="col" style="text-align:<?php echo esc_attr( $moneyspace_text_align ); ?>;"><?php esc_html_e( 'Price', 'money-space' ); ?></th>
 			</tr>
 		</thead>
 		<tbody>
 			<?php
 			echo wc_get_email_order_items( // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-				$order,
+				$moneyspace_order,
 				array(
-					'show_sku'      => $sent_to_admin,
+					'show_sku'      => false,
 					'show_image'    => true,
 					'image_size'    => array( 100, 100 ),
-					'plain_text'    => $plain_text,
-					'sent_to_admin' => $sent_to_admin,
+					'plain_text'    => false,
+					'sent_to_admin' => false,
 				)
 			);
 			?>
 		</tbody>
 		<tfoot>
 			<?php
-			$item_totals = $order->get_order_item_totals();
+			$moneyspace_item_totals = $moneyspace_order->get_order_item_totals();
 
-			if ( $item_totals ) {
-				$i = 0;
-				foreach ( $item_totals as $total ) {
-					$i++;
+			if ( $moneyspace_item_totals ) {
+				$moneyspace_i = 0;
+				foreach ( $moneyspace_item_totals as $moneyspace_total ) {
+					$moneyspace_i++;
 					?>
 					<tr>
-						<th class="td" scope="row" colspan="2" style="text-align:<?php echo esc_attr( $text_align ); ?>; <?php echo ( 1 === $i ) ? 'border-top-width: 4px;' : ''; ?>"><?php echo wp_kses_post( $total['label'] ); ?></th>
-						<td class="td" style="text-align:<?php echo esc_attr( $text_align ); ?>; <?php echo ( 1 === $i ) ? 'border-top-width: 4px;' : ''; ?>"><?php echo wp_kses_post( $total['value'] ); ?></td>
+						<th class="td" scope="row" colspan="2" style="text-align:<?php echo esc_attr( $moneyspace_text_align ); ?>; <?php echo ( 1 === $moneyspace_i ) ? 'border-top-width: 4px;' : ''; ?>"><?php echo wp_kses_post( $moneyspace_total['label'] ); ?></th>
+						<td class="td" style="text-align:<?php echo esc_attr( $moneyspace_text_align ); ?>; <?php echo ( 1 === $moneyspace_i ) ? 'border-top-width: 4px;' : ''; ?>"><?php echo wp_kses_post( $moneyspace_total['value'] ); ?></td>
 					</tr>
 					<?php
 				}
 			}
-			if ( $order->get_customer_note() ) {
+			if ( $moneyspace_order->get_customer_note() ) {
 				?>
 				<tr>
-					<th class="td" scope="row" colspan="2" style="text-align:<?php echo esc_attr( $text_align ); ?>;"><?php esc_html_e( 'Note:', 'money-space' ); ?></th>
-					<td class="td" style="text-align:<?php echo esc_attr( $text_align ); ?>;"><?php echo wp_kses_post( nl2br( wptexturize( $order->get_customer_note() ) ) ); ?></td>
+					<th class="td" scope="row" colspan="2" style="text-align:<?php echo esc_attr( $moneyspace_text_align ); ?>;"><?php esc_html_e( 'Note:', 'money-space' ); ?></th>
+					<td class="td" style="text-align:<?php echo esc_attr( $moneyspace_text_align ); ?>;"><?php echo wp_kses_post( nl2br( wptexturize( $moneyspace_order->get_customer_note() ) ) ); ?></td>
 				</tr>
 				<?php
 			}

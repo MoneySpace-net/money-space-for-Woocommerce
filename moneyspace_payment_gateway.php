@@ -39,7 +39,7 @@ MoneySpacePayment::Import('MNS_Bootstrapper.php');
 
 class MoneySpacePayment {
 
-    public $active_plugins;
+    public $moneyspace_active_plugins;
     public $updater;
 
     public function __construct() {
@@ -52,8 +52,8 @@ class MoneySpacePayment {
 
     public function Initialize() {
         
-        $this->active_plugins = apply_filters('active_plugins', get_option('active_plugins'));
-        if (in_array('woocommerce/woocommerce.php', $this->active_plugins)) {
+        $this->moneyspace_active_plugins = apply_filters('moneyspace_active_plugins', get_option('moneyspace_active_plugins'));
+        if (in_array('woocommerce/woocommerce.php', $this->moneyspace_active_plugins)) {
             add_action('plugins_loaded', array($this, 'load_MS_Payment_Gateway'));
             add_filter('plugin_action_links_' . plugin_basename(__FILE__), array($this, 'add_action_links'));
         }
@@ -86,7 +86,7 @@ class MoneySpacePayment {
     public function add_action_links($links)
     {
         $mylinks = array(
-            '<a href="' . admin_url('admin.php?page=wc-settings&tab=checkout&section=moneyspace') . '">' . MNS_SETTING_LINK . '</a>',
+            '<a href="' . admin_url('admin.php?page=wc-settings&tab=checkout&section=moneyspace') . '">' . MONEYSPACE_SETTING_LINK . '</a>',
         );
         return array_merge($links, $mylinks);
     }
@@ -119,13 +119,13 @@ class MoneySpacePayment {
             add_action(MNS_Router_Utility::PLUGIN_INIT_HOOK, array(MNS_CheckPayment::class, 'init'), 1, 0);
 
             add_action('admin_enqueue_scripts', array($this, 'load_custom_wp_admin_style'));
-            add_filter('wc_order_statuses', 'wc_renaming_order_status');
+            add_filter('wc_order_statuses', 'moneyspace_wc_renaming_order_status');
         }
     }
 
     public function load_custom_wp_admin_style(){
-        wp_register_style( "moneyspace-style", MNS_PAYMENT_FORM_CSS, array(), "1.0.0", "");
-        wp_enqueue_style( "moneyspace-style", MNS_PAYMENT_FORM_CSS, array(), "1.0.0", "");
+        wp_register_style( "moneyspace-style", MONEYSPACE_PAYMENT_FORM_CSS, array(), "1.0.0", "");
+        wp_enqueue_style( "moneyspace-style", MONEYSPACE_PAYMENT_FORM_CSS, array(), "1.0.0", "");
         wp_register_style( 'custom_wp_admin_css', plugin_dir_url( __FILE__ )."includes/css/admin-style.css", false, '1.0.0' );
         wp_enqueue_style( 'custom_wp_admin_css' );
     }

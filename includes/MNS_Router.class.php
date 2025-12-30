@@ -167,8 +167,8 @@ class MNS_Router extends MNS_Router_Utility
      */
     public function generate_routes()
     {
-        do_action('mns_router_generate_routes', $this);
-        do_action('ms_Router_alter_routes', $this);
+        do_action('moneyspace_router_generate_routes', $this);
+        do_action('moneyspace_router_alter_routes', $this);
         $rules = $this->rewrite_rules();
         if ($this->hash($rules) != get_option(self::ROUTE_CACHE_OPTION)) {
             $this->flush_rewrite_rules();
