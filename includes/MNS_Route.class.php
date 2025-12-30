@@ -37,7 +37,8 @@ class MNS_Route extends MNS_Router_Utility
             if (!isset($properties[$property]) || !$properties[$property]) {
                 throw new Exception(
                     sprintf(
-                        esc_html__('Missing %s', 'ms-router'),
+                        // translators: %s: Missing route property name.
+                        esc_html__('Missing %s', 'money-space'),
                         esc_html((string) $property)
                     )
                 );
@@ -70,7 +71,8 @@ class MNS_Route extends MNS_Router_Utility
         } else {
             throw new Exception(
                 sprintf(
-                    esc_html__('Property not found: %s.', 'ms-router'),
+                    // translators: %s: Route property name.
+                    esc_html__('Property not found: %s.', 'money-space'),
                     esc_html((string) $property)
                 )
             );
@@ -90,7 +92,8 @@ class MNS_Route extends MNS_Router_Utility
         if (in_array($property, array('id', 'path', 'page_callback')) && !$value) {
             throw new Exception(
                 sprintf(
-                    esc_html__('Invalid value for %s. Value may not be empty.', 'ms-router'),
+                    // translators: %s: Route property name.
+                    esc_html__('Invalid value for %s. Value may not be empty.', 'money-space'),
                     esc_html((string) $property)
                 )
             );
@@ -99,7 +102,8 @@ class MNS_Route extends MNS_Router_Utility
             $value_string = is_scalar($value) ? (string) $value : wp_json_encode($value);
             throw new Exception(
                 sprintf(
-                    esc_html__('Invalid value for %1$s: %2$s. Value must be an array.', 'ms-router'),
+                    // translators: 1: Route property name. 2: Invalid value.
+                    esc_html__('Invalid value for %1$s: %2$s. Value must be an array.', 'money-space'),
                     esc_html((string) $property),
                     esc_html((string) $value_string)
                 )
@@ -286,11 +290,11 @@ class MNS_Route extends MNS_Router_Utility
     {
         $message = apply_filters(
             'MNS_Router_access_denied_message',
-            esc_html__('You are not authorized to access this page', 'ms-router')
+            esc_html__('You are not authorized to access this page', 'money-space')
         );
         $title = apply_filters(
             'MNS_Router_access_denied_title',
-            esc_html__('Access Denied', 'ms-router')
+            esc_html__('Access Denied', 'money-space')
         );
         $args = apply_filters('MNS_Router_access_denied_args', array('response' => 403));
 

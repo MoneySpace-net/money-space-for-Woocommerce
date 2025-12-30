@@ -18,10 +18,10 @@ class MNS_Payment_Gateway extends WC_Payment_Gateway
         $this->domain = 'ms_payment';
 
         $this->id = MNS_ID;
-        $this->title = __($this->get_option('title'), $this->domain);
+        $this->title = $this->get_option('title');
         $this->icon = apply_filters('woocommerce_custom_gateway_icon', MNS_LOGO, '');
-        $this->method_title = _x(MNS_METHOD_TITLE, $this->domain);
-        $this->method_description = __(MNS_DESCRIPTION, $this->domain);
+        $this->method_title = MNS_METHOD_TITLE;
+        $this->method_description = MNS_DESCRIPTION;
         $this->has_fields = true;
 
         $this->init_form_fields();
@@ -48,7 +48,7 @@ class MNS_Payment_Gateway extends WC_Payment_Gateway
         if (is_wp_error($response)) {
             $log_body = function_exists('moneyspace_filter_sensitive_data') ? moneyspace_filter_sensitive_data($ms_body) : $ms_body;
             (new Mslogs())->insert($response->get_error_message(), 1, 'Create Link Payment (HTTP error)', date("Y-m-d H:i:s"), json_encode($log_body));
-            wc_add_notice(__('Error : ' . MNS_NOTICE_ERROR_SETUP, $this->domain), 'error');
+            wc_add_notice('Error : ' . MNS_NOTICE_ERROR_SETUP, 'error');
             return;
         }
         
@@ -56,7 +56,7 @@ class MNS_Payment_Gateway extends WC_Payment_Gateway
 
         $data_status = json_decode($body);
         if (empty($data_status) || !isset($data_status[0]->status) || $data_status[0]->status != "success") {
-            wc_add_notice(__('Error ms102 : ' . MNS_NOTICE_CHECK_TRANSACTION, $this->domain), 'error');
+            wc_add_notice('Error ms102 : ' . MNS_NOTICE_CHECK_TRANSACTION, 'error');
             return;
         }
         
@@ -89,79 +89,79 @@ class MNS_Payment_Gateway extends WC_Payment_Gateway
     {
         $this->form_fields = array(
             'header_setting' => array(
-                'title' => __(set_title_html(MNS_FORM_FIELD_HEADER_SETTING), $this->domain),
+                'title' => set_title_html(MNS_FORM_FIELD_HEADER_SETTING),
                 'type' => 'title'
             ),
             'enabled' => array(
-                'title' => __(MNS_FORM_FIELD_ENABLE, $this->domain),
+                'title' => MNS_FORM_FIELD_ENABLE,
                 'type' => 'checkbox',
-                'label' => __(MNS_FORM_FIELD_ENABLE_LABEL, $this->domain),
+                'label' => MNS_FORM_FIELD_ENABLE_LABEL,
                 'default' => 'no'
             ),
             'title' => array(
-                'title' => __('Title', $this->domain),
+                'title' => __('Title', 'ms_payment'),
                 'type' => 'text',
-                'description' => __('This controls the title which the user sees during checkout.', $this->domain),
-                'default' => __('Pay by Card 3D secured', $this->domain),
+                'description' => __('This controls the title which the user sees during checkout.', 'ms_payment'),
+                'default' => __('Pay by Card 3D secured', 'ms_payment'),
                 'desc_tip' => true,
             ),
             'description' => array(
-                'title' => __(MNS_FORM_FIELD_DESCRIPTION, $this->domain),
+                'title' => MNS_FORM_FIELD_DESCRIPTION,
                 'type' => 'textarea',
-                'default' => __("", $this->domain),
+                'default' => '',
                 'desc_tip' => true,
-                'description' => __(MNS_ADMIN_SETTING_CC_DESC, $this->domain)
+                'description' => MNS_ADMIN_SETTING_CC_DESC
             ),
             'desc_domain_webhook1' => array(
-                'title' => __(set_title_html(MNS_HEAD_DOMAIN_WEBHOOK), $this->domain),
+                'title' => set_title_html(MNS_HEAD_DOMAIN_WEBHOOK),
                 'type' => 'title',
                 'desc_tip' => true,
                 'description' => MNS_DOMAIN_WEBHOOK
             ),
             'ms_domain' => array(
-                'title' => __(MNS_YOUR_DOMAIN . " : <code>" . esc_html(get_site_url()) . "</code>", $this->domain),
+                'title' => MNS_YOUR_DOMAIN . " : <code>" . esc_html(get_site_url()) . "</code>",
                 'type' => 'title'
             ),
             'ms_webhook' => array(
-                'title' => __(MNS_YOUR_WEBHOOK . " : <code>" . esc_html(get_site_url()) . "/ms/webhook" . "</code>", $this->domain),
+                'title' => MNS_YOUR_WEBHOOK . " : <code>" . esc_html(get_site_url()) . "/ms/webhook" . "</code>",
                 'type' => 'title'
             ),
             'header_setting_ms' => array(
-                'title' => __(set_title_html(MNS_FORM_FIELD_HEADER_SETTING_MS), $this->domain),
+                'title' => set_title_html(MNS_FORM_FIELD_HEADER_SETTING_MS),
                 'type' => 'title'
             ),
             'secret_id' => array(
-                'title' => __('secret_id', $this->domain),
+                'title' => __('secret_id', 'ms_payment'),
                 'type' => 'input',
                 'default' => '',
                 'desc_tip' => true,
             ),
             'secret_key' => array(
-                'title' => __('secret_key', $this->domain),
+                'title' => __('secret_key', 'ms_payment'),
                 'type' => 'input',
                 'default' => '',
                 'desc_tip' => true,
             ),
             'fee_setting' => array(
-                'title' => __(MNS_FEE_HEADER, $this->domain),
+                'title' => MNS_FEE_HEADER,
                 'type' => 'select',
                 'class' => 'wc-enhanced-select',
                 'default' => 'include',
                 'desc_tip' => true,
                 'options' => ["include" => MNS_FEE_INCLUDE,"exclude" => MNS_FEE_EXCLUDE],
-                'description' => __(MNS_FEE_HEADER, $this->domain)
+                'description' => MNS_FEE_HEADER
             ),
             'order_status_if_success' => array(
-                'title' => __(MNS_FORM_FIELD_SET_ORDER_STATUS, $this->domain),
+                'title' => MNS_FORM_FIELD_SET_ORDER_STATUS,
                 'type' => 'select',
                 'class' => 'wc-enhanced-select',
                 'default' => 'wc-completed',
                 'desc_tip' => true,
                 'options' => wc_get_order_statuses(),
-                'description' => __(MNS_ADMIN_SETTING_STATUS_AFTER_PAY, $this->domain)
+                'description' => MNS_ADMIN_SETTING_STATUS_AFTER_PAY
             ),
             'ms_stock_setting' => array(
-                'title' => __(MNS_STOCKSETTING_HEAD, $this->domain),
+                'title' => MNS_STOCKSETTING_HEAD,
                 'type' => 'select',
                 'class' => 'wc-enhanced-select',
                 'default' => 'Enable',
@@ -169,57 +169,57 @@ class MNS_Payment_Gateway extends WC_Payment_Gateway
                 'options' => ["Disable" => MNS_STOCKSETTING_DISABLE, "Enable" => MNS_STOCKSETTING_ENABLE]
             ),
             'header_setting_QRPROM' => array(
-                'title' => __(set_title_html(MNS_FORM_FIELD_HEADER_SETTING_MS . " ( " . MNS_TYPE_PAYMENT_QR . " )"), $this->domain),
+                'title' => set_title_html(MNS_FORM_FIELD_HEADER_SETTING_MS . " ( " . MNS_TYPE_PAYMENT_QR . " )"),
                 'type' => 'title'
             ),
             'header_setting_QRPROM_Link' => array(
-                'title' => __('<a href="admin.php?page=wc-settings&tab=checkout&section=moneyspace_qrprom">' . esc_html(MNS_SETTING_LINK) . '</a>', $this->domain),
+                'title' => '<a href="admin.php?page=wc-settings&tab=checkout&section=moneyspace_qrprom">' . esc_html(MNS_SETTING_LINK) . '</a>',
                 'type' => 'title'
             ),
             'header_setting_INSTALLMENT' => array(
-                'title' => __(set_title_html(MNS_FORM_FIELD_HEADER_SETTING_MS . " ( ผ่อนชำระรายเดือน )"), $this->domain),
+                'title' => set_title_html(MNS_FORM_FIELD_HEADER_SETTING_MS . " ( ผ่อนชำระรายเดือน )"),
                 'type' => 'title'
             ),
             'header_setting_installment_Link' => array(
-                'title' => __('<a href="admin.php?page=wc-settings&tab=checkout&section=moneyspace_installment">' . esc_html(MNS_SETTING_LINK) . '</a>', $this->domain),
+                'title' => '<a href="admin.php?page=wc-settings&tab=checkout&section=moneyspace_installment">' . esc_html(MNS_SETTING_LINK) . '</a>',
                 'type' => 'title'
             ),
             'header_setting_ui' => array(
-                'title' => __(set_title_html(MNS_FORM_FIELD_HEADER_SETTING_UI . ' ( Moneyspace )'), $this->domain),
+                'title' => set_title_html(MNS_FORM_FIELD_HEADER_SETTING_UI . ' ( Moneyspace )'),
                 'type' => 'title'
             ),
             'ms_firstname' => array(
-                'title' => __('' . MNS_FORM_FIELD_MS_FIRSTNAME, $this->domain),
+                'title' => MNS_FORM_FIELD_MS_FIRSTNAME,
                 'type' => 'checkbox',
-                'label' => __(MNS_FORM_FIELD_MS_LABEL, $this->domain),
+                'label' => MNS_FORM_FIELD_MS_LABEL,
                 'default' => 'yes'
             ),
             'ms_lastname' => array(
-                'title' => __('' . MNS_FORM_FIELD_MS_LASTNAME, $this->domain),
+                'title' => MNS_FORM_FIELD_MS_LASTNAME,
                 'type' => 'checkbox',
-                'label' => __(MNS_FORM_FIELD_MS_LABEL, $this->domain),
+                'label' => MNS_FORM_FIELD_MS_LABEL,
                 'default' => 'yes'
             ),
             'ms_email' => array(
-                'title' => __('' . MNS_FORM_FIELD_MS_EMAIL, $this->domain),
+                'title' => MNS_FORM_FIELD_MS_EMAIL,
                 'type' => 'checkbox',
-                'label' => __(MNS_FORM_FIELD_MS_LABEL, $this->domain),
+                'label' => MNS_FORM_FIELD_MS_LABEL,
                 'default' => 'yes'
             ),
             'ms_phone' => array(
-                'title' => __('' . MNS_FORM_FIELD_MS_PHONE, $this->domain),
+                'title' => MNS_FORM_FIELD_MS_PHONE,
                 'type' => 'checkbox',
-                'label' => __(MNS_FORM_FIELD_MS_LABEL, $this->domain),
+                'label' => MNS_FORM_FIELD_MS_LABEL,
                 'default' => 'yes'
             ),
             'ms_address' => array(
-                'title' => __('' . MNS_FORM_FIELD_MS_ADDRESS, $this->domain),
+                'title' => MNS_FORM_FIELD_MS_ADDRESS,
                 'type' => 'checkbox',
-                'label' => __(MNS_FORM_FIELD_MS_LABEL, $this->domain),
+                'label' => MNS_FORM_FIELD_MS_LABEL,
                 'default' => 'yes'
             ),
             'header_setting_check_connection' => array(
-                'title' => __(set_title_html(MNS_FORM_FIELD_HEADER_SETTING_CHECK_CONNECTION), $this->domain),
+                'title' => set_title_html(MNS_FORM_FIELD_HEADER_SETTING_CHECK_CONNECTION),
                 'type' => 'title'
             ),
         );
@@ -254,10 +254,10 @@ class MNS_Payment_Gateway extends WC_Payment_Gateway
             $order = wc_get_order($order_id);
             return $this->_process_external_payment($order);
         } else {
-            wc_add_notice(__(MNS_NOTICE_CURRENCY, $this->domain), 'error');
+            wc_add_notice(MNS_NOTICE_CURRENCY, 'error');
             return array(
                 'result' => 'failure',
-                'messages' => __(MNS_NOTICE_CURRENCY, $this->domain)
+                'messages' => MNS_NOTICE_CURRENCY
             );
         }
     } // End Process

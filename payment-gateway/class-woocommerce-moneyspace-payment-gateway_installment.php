@@ -26,10 +26,10 @@ class MNS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
         $this->domain = 'ms_payment_installment';
         global $woocommerce;
         $this->id             = MNS_ID_INSTALLMENT;
-        $this->title = __($this->get_option( 'title' ), $this->domain);
+        $this->title = $this->get_option( 'title' );
         $this->icon = apply_filters('woocommerce_custom_gateway_icon', MNS_LOGO_INSTALLMENT, '');
-        $this->method_title = __("Money Space for WooCommerce ( ผ่อนชำระรายเดือน )", $this->domain);
-        $this->method_description = __("
+        $this->method_title = "Money Space for WooCommerce ( ผ่อนชำระรายเดือน )";
+        $this->method_description = "
 
         ไม่คิดคา่ธรรมเนียม :
 
@@ -50,7 +50,7 @@ class MNS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
         FCY : บัตรกรุงศรีเฟิร์สช้อยส์ , บัตรโฮมโปร , บัตรเมกาโฮม
         
         ขั้นต่ำของการรับชำระเงิน ของ KTC และ FCY 3000.01 บาท โดย ต่อเดือน ไม่ต่ำกว่า 300 บาท
-        ขั้นต่ำของการรับชำระเงิน ของ BAY 3000.01 บาท โดย ต่อเดือนไม่ต่ำกว่า 500 บาท", $this->domain);
+        ขั้นต่ำของการรับชำระเงิน ของ BAY 3000.01 บาท โดย ต่อเดือนไม่ต่ำกว่า 500 บาท";
 
 
         $this->has_fields = true;
@@ -72,24 +72,24 @@ class MNS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
     {
         $this->form_fields = array(
             'header_setting' => array(
-                'title' => __(MNS_FORM_FIELD_HEADER_SETTING, $this->domain), // '<h1><b> ' . MNS_FORM_FIELD_HEADER_SETTING . ' </b></h1>'
+                'title' => MNS_FORM_FIELD_HEADER_SETTING, // '<h1><b> ' . MNS_FORM_FIELD_HEADER_SETTING . ' </b></h1>'
                 'type' => 'title'
             ),
             'enabled' => array(
-                'title' => __(MNS_FORM_FIELD_ENABLE, $this->domain),
+                'title' => MNS_FORM_FIELD_ENABLE,
                 'type' => 'checkbox',
-                'label' => __(MNS_FORM_FIELD_ENABLE_LABEL, $this->domain),
+                'label' => MNS_FORM_FIELD_ENABLE_LABEL,
                 'default' => 'no'
             ),
             'title' => array(
-                'title' => __('Title', $this->domain),
+                'title' => __('Title', 'ms_payment_installment'),
                 'type' => 'text',
-                'description' => __('This controls the title which the user sees during checkout.', $this->domain),
-                'default' => __(MNS_PAY_INS, $this->domain),
+                'description' => __('This controls the title which the user sees during checkout.', 'ms_payment_installment'),
+                'default' => MNS_PAY_INS,
                 'desc_tip' => true,
             ),
             'order_status_if_success' => array(
-                'title' => __(MNS_FORM_FIELD_SET_ORDER_STATUS, $this->domain),
+                'title' => MNS_FORM_FIELD_SET_ORDER_STATUS,
                 'type' => 'select',
                 'class' => 'wc-enhanced-select',
                 'default' => 'wc-completed',
@@ -97,13 +97,13 @@ class MNS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
                 'options' => wc_get_order_statuses()
             ),
             'description' => array(
-                'title' => __(MNS_FORM_FIELD_DESCRIPTION, $this->domain),
+                'title' => MNS_FORM_FIELD_DESCRIPTION,
                 'type' => 'textarea',
-                'default' => __("", $this->domain),
+                'default' => '',
                 'desc_tip' => true
             ),
             'fee_setting' => array(
-                'title' => __("เลือกผู้รับผิดชอบดอกเบี้ยรายเดือน", $this->domain),
+                'title' => "เลือกผู้รับผิดชอบดอกเบี้ยรายเดือน",
                 'type' => 'select',
                 'class' => 'wc-enhanced-select',
                 'default' => 'include',
@@ -111,7 +111,7 @@ class MNS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
                 'options' => ["include" => "ร้านค้ารับผิดชอบดอกเบี้ยรายเดือน" , "exclude" => " ผู้ถือบัตรรับผิดชอบดอกเบี้ยรายเดือน ( ดอกเบี้ย : 0.8% , 1% )"]
             ),
             'ktc_max_months_setting' => array(
-                'title' => __("KTC ผ่อนสูงสุด", $this->domain),
+                'title' => "KTC ผ่อนสูงสุด",
                 'type' => 'select',
                 'class' => 'wc-enhanced-select',
                 'default' => 'ten',
@@ -119,7 +119,7 @@ class MNS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
                 'options' => [3 => "3 เดือน" , 4 => "4 เดือน" , 5 => "5 เดือน" , 6 => "6 เดือน" , 7 => "7 เดือน" , 8 => "8 เดือน" , 9 => "9 เดือน" , 10 => "10 เดือน"]
             ),
             'bay_max_months_setting' => array(
-                'title' => __("BAY ผ่อนสูงสุด", $this->domain),
+                'title' => "BAY ผ่อนสูงสุด",
                 'type' => 'select',
                 'class' => 'wc-enhanced-select',
                 'default' => 'ten',
@@ -127,7 +127,7 @@ class MNS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
                 'options' => [3 => "3 เดือน" , 4 => "4 เดือน" , 6 => "6 เดือน" , 9 => "9 เดือน" , 10 => "10 เดือน"]
             ),
             'fcy_max_months_setting' => array(
-                'title' => __("FCY ผ่อนสูงสุด", $this->domain),
+                'title' => "FCY ผ่อนสูงสุด",
                 'type' => 'select',
                 'class' => 'wc-enhanced-select',
                 'default' => 'ten',
@@ -135,7 +135,7 @@ class MNS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
                 'options' => [3 => "3 เดือน" , 4 => "4 เดือน" , 6 => "6 เดือน" , 9 => "9 เดือน" , 10 => "10 เดือน", 12 => "12 เดือน (เฉพาะผู้ถือบัตรรับผิดชอบดอกเบี้ยรายเดือน)", 18 => "18 เดือน (เฉพาะผู้ถือบัตรรับผิดชอบดอกเบี้ยรายเดือน)", 24 => "24 เดือน (เฉพาะผู้ถือบัตรรับผิดชอบดอกเบี้ยรายเดือน)", 36 => "36 เดือน (เฉพาะผู้ถือบัตรรับผิดชอบดอกเบี้ยรายเดือน)"]
             ),
             'agreement_setting' => array(
-                'title' => __("เงื่อนไข", $this->domain),
+                'title' => "เงื่อนไข",
                 'type' => 'select',
                 'class' => 'wc-enhanced-select',
                 'default' => '1',
@@ -148,21 +148,21 @@ class MNS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
                  "5" => "ข้าพเจ้ายอมรับว่าไม่สามารถขอคืนเงิน และเมื่อหากสินค้า / บริการ มีปัญหาจะรีบติดต่อกลับ ภายใน 60 วัน หรือ ปฏิบัติตามนโยบายการคืนเงินของร้านค้า"]
             ),
             'ktc_enabled' => array(
-                'title' => __(MNS_FORM_FIELD_KTC_ENABLE, $this->domain),
+                'title' => MNS_FORM_FIELD_KTC_ENABLE,
                 'type' => 'checkbox',
-                'label' => __(MNS_FORM_FIELD_ENABLE_LABEL, $this->domain),
+                'label' => MNS_FORM_FIELD_ENABLE_LABEL,
                 'default' => 'yes'
             ),
             'bay_enabled' => array(
-                'title' => __(MNS_FORM_FIELD_BAY_ENABLE, $this->domain),
+                'title' => MNS_FORM_FIELD_BAY_ENABLE,
                 'type' => 'checkbox',
-                'label' => __(MNS_FORM_FIELD_ENABLE_LABEL, $this->domain),
+                'label' => MNS_FORM_FIELD_ENABLE_LABEL,
                 'default' => 'yes'
             ),
             'fcy_enabled' => array(
-                'title' => __(MNS_FORM_FIELD_FCY_ENABLE, $this->domain),
+                'title' => MNS_FORM_FIELD_FCY_ENABLE,
                 'type' => 'checkbox',
-                'label' => __(MNS_FORM_FIELD_ENABLE_LABEL, $this->domain),
+                'label' => MNS_FORM_FIELD_ENABLE_LABEL,
                 'default' => 'yes'
             ),
         );
@@ -467,27 +467,27 @@ class MNS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
         update_post_meta($order_id, 'MNS_special_instructions_to_merchant', $message_card);
 
         if (!is_user_logged_in() && !$is_error) {
-            wc_add_notice(__("Please login !", $this->domain), 'error');
+            wc_add_notice("Please login !", 'error');
             $is_error = true;
         }
 
         if (strlen($message_card) > 150 && !$is_error) {
-            wc_add_notice(__("Message to the store (150 characters maximum)", $this->domain), 'error');
+            wc_add_notice("Message to the store (150 characters maximum)", 'error');
             $is_error = true;
         }
 
         if (get_woocommerce_currency() != "THB" && !$is_error) { 
-            wc_add_notice(__(MNS_NOTICE_CURRENCY, $this->domain), 'error');
+            wc_add_notice(MNS_NOTICE_CURRENCY, 'error');
             $is_error = true;
         }
 
         if($order_amount < 3000.01 && !$is_error) { 
-            wc_add_notice(__("จำนวนยอดเงินต้อง 3,000.01 บาทขึ้นไปถึงจะทำการผ่อนชำระได้", $this->domain), 'error');
+            wc_add_notice("จำนวนยอดเงินต้อง 3,000.01 บาทขึ้นไปถึงจะทำการผ่อนชำระได้", 'error');
             $is_error = true;
         }
 
         if($selectbank == "" && !$is_error) {
-            wc_add_notice(__("กรุณาเลือกการผ่อนชำระ".$selectbank, $this->domain), 'error');
+            wc_add_notice("กรุณาเลือกการผ่อนชำระ" . $selectbank, 'error');
             $is_error = true;
         }
 
@@ -518,7 +518,7 @@ class MNS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
             moneyspace_debug_log('Installment Payment Error: Validation failed', true); // Always log errors
             return array(
                 'result' => 'failure',
-                'messages' => __("Error : Message to the store (150 characters maximum)", $this->domain)
+                'messages' => "Error : Message to the store (150 characters maximum)"
             );
         }
     }
@@ -592,7 +592,7 @@ class MNS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
         if (is_wp_error($response)) {
             $log_body = function_exists('moneyspace_filter_sensitive_data') ? moneyspace_filter_sensitive_data($payment_data) : $payment_data;
             (new Mslogs())->insert($response->get_error_message(), 4, 'Create Transaction Installment (HTTP error)', date("Y-m-d H:i:s"), json_encode($log_body));
-            wc_add_notice(__(json_encode($response), $this->domain), 'error');
+            wc_add_notice(json_encode($response), 'error');
             return;
         }
 
@@ -613,7 +613,7 @@ class MNS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
         || $json_tranId_status[0]->status == "The payment amount must be greater than 3000 baht." 
         || $json_tranId_status[0]->status == "Data Invalid"
         || $json_tranId_status[0]->status == "Payment amount must be less than 10000.00"))) {
-            wc_add_notice(__($json_tranId_status[0]->status ?? 'Error creating installment', $this->domain), 'error');
+            wc_add_notice($json_tranId_status[0]->status ?? 'Error creating installment', 'error');
             return;
         }
         $json_tranId = json_decode($body);

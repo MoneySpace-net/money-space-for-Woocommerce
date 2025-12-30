@@ -184,7 +184,7 @@ if ($order && $pid) {
                     exit;
                 } else {
                     // Redirect to a pending payment page or back to checkout
-                    wc_add_notice(__('Your payment is pending. Please complete the payment process.', 'woocommerce'), 'notice');
+                    wc_add_notice(__('Your payment is pending. Please complete the payment process.', 'money-space'), 'notice');
                     wp_safe_redirect(esc_url_raw($order->get_checkout_payment_url(true)));
                     exit;
                 }

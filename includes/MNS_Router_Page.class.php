@@ -79,7 +79,7 @@ class MNS_Router_Page extends MNS_Router_Utility
     private static function make_post()
     {
         $post = array(
-            'post_title' => __('MS Router Placeholder Page', 'ms-router'),
+            'post_title' => __('MS Router Placeholder Page', 'money-space'),
             'post_status' => 'publish',
             'post_type' => self::POST_TYPE,
         );

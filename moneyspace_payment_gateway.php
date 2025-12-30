@@ -7,6 +7,10 @@
  * Version:           2.14.0
  * Author:            Money Space
  * Author URI:        https://moneyspace.net
+ * Text Domain:       money-space
+ * Domain Path:       /languages
+ * Copyright:         Copyright (c) 2024 Money Space
+ * License:           GPL-2.0+
  * 
  * @package MoneySpace
  */
@@ -21,7 +25,6 @@ use MoneySpace\MNS_Webhook;
 use MoneySpace\MNS_Cancel;
 use MoneySpace\MNS_Info;
 use MoneySpace\MNS_CheckPayment;
-use MoneySpace\Moneyspace_Updater;
 use MoneySpace\Payments\MoneySpace_CreditCard;
 use MoneySpace\Payments\MoneySpace_QRCode;
 use MoneySpace\Payments\MoneySpace_CreditCard_Installment;
@@ -64,10 +67,8 @@ class MoneySpacePayment {
         
         // load the base class
         MoneySpacePayment::Import('includes/MNS_Router_Utility.class.php');
-        MoneySpacePayment::Import('includes/updater.php');
 
         add_action('MoneySpaceInit', array($this, 'MNS_Router_load'));
-        add_action('MoneySpaceInit', array($this, 'MoneySpaceUpdater'));
         do_action('MoneySpaceInit');
 
         
@@ -120,13 +121,6 @@ class MoneySpacePayment {
             add_action('admin_enqueue_scripts', array($this, 'load_custom_wp_admin_style'));
             add_filter('wc_order_statuses', 'wc_renaming_order_status');
         }
-    }
-
-    public function MoneySpaceUpdater() {
-        $updater = new Moneyspace_Updater( __FILE__ );
-        $updater->set_username( 'MoneySpace-net' );
-        $updater->set_repository( 'money-space-for-woocommerce' );
-        $updater->initialize();
     }
 
     public function load_custom_wp_admin_style(){

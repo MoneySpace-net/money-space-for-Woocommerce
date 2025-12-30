@@ -181,8 +181,9 @@ function array_select_keys(array $select_keys, array $array_source) {
 
 function wc_renaming_order_status( $order_statuses ) {
     foreach ( $order_statuses as $key => $status ) {
-        if ( 'wc-completed' === $key ) 
-            $order_statuses['wc-completed'] = _x( MNS_ORDER_STATUS_COMPLETED, 'Order status', 'woocommerce' );
+        if ( 'wc-completed' === $key ) {
+            $order_statuses['wc-completed'] = MNS_ORDER_STATUS_COMPLETED;
+        }
     }
     return $order_statuses;
 }

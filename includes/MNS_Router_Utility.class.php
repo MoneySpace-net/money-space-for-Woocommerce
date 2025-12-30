@@ -50,7 +50,8 @@ class MNS_Router_Utility
     public static function failed_to_load_notices($php_version = self::MIN_PHP_VERSION, $wp_version = self::MIN_WP_VERSION)
     {
         $message = sprintf(
-            __('%1$s requires WordPress %2$s or higher and PHP %3$s or higher.', 'ms-router'),
+            // translators: 1: Plugin name. 2: Minimum WordPress version. 3: Minimum PHP version.
+            __('%1$s requires WordPress %2$s or higher and PHP %3$s or higher.', 'money-space'),
             self::PLUGIN_NAME,
             $wp_version,
             $php_version
