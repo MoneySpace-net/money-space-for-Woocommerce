@@ -7,11 +7,20 @@ global $woocommerce;
 
 $moneyspace_pid = isset($pid) ? absint($pid) : 0;
 $moneyspace_order = wc_get_order($moneyspace_pid);
-$moneyspace_provided_key = isset($_GET['key']) ? sanitize_text_field(wp_unslash($_GET['key'])) : '';
+$moneyspace_provided_key = filter_input(INPUT_GET, 'key', FILTER_SANITIZE_STRING);
+$moneyspace_nonce = filter_input(INPUT_GET, 'ms_nonce', FILTER_SANITIZE_STRING);
+$moneyspace_nonce_valid = $moneyspace_nonce ? wp_verify_nonce($moneyspace_nonce, 'moneyspace_cancel_payment') : false;
 $moneyspace_order_id = $moneyspace_order ? $moneyspace_order->get_id() : 0;
 
 if (!$moneyspace_order || (function_exists('moneyspace_can_access_order') && !moneyspace_can_access_order($moneyspace_order, $moneyspace_provided_key))) {
     status_header(404);
+    nocache_headers();
+    exit;
+}
+
+// If a nonce is provided for cancel route, ensure validity.
+if (isset($_GET['ms_nonce']) && ! $moneyspace_nonce_valid) {
+    status_header(403);
     nocache_headers();
     exit;
 }

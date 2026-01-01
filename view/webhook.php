@@ -4,9 +4,11 @@ global $wpdb;
 
 global $woocommerce;
 
-if (!empty(sanitize_text_field(wp_unslash($_POST["transectionID"] ?? '')))) {
+// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- External webhook uses HMAC signature verification instead of nonces.
+$moneyspace_transection_id = filter_input(INPUT_POST, 'transectionID', FILTER_SANITIZE_STRING);
+if (!empty($moneyspace_transection_id)) {
 
-    $moneyspace_getorderid = sanitize_text_field(wp_unslash($_POST["orderid"] ?? ''));
+    $moneyspace_getorderid = filter_input(INPUT_POST, 'orderid', FILTER_SANITIZE_STRING);
     preg_match_all('!\d+!', $moneyspace_getorderid, $moneyspace_arroid);
     $moneyspace_order = wc_get_order($moneyspace_arroid[0][0] ?? 0);
     
@@ -28,7 +30,7 @@ if (!empty(sanitize_text_field(wp_unslash($_POST["transectionID"] ?? '')))) {
     $moneyspace_qr_stock_setting = $moneyspace_payment_gateway_qr->settings['ms_stock_setting'] ?? ''; // qrnone mode stock reduce
     $moneyspace_install_stock_setting = $moneyspace_payment_gateway_installment->settings['ms_stock_setting'] ?? ''; // installment mode stock reduce
 
-    $moneyspace_time = date("YmdHis");
+    $moneyspace_time = gmdate("YmdHis");
     $moneyspace_order_id = $moneyspace_order ? $moneyspace_order->get_id() : 0;
 
     $moneyspace_transaction_orderid = get_post_meta($moneyspace_order_id, 'MNS_transaction_orderid', true);
@@ -39,11 +41,11 @@ if (!empty(sanitize_text_field(wp_unslash($_POST["transectionID"] ?? '')))) {
     $moneyspace_order_select_qr = $moneyspace_payment_gateway_qr->settings['order_status_if_success'] ?? '';
     $moneyspace_order_select_installment = $moneyspace_payment_gateway_installment->settings['order_status_if_success'] ?? '';
 
-    $moneyspace_process_transactionID = sanitize_text_field(wp_unslash($_POST["transectionID"] ?? '')); 
-    $moneyspace_amount = sanitize_text_field(wp_unslash($_POST["amount"] ?? ''));
-    $moneyspace_status = sanitize_text_field(wp_unslash($_POST["status"] ?? ''));
-    $moneyspace_hash = sanitize_text_field(wp_unslash($_POST["hash"] ?? ''));
-    $moneyspace_process_payment_hash = hash_hmac('sha256', $moneyspace_process_transactionID.$moneyspace_amount.$moneyspace_status.$moneyspace_getorderid, $moneyspace_secret_key);
+    $moneyspace_process_transactionID = $moneyspace_transection_id; 
+    $moneyspace_amount = filter_input(INPUT_POST, 'amount', FILTER_SANITIZE_STRING);
+    $moneyspace_status = filter_input(INPUT_POST, 'status', FILTER_SANITIZE_STRING);
+    $moneyspace_hash = filter_input(INPUT_POST, 'hash', FILTER_SANITIZE_STRING);
+    $moneyspace_process_payment_hash = hash_hmac('sha256', $moneyspace_process_transactionID . $moneyspace_amount . $moneyspace_status . $moneyspace_getorderid, $moneyspace_secret_key);
 
     if ($moneyspace_hash === $moneyspace_process_payment_hash && $moneyspace_status === "paysuccess"){
         if($moneyspace_payment_type === "Card"){

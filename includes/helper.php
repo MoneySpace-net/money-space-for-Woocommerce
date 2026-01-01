@@ -1,5 +1,6 @@
 <?php
 
+$logger = wc_get_logger();
 /**
  * MoneySpace debug logging helper
  * Only logs when WP_DEBUG is enabled
@@ -7,7 +8,7 @@
  */
 function moneyspace_debug_log($message, $always_log = false) {
     if ($always_log || (defined('WP_DEBUG') && WP_DEBUG)) {
-        error_log('MoneySpace: ' . $message);
+        $logger->error( 'MoneySpace: ' . $message, [ 'source' => 'moneyspace' ] );
     }
 }
 

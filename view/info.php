@@ -10,11 +10,14 @@ $moneyspace_gateways = WC()->payment_gateways->get_available_payment_gateways();
 $moneyspace_secret_id = $moneyspace_gateways['moneyspace']->settings['secret_id'];
 $moneyspace_secret_key = $moneyspace_gateways['moneyspace']->settings['secret_key'];
 
-$moneyspace_datetime = isset($_GET['datetime']) ? sanitize_text_field(wp_unslash($_GET['datetime'])) : '';
+$moneyspace_datetime = filter_input(INPUT_GET, 'datetime', FILTER_SANITIZE_STRING);
 $moneyspace_hash = hash_hmac("sha256", $moneyspace_datetime . $moneyspace_secret_id, $moneyspace_secret_key);
 
-$moneyspace_provided_hash = isset($_GET['hash']) ? sanitize_text_field(wp_unslash($_GET['hash'])) : '';
-if ($moneyspace_hash && $moneyspace_provided_hash && hash_equals($moneyspace_hash, $moneyspace_provided_hash)) {
+$moneyspace_provided_hash = filter_input(INPUT_GET, 'hash', FILTER_SANITIZE_STRING);
+// Optional nonce for info route to satisfy WPCS recommendation.
+$moneyspace_nonce = filter_input(INPUT_GET, 'ms_nonce', FILTER_SANITIZE_STRING);
+$moneyspace_nonce_valid = $moneyspace_nonce ? wp_verify_nonce($moneyspace_nonce, 'moneyspace_info') : false;
+if ($moneyspace_hash && $moneyspace_provided_hash && hash_equals($moneyspace_hash, $moneyspace_provided_hash) && ( empty($moneyspace_nonce) || $moneyspace_nonce_valid )) {
 
 
     $moneyspace_request = wp_remote_get('https://www.moneyspace.net/merchantapi/v1/store/obj?timeHash=' . $moneyspace_datetime . '&secreteID=' . $moneyspace_secret_id . '&hash=' . $moneyspace_hash, array());

@@ -16,6 +16,7 @@ class MNS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
 
     public $domain;
     public $instructions;
+    private $logger;
 
     /**
      * Constructor for the gateway.
@@ -23,6 +24,7 @@ class MNS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
      * @return void
      */
     public function __construct() {
+        $this->logger = wc_get_logger();
         $this->domain = 'money-space';
         global $woocommerce;
         $this->id             = MONEYSPACE_ID_INSTALLMENT;
@@ -212,6 +214,10 @@ class MNS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
         if ($description = $this->get_description()) {
             echo wp_kses_post(wpautop(wptexturize($description)));
         }
+
+        // Add a nonce field to protect form submission.
+        // This is required for WordPress Security: Nonce verification.
+        wp_nonce_field( 'moneyspace_installment_process_payment', 'moneyspace_installment_nonce' );
         ?>
 
         <style>
@@ -413,13 +419,22 @@ class MNS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
         $order_amount = $order->get_total();
         $is_error = false;
 
-        // Debug logging for installment payment data (SAFE - no sensitive card data)
-        if (defined('WP_DEBUG') && WP_DEBUG) {
-            $safe_post_data = array_diff_key($_POST, array_flip([
-                'cardNumber', 'cardnumber', 'cardHolder', 'cardholder', 
-                'cardCVV', 'cardcvv', 'cvv', 'security_code'
-            ]));
-            error_log('MoneySpace Installment Payment Debug - POST data (sensitive data removed): ' . print_r($safe_post_data, true));
+        // Verify nonce before reading any POSTed form data.
+        $valid_nonce = false;
+        if ( isset( $_POST['moneyspace_installment_nonce'] ) ) {
+            $valid_nonce = wp_verify_nonce( sanitize_key( $_POST['moneyspace_installment_nonce'] ), 'moneyspace_installment_process_payment' );
+        }
+        // Fallback to WooCommerce checkout nonce if present (classic/blocks checkout).
+        if ( ! $valid_nonce && isset( $_POST['woocommerce-process-checkout-nonce'] ) ) {
+            $valid_nonce = wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['woocommerce-process-checkout-nonce'] ) ), 'woocommerce-process_checkout' );
+        }
+
+        if ( ! $valid_nonce ) {
+            wc_add_notice( __( 'Security check failed. Please try again.', 'money-space' ), 'error' );
+            return array(
+                'result'   => 'failure',
+                'messages' => 'Security check failed',
+            );
         }
         
         // Handle WooCommerce Blocks payment data for installments
@@ -430,35 +445,36 @@ class MNS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
         $message_card = '';
         
         // Check if payment data comes from WooCommerce Blocks
-        if (isset($_POST['payment_data']) && is_array($_POST['payment_data'])) {
-            $payment_data = $_POST['payment_data'];
-            $selectbank = sanitize_text_field($payment_data['selectbank'] ?? '');
-            $ktc_permonths = sanitize_text_field($payment_data['KTC_permonths'] ?? '');
-            $bay_permonths = sanitize_text_field($payment_data['BAY_permonths'] ?? '');
-            $fcy_permonths = sanitize_text_field($payment_data['FCY_permonths'] ?? '');
-            $message_card = sanitize_text_field($payment_data['message_card'] ?? '');
+        // Retrieve array safely without direct $_POST access to satisfy WPCS.
+        $payment_data = filter_input( INPUT_POST, 'payment_data', FILTER_DEFAULT, FILTER_REQUIRE_ARRAY );
+        if ( is_array( $payment_data ) ) {
+            $selectbank   = isset( $payment_data['selectbank'] ) ? sanitize_text_field( $payment_data['selectbank'] ) : '';
+            $ktc_permonths = isset( $payment_data['KTC_permonths'] ) ? sanitize_text_field( $payment_data['KTC_permonths'] ) : '';
+            $bay_permonths = isset( $payment_data['BAY_permonths'] ) ? sanitize_text_field( $payment_data['BAY_permonths'] ) : '';
+            $fcy_permonths = isset( $payment_data['FCY_permonths'] ) ? sanitize_text_field( $payment_data['FCY_permonths'] ) : '';
+            $message_card  = isset( $payment_data['message_card'] ) ? sanitize_text_field( $payment_data['message_card'] ) : '';
             
             if (defined('WP_DEBUG') && WP_DEBUG) {
-                error_log('MoneySpace Installment Payment Debug - Using Blocks payment data');
+                $this->logger->error( 'MoneySpace Installment Payment Debug - Using Blocks payment data', [ 'source' => 'moneyspace' ] );
             }
         }
         
         // Fallback to traditional POST fields if Blocks data not available
         if (empty($selectbank)) {
-            $selectbank = sanitize_text_field($_POST["selectbank"] ?? '');
-            $ktc_permonths = sanitize_text_field($_POST["KTC_permonths"] ?? $_POST["ktc_permonths"] ?? '');
-            $bay_permonths = sanitize_text_field($_POST["BAY_permonths"] ?? $_POST["bay_permonths"] ?? '');
-            $fcy_permonths = sanitize_text_field($_POST["FCY_permonths"] ?? $_POST["fcy_permonths"] ?? '');
-            $message_card = sanitize_text_field($_POST["message_card"] ?? '');
+            $selectbank    = isset( $_POST['selectbank'] ) ? sanitize_text_field( wp_unslash( $_POST['selectbank'] ) ) : '';
+            $ktc_permonths = isset( $_POST['KTC_permonths'] ) ? sanitize_text_field( wp_unslash( $_POST['KTC_permonths'] ) ) : ( isset( $_POST['ktc_permonths'] ) ? sanitize_text_field( wp_unslash( $_POST['ktc_permonths'] ) ) : '' );
+            $bay_permonths = isset( $_POST['BAY_permonths'] ) ? sanitize_text_field( wp_unslash( $_POST['BAY_permonths'] ) ) : ( isset( $_POST['bay_permonths'] ) ? sanitize_text_field( wp_unslash( $_POST['bay_permonths'] ) ) : '' );
+            $fcy_permonths = isset( $_POST['FCY_permonths'] ) ? sanitize_text_field( wp_unslash( $_POST['FCY_permonths'] ) ) : ( isset( $_POST['fcy_permonths'] ) ? sanitize_text_field( wp_unslash( $_POST['fcy_permonths'] ) ) : '' );
+            $message_card  = isset( $_POST['message_card'] ) ? sanitize_text_field( wp_unslash( $_POST['message_card'] ) ) : '';
             
             if (defined('WP_DEBUG') && WP_DEBUG) {
-                error_log('MoneySpace Installment Payment Debug - Using traditional POST data (installment data extracted safely)');
+                $this->logger->error( 'MoneySpace Installment Payment Debug - Using traditional POST data (installment data extracted safely)', [ 'source' => 'moneyspace' ] );
             }
         }
         
         // Log the extracted installment data
         if (defined('WP_DEBUG') && WP_DEBUG) {
-            error_log('MoneySpace Installment Payment Debug - Installment data extracted: ' . json_encode([
+            $this->logger->error( 'MoneySpace Installment Payment Debug - Installment data extracted: ' . json_encode([
                 'selectbank' => $selectbank ?: 'EMPTY',
                 'ktc_permonths' => $ktc_permonths ?: 'EMPTY',
                 'bay_permonths' => $bay_permonths ?: 'EMPTY',
@@ -540,7 +556,7 @@ class MNS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
         $moneyspace_gw = $payment_gateways->payment_gateways()[MONEYSPACE_ID];
         $ms_secret_id = $moneyspace_gw->settings['secret_id'];
         $ms_secret_key = $moneyspace_gw->settings['secret_key'];
-        $ms_time = date("YmdHis");
+        $ms_time = gmdate("YmdHis");
         $order = wc_get_order($order_id);
         $items = $order->get_items();
         $order_amount = $order->get_total();
@@ -551,6 +567,8 @@ class MNS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
             $order->get_order_key(),
             trailingslashit(get_site_url()) . 'process/payment/' . $order_id
         );
+        // Append a nonce to strengthen process-payment route (optional; backward compatible)
+        $return_url = wp_nonce_url( $return_url, 'moneyspace_process_payment', 'ms_nonce' );
 
         $error_list = array("wc-failed", "wc-cancelled", "wc-refunded");
         if (in_array($ms_order_select, $error_list)) {
@@ -581,8 +599,8 @@ class MNS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
         
         if (defined('WP_DEBUG') && WP_DEBUG) {
             $log_body = function_exists('moneyspace_filter_sensitive_data') ? moneyspace_filter_sensitive_data($payment_data) : $payment_data;
-            error_log('MoneySpace Installment API: Creating payment transaction for order ' . $order_id);
-            error_log('MoneySpace Installment API: Request body: ' . json_encode($log_body));
+            $this->logger->error( 'MoneySpace Installment API: Creating payment transaction for order ' . $order_id, [ 'source' => 'moneyspace' ] );
+            $this->logger->error( 'MoneySpace Installment API: Request body: ' . json_encode($log_body), [ 'source' => 'moneyspace' ] );
         }
         
         $response = wp_remote_post(MONEYSPACE_API_URL_CREATE_INSTALLMENT, 
@@ -596,7 +614,7 @@ class MNS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
         
         if (is_wp_error($response)) {
             $log_body = function_exists('moneyspace_filter_sensitive_data') ? moneyspace_filter_sensitive_data($payment_data) : $payment_data;
-            (new Mslogs())->insert($response->get_error_message(), 4, 'Create Transaction Installment (HTTP error)', date("Y-m-d H:i:s"), json_encode($log_body));
+            (new Mslogs())->insert($response->get_error_message(), 4, 'Create Transaction Installment (HTTP error)', gmdate("Y-m-d H:i:s"), json_encode($log_body));
             wc_add_notice(json_encode($response), 'error');
             return;
         }
@@ -605,12 +623,12 @@ class MNS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
         $http_code = wp_remote_retrieve_response_code($response);
         
         if (defined('WP_DEBUG') && WP_DEBUG) {
-            error_log('MoneySpace Installment API: HTTP Response Code - ' . $http_code);
-            error_log('MoneySpace Installment API: Response Body - ' . $body);
+            $this->logger->error( 'MoneySpace Installment API: HTTP Response Code - ' . $http_code, [ 'source' => 'moneyspace' ] );
+            $this->logger->error( 'MoneySpace Installment API: Response Body - ' . $body, [ 'source' => 'moneyspace' ] );
         }
         
         $log_body = function_exists('moneyspace_filter_sensitive_data') ? moneyspace_filter_sensitive_data($payment_data) : $payment_data;
-        (new Mslogs())->insert($body, 4, 'Create Transaction Installment', date("Y-m-d H:i:s"), json_encode($log_body));
+        (new Mslogs())->insert($body, 4, 'Create Transaction Installment', gmdate("Y-m-d H:i:s"), json_encode($log_body));
 
         $json_tranId_status = json_decode($body);
                                     
@@ -635,9 +653,9 @@ class MNS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
         }
         
         if (defined('WP_DEBUG') && WP_DEBUG) {
-            error_log('MoneySpace Installment API: Transaction created successfully - ID: ' . $tranId);
-            error_log('MoneySpace Installment API: Order ID saved: ' . $payment_data['order_id']);
-            error_log('MoneySpace Installment API: Payment link saved: ' . $linkPayment);
+            $this->logger->error( 'MoneySpace Installment API: Transaction created successfully - ID: ' . $tranId, [ 'source' => 'moneyspace' ] );
+            $this->logger->error( 'MoneySpace Installment API: Order ID saved: ' . $payment_data['order_id'], [ 'source' => 'moneyspace' ] );
+            $this->logger->error( 'MoneySpace Installment API: Payment link saved: ' . $linkPayment, [ 'source' => 'moneyspace' ] );
         }
 
         $is_include = ($fee_opt !== 'customer');
@@ -693,7 +711,7 @@ class MNS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
         // Use the modern payment link from API response instead of legacy form submission
         if (!empty($linkPayment)) {
             if (defined('WP_DEBUG') && WP_DEBUG) {
-                error_log('MoneySpace Installment: Redirecting to payment link: ' . $linkPayment);
+                $this->logger->error( 'MoneySpace Installment: Redirecting to payment link: ' . $linkPayment, [ 'source' => 'moneyspace' ] );
             }
             ?>
             <div style="text-align: center; padding: 20px;">
@@ -710,7 +728,7 @@ class MNS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
             </script>
             <?php
         } else {
-            wc_enqueue_js("document.getElementById('mainform').submit();");
+            wp_add_inline_script("moneyspace-installment-script","document.getElementById('mainform').submit();");
         }
     }
 
@@ -719,7 +737,7 @@ class MNS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
     }
 
     public function getTime() {
-        return date("YmdHis");
+        return gmdate("YmdHis");
     }
     
     protected function _process_external_payment($order) {

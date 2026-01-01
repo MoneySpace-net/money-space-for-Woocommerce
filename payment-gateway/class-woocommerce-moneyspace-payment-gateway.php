@@ -47,7 +47,7 @@ class MNS_Payment_Gateway extends WC_Payment_Gateway
 
         if (is_wp_error($response)) {
             $log_body = function_exists('moneyspace_filter_sensitive_data') ? moneyspace_filter_sensitive_data($ms_body) : $ms_body;
-            (new Mslogs())->insert($response->get_error_message(), 1, 'Create Link Payment (HTTP error)', date("Y-m-d H:i:s"), json_encode($log_body));
+            (new Mslogs())->insert($response->get_error_message(), 1, 'Create Link Payment (HTTP error)', gmdate("Y-m-d H:i:s"), json_encode($log_body));
             wc_add_notice('Error : ' . MONEYSPACE_NOTICE_ERROR_SETUP, 'error');
             return;
         }
@@ -277,7 +277,7 @@ class MNS_Payment_Gateway extends WC_Payment_Gateway
         $fee_opt = $payment_gateway->settings['fee_setting'];
         $ms_fee = ($fee_opt === 'customer') ? ('ex'.'clude') : ('inc'.'lude');
 
-        $ms_time = date("YmdHis");
+        $ms_time = gmdate("YmdHis");
         $items = $order->get_items();
         $items_msg = moneyspace_set_item_message($items);
         $return_url = add_query_arg(

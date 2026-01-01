@@ -1,60 +1,57 @@
 <?php
 
-global $wp_version;
-global $woocommerce;
-
-$pid = absint($pid);
-$order = wc_get_order($pid);
-$provided_key = isset($_GET['key']) ? sanitize_text_field(wp_unslash($_GET['key'])) : '';
+$moneyspace_pid = absint($moneyspace_pid);
+$moneyspace_order = wc_get_order($moneyspace_pid);
+$moneyspace_provided_key = isset($moneyspace__GET['key']) ? sanitize_text_field(wp_unslash($moneyspace__GET['key'])) : '';
 
 header('Content-Type: application/json; charset=' . get_option('blog_charset'));
 
-if (!$order || (function_exists('moneyspace_can_access_order') && !moneyspace_can_access_order($order, $provided_key))) {
+if (!$moneyspace_order || (function_exists('moneyspace_can_access_order') && !moneyspace_can_access_order($moneyspace_order, $moneyspace_provided_key))) {
     status_header(403);
     echo wp_json_encode(['error' => 'forbidden']);
     exit;
 }
 
-$payment_gateway_id = MNS_ID;
-$payment_gateways = WC_Payment_Gateways::instance();
+$moneyspace_payment_gateway_id = MONEYSPACE_ID;
+$moneyspace_payment_gateways = WC_Payment_Gateways::instance();
 
-$gateways = WC()->payment_gateways->get_available_payment_gateways();
-$ms_secret_id = $gateways[$payment_gateway_id]->settings['secret_id'];
-$ms_secret_key = $gateways[$payment_gateway_id]->settings['secret_key'];
+$moneyspace_gateways = WC()->payment_gateways->get_available_payment_gateways();
+$moneyspace_ms_secret_id = $moneyspace_gateways[$moneyspace_payment_gateway_id]->settings['secret_id'];
+$moneyspace_ms_secret_key = $moneyspace_gateways[$moneyspace_payment_gateway_id]->settings['secret_key'];
 
-$ms_body = array(
-    "transaction_ID" => get_post_meta($pid, 'MNS_transaction', true),
-    "secret_id" => $ms_secret_id,
-    "secret_key" => $ms_secret_key
+$moneyspace_ms_body = array(
+    "transaction_ID" => get_post_meta($moneyspace_pid, 'MONEYSPACE_transaction', true),
+    "secret_id" => $moneyspace_ms_secret_id,
+    "secret_key" => $moneyspace_ms_secret_key
 );
 
-$response = array();
+$moneyspace_response = array();
 
-$response = wp_remote_post(MNS_API_URL_CHECK_PAYMENT, array(
+$moneyspace_response = wp_remote_post(MONEYSPACE_API_URL_CHECK_PAYMENT, array(
     'method' => 'POST',
     'timeout' => 120,
-    'body' => $ms_body
+    'body' => $moneyspace_ms_body
 ));
 
-$body = is_wp_error($response) ? '' : wp_remote_retrieve_body($response);
-$data_status = $body ? json_decode($body) : null;
-$transaction_ID = "transaction id";
-$result = new stdClass();
-$result->order_id = $order->get_id();
-$result->transaction_id = get_post_meta($pid, 'MNS_transaction', true);
-$result->status = (is_array($data_status) && isset($data_status[0]->$transaction_ID->status)) ? $data_status[0]->$transaction_ID->status : 'Unknown';
+$moneyspace_body = is_wp_error($moneyspace_response) ? '' : wp_remote_retrieve_body($moneyspace_response);
+$moneyspace_data_status = $moneyspace_body ? json_decode($moneyspace_body) : null;
+$moneyspace_transaction_ID = "transaction id";
+$moneyspace_result = new stdClass();
+$moneyspace_result->order_id = $moneyspace_order->get_id();
+$moneyspace_result->transaction_id = get_post_meta($moneyspace_pid, 'MNS_transaction', true);
+$moneyspace_result->status = (is_array($moneyspace_data_status) && isset($moneyspace_data_status[0]->$moneyspace_transaction_ID->status)) ? $moneyspace_data_status[0]->$moneyspace_transaction_ID->status : 'Unknown';
 
-if ($result->status == "Pay Success")
+if ($moneyspace_result->status == "Pay Success")
 {
-    $process_url = add_query_arg(
+    $moneyspace_process_url = add_query_arg(
         'key',
-        $order->get_order_key(),
-        trailingslashit(get_site_url()) . 'process/payment/' . $order->get_id()
+        $moneyspace_order->get_order_key(),
+        trailingslashit(get_site_url()) . 'process/payment/' . $moneyspace_order->get_id()
     );
-    wp_remote_post($process_url, array(
+    wp_remote_post($moneyspace_process_url, array(
         'method' => 'POST',
         'timeout' => 120
     ));
 }
 
-echo json_encode($result);
+echo json_encode($moneyspace_result);

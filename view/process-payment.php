@@ -5,7 +5,10 @@ global $wpdb;
 global $woocommerce;
 $moneyspace_pid = isset($pid) ? absint($pid) : 0;
 $moneyspace_order = wc_get_order($moneyspace_pid);
-$moneyspace_provided_key = isset($_GET['key']) ? sanitize_text_field(wp_unslash($_GET['key'])) : '';
+$moneyspace_provided_key = filter_input(INPUT_GET, 'key', FILTER_SANITIZE_STRING);
+$moneyspace_nonce = filter_input(INPUT_GET, 'ms_nonce', FILTER_SANITIZE_STRING);
+$moneyspace_nonce_valid = $moneyspace_nonce ? wp_verify_nonce($moneyspace_nonce, 'moneyspace_process_payment') : false;
+$logger = wc_get_logger();
 
 if (!$moneyspace_order || (function_exists('moneyspace_can_access_order') && !moneyspace_can_access_order($moneyspace_order, $moneyspace_provided_key))) {
     status_header(404);
@@ -13,11 +16,18 @@ if (!$moneyspace_order || (function_exists('moneyspace_can_access_order') && !mo
     exit;
 }
 
+// If a nonce is provided, ensure it is valid before proceeding with any state changes.
+if (isset($_GET['ms_nonce']) && ! $moneyspace_nonce_valid) {
+    status_header(403);
+    nocache_headers();
+    exit;
+}
+
 if ($moneyspace_order && $moneyspace_pid) {
 
-    $moneyspace_payment_gateway_id = defined('MONEYSPACE_ID_CREDITCARD') ? MONEYSPACE_ID_CREDITCARD : (defined('MNS_ID') ? MNS_ID : 'moneyspace');
-    $moneyspace_payment_gateway_qr_id = defined('MONEYSPACE_ID_QRPROM') ? MONEYSPACE_ID_QRPROM : (defined('MNS_ID_QRPROM') ? MNS_ID_QRPROM : 'moneyspace_qrnone');
-    $moneyspace_payment_gateway_installment_id = defined('MONEYSPACE_ID_INSTALLMENT') ? MONEYSPACE_ID_INSTALLMENT : (defined('MNS_ID_INSTALLMENT') ? MNS_ID_INSTALLMENT : 'moneyspace_installment');
+    $moneyspace_payment_gateway_id = defined('MONEYSPACE_ID_CREDITCARD') ? MONEYSPACE_ID_CREDITCARD : (defined('MONEYSPACE_ID') ? MONEYSPACE_ID : 'moneyspace');
+    $moneyspace_payment_gateway_qr_id = defined('MONEYSPACE_ID_QRPROM') ? MONEYSPACE_ID_QRPROM : (defined('MONEYSPACE_ID_QRPROM') ? MONEYSPACE_ID_QRPROM : 'moneyspace_qrnone');
+    $moneyspace_payment_gateway_installment_id = defined('MONEYSPACE_ID_INSTALLMENT') ? MONEYSPACE_ID_INSTALLMENT : (defined('MONEYSPACE_ID_INSTALLMENT') ? MONEYSPACE_ID_INSTALLMENT : 'moneyspace_installment');
 
 
     $moneyspace_payment_gateways = WC_Payment_Gateways::instance();
@@ -37,47 +47,47 @@ if ($moneyspace_order && $moneyspace_pid) {
 
     $moneyspace_enable_auto_check_result = $moneyspace_payment_gateway_qr->settings['enable_auto_check_result'] ?? '';
 
-    $moneyspace_time = date("YmdHis");
+    $moneyspace_time = gmdate("YmdHis");
     $moneyspace_order_id = $moneyspace_order ? $moneyspace_order->get_id() : 0;
-    $moneyspace_transaction_orderid = get_post_meta($moneyspace_order_id, 'MNS_transaction_orderid', true);
-    $moneyspace_payment_type = get_post_meta($moneyspace_order_id, 'MNS_PAYMENT_TYPE', true);
+    $moneyspace_transaction_orderid = get_post_meta($moneyspace_order_id, 'MONEYSPACE_transaction_orderid', true);
+    $moneyspace_payment_type = get_post_meta($moneyspace_order_id, 'MONEYSPACE_PAYMENT_TYPE', true);
     $moneyspace_order_amount = $moneyspace_order ? $moneyspace_order->get_total() : 0;
-    $moneyspace_check_orderid = wp_remote_post(MNS_API_URL_CHECK, array(
+    $moneyspace_check_orderid = wp_remote_post(MONEYSPACE_API_URL_CHECK, array(
         'method' => 'POST',
         'timeout' => 120,
         'body' => array(
             'secret_id' => $moneyspace_secret_id,
             'secret_key' => $moneyspace_secret_key,
-            'order_id' => $MNS_transaction_orderid,
+            'order_id' => $MONEYSPACE_transaction_orderid,
         )
     ));
 
     // Debug logging - only active when WP_DEBUG is enabled
     if (defined('WP_DEBUG') && WP_DEBUG) {
-        error_log('MoneySpace Payment Status Check - Order ID: ' . $moneyspace_order_id);
-        error_log('MoneySpace Payment Status Check - Transaction Order ID: ' . $moneyspace_transaction_orderid);
-        error_log('MoneySpace Payment Status Check - Payment Type: ' . $moneyspace_payment_type);
+        $logger->error( 'MoneySpace Payment Status Check - Order ID: ' . $moneyspace_order_id, [ 'source' => 'moneyspace' ] );
+        $logger->error( 'MoneySpace Payment Status Check - Transaction Order ID: ' . $moneyspace_transaction_orderid, [ 'source' => 'moneyspace' ] );
+        $logger->error( 'MoneySpace Payment Status Check - Payment Type: ' . $moneyspace_payment_type, [ 'source' => 'moneyspace' ] );
     }
 
     if (!is_wp_error($moneyspace_check_orderid)) {
         $moneyspace_response_body = wp_remote_retrieve_body($moneyspace_check_orderid);
         
         if (defined('WP_DEBUG') && WP_DEBUG) {
-            error_log('MoneySpace Payment Status Check - Raw Response: ' . $moneyspace_response_body);
+            $logger->error( 'MoneySpace Payment Status Check - Raw Response: ' . $moneyspace_response_body, [ 'source' => 'moneyspace' ] );
         }
         
         $moneyspace_json_status = json_decode($moneyspace_response_body);
         
         // Add safety check for API response
         if (empty($moneyspace_json_status) || !is_array($moneyspace_json_status) || !isset($moneyspace_json_status[0])) {
-            error_log('MoneySpace API: Invalid response format in process-payment.php - Response: ' . $moneyspace_response_body);
+            $logger->error( 'MoneySpace API: Invalid response format in process-payment.php - Response: ' . $moneyspace_response_body, [ 'source' => 'moneyspace' ] );
             $moneyspace_order->update_status("wc-failed");
             wp_safe_redirect(esc_url_raw($moneyspace_order->get_checkout_order_received_url()));
             exit;
         }
         
         if (defined('WP_DEBUG') && WP_DEBUG) {
-            error_log('MoneySpace Payment Status Check - Parsed Response: ' . json_encode($moneyspace_json_status[0]));
+            $logger->error( 'MoneySpace Payment Status Check - Parsed Response: ' . json_encode($moneyspace_json_status[0]), [ 'source' => 'moneyspace' ] );
         }
         
         // Access the order data using proper property notation
@@ -85,13 +95,13 @@ if ($moneyspace_order && $moneyspace_pid) {
         $moneyspace_status_obj = isset($moneyspace_response_data->{'order id'}) ? $moneyspace_response_data->{'order id'} : null;
         
         if (defined('WP_DEBUG') && WP_DEBUG) {
-            error_log('MoneySpace Payment Status Check - Order Status Object: ' . json_encode($moneyspace_status_obj));
+            $logger->error( 'MoneySpace Payment Status Check - Order Status Object: ' . json_encode($moneyspace_status_obj), [ 'source' => 'moneyspace' ] );
         }
         
         // Additional safety check for order status
         if (empty($moneyspace_status_obj)) {
-            error_log('MoneySpace API: No order status found in response in process-payment.php');
-            error_log('MoneySpace API: Available properties: ' . json_encode(array_keys((array)$moneyspace_response_data)));
+            $logger->error( 'MoneySpace API: No order status found in response in process-payment.php', [ 'source' => 'moneyspace' ] );
+            $logger->error( 'MoneySpace API: Available properties: ' . json_encode(array_keys((array)$moneyspace_response_data)), [ 'source' => 'moneyspace' ] );
             $moneyspace_order->update_status("wc-failed");
             wp_safe_redirect(esc_url_raw($moneyspace_order->get_checkout_order_received_url()));
             exit;
@@ -108,7 +118,7 @@ if ($moneyspace_order && $moneyspace_pid) {
             if ($moneyspace_status == "Pay Success" || $moneyspace_status == "Success") {
                 $moneyspace_is_payment_successful = true;
                 if (defined('WP_DEBUG') && WP_DEBUG) {
-                    error_log('MoneySpace Payment: Payment successful with status "' . $moneyspace_status . '" for payment type: ' . $moneyspace_payment_type);
+                    $logger->error('MoneySpace Payment: Payment successful with status "' . $moneyspace_status . '" for payment type: ' . $moneyspace_payment_type, [ 'source' => 'moneyspace' ]);
                 }
             }
         }
@@ -146,8 +156,8 @@ if ($moneyspace_order && $moneyspace_pid) {
             if ($moneyspace_stock_setting != "Disable") {
                 wc_reduce_stock_levels($moneyspace_order_id);
             }
-            update_post_meta($moneyspace_order_id, 'MNS_PAYMENT_PAID', $moneyspace_status_obj->amount);
-            update_post_meta($moneyspace_order_id, 'MNS_PAYMENT_STATUS', $moneyspace_status_obj->status);
+            update_post_meta($moneyspace_order_id, 'MONEYSPACE_PAYMENT_PAID', $moneyspace_status_obj->amount);
+            update_post_meta($moneyspace_order_id, 'MONEYSPACE_PAYMENT_STATUS', $moneyspace_status_obj->status);
             wp_safe_redirect(esc_url_raw($moneyspace_order->get_checkout_order_received_url()));
             exit;
         } else if (isset($moneyspace_status_obj->status) && $moneyspace_status_obj->status == "Cancel") {
@@ -157,15 +167,15 @@ if ($moneyspace_order && $moneyspace_pid) {
         } else if (isset($moneyspace_status_obj->status) && $moneyspace_status_obj->status == "Pending") {
             // Handle pending payments - keep order in pending status and redirect to payment page
             if (defined('WP_DEBUG') && WP_DEBUG) {
-                error_log('MoneySpace Payment Status: Pending - keeping order in pending status');
+                $logger->error('MoneySpace Payment Status: Pending - keeping order in pending status', [ 'source' => 'moneyspace' ]);
             }
             $moneyspace_order->update_status("wc-pending");
-            update_post_meta($moneyspace_order_id, 'MNS_PAYMENT_STATUS', $moneyspace_status_obj->status);
+            update_post_meta($moneyspace_order_id, 'MONEYSPACE_PAYMENT_STATUS', $moneyspace_status_obj->status);
             
             // For installment payments, redirect back to complete the payment
             if ($moneyspace_payment_type == "Installment") {
                 // Check if we have a payment link in the transaction data
-                $moneyspace_payment_link = get_post_meta($moneyspace_order_id, 'MNS_PAYMENT_LINK', true);
+                $moneyspace_payment_link = get_post_meta($moneyspace_order_id, 'MONEYSPACE_PAYMENT_LINK', true);
                 if (!empty($moneyspace_payment_link)) {
                     $moneyspace_allowed_host = wp_parse_url($moneyspace_payment_link, PHP_URL_HOST);
                     if (!empty($moneyspace_allowed_host)) {
