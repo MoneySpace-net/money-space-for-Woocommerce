@@ -88,8 +88,27 @@ class Mslogs
             return $cached;
         }
 
-        $results = $wpdb->get_results("SELECT * FROM {$this->table_name} ORDER BY id DESC LIMIT 200"); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
+        $table = $this->table_name;
+
+        // Validate table name
+        if (
+            strpos($table, $wpdb->prefix) !== 0 ||
+            !preg_match('/^[a-zA-Z0-9_]+$/', $table)
+        ) {
+            return array();
+        }
+        $table_safe = esc_sql($table);
+        $limit = 200;
+        $results = $wpdb->get_results(
+            $wpdb->prepare(
+                // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+                "SELECT * FROM `$table_safe` ORDER BY id DESC LIMIT %d",
+                $limit
+            )
+        ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
+
         wp_cache_set($cache_key, $results, 'moneyspace_ms_logs', 60);
+
         return $results;
     }
 
@@ -104,13 +123,22 @@ class Mslogs
         }
 
         // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery
+        $table = $this->table_name;
+        global $wpdb;
+        if (strpos($table, $wpdb->prefix) !== 0 || !preg_match('/^[a-zA-Z0-9_]+$/', $table)) {
+            return array();
+        }
+
+        $table_safe = esc_sql($table);
+        $limit = 200;
         $results = $wpdb->get_results(
             $wpdb->prepare(
-                "SELECT * FROM {$this->table_name} WHERE m_func_type = %s ORDER BY id DESC LIMIT 200",
-                $m_func_type
+                // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+                "SELECT * FROM `$table_safe` WHERE m_func_type = %s ORDER BY id DESC LIMIT %d",
+                [$m_func_type, $limit]
             )
-        );
-        // phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery
+        );// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery
+
         wp_cache_set($cache_key, $results, 'moneyspace_ms_logs', 60);
         return $results;
     }

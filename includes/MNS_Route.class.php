@@ -196,7 +196,7 @@ class MNS_Route extends MNS_Router_Utility
             return $possibilities;
         }
         if (is_array($possibilities)) {
-            $method = $_SERVER['REQUEST_METHOD'];
+            $method = isset($_SERVER['REQUEST_METHOD']) ? sanitize_text_field(wp_unslash($_SERVER['REQUEST_METHOD'])) : '';
             if ($method && isset($possibilities[$method]) && is_callable($possibilities[$method])) {
                 return $possibilities[$method];
             }
@@ -320,7 +320,8 @@ class MNS_Route extends MNS_Router_Utility
      */
     protected function login_redirect()
     {
-        $url = wp_login_url($_SERVER['REQUEST_URI']);
+        $request_uri = isset($_SERVER['REQUEST_URI']) ? sanitize_text_field(wp_unslash($_SERVER['REQUEST_URI'])) : '';
+        $url = wp_login_url($request_uri);
         wp_safe_redirect(esc_url_raw($url));
         exit;
     }
