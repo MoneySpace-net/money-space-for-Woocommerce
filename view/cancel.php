@@ -30,9 +30,9 @@ if (isset($_GET['ms_nonce']) && ! $moneyspace_nonce_valid) {
 $moneyspace_force_cancelling = false;
 
 if ($moneyspace_order && $moneyspace_pid) {
-    $moneyspace_payment_gateway_id = defined('MONEYSPACE_ID_CREDITCARD') ? MONEYSPACE_ID_CREDITCARD : (defined('MNS_ID') ? MNS_ID : 'moneyspace');
-    $moneyspace_payment_gateway_qr_id = defined('MONEYSPACE_ID_QRPROM') ? MONEYSPACE_ID_QRPROM : (defined('MNS_ID_QRPROM') ? MNS_ID_QRPROM : 'moneyspace_qrnone');
-    $moneyspace_payment_gateway_installment_id = defined('MONEYSPACE_ID_INSTALLMENT') ? MONEYSPACE_ID_INSTALLMENT : (defined('MNS_ID_INSTALLMENT') ? MNS_ID_INSTALLMENT : 'moneyspace_installment');
+    $moneyspace_payment_gateway_id = defined('MONEYSPACE_ID_CREDITCARD') ? MONEYSPACE_ID_CREDITCARD : (defined('MONEYSPACE_ID') ? MONEYSPACE_ID : 'moneyspace');
+    $moneyspace_payment_gateway_qr_id = defined('MONEYSPACE_ID_QRPROM') ? MONEYSPACE_ID_QRPROM : (defined('MONEYSPACE_ID_QRPROM') ? MONEYSPACE_ID_QRPROM : 'moneyspace_qrnone');
+    $moneyspace_payment_gateway_installment_id = defined('MONEYSPACE_ID_INSTALLMENT') ? MONEYSPACE_ID_INSTALLMENT : (defined('MONEYSPACE_ID_INSTALLMENT') ? MONEYSPACE_ID_INSTALLMENT : 'moneyspace_installment');
 
     $moneyspace_payment_gateways = WC_Payment_Gateways::instance();
     $moneyspace_payment_gateway = $moneyspace_payment_gateways->payment_gateways()[$moneyspace_payment_gateway_id] ?? null;
@@ -61,7 +61,7 @@ if ($moneyspace_order && $moneyspace_pid) {
 
         if ((time() - $moneyspace_qr_time) > $moneyspace_limit_time){
             if (moneyspace_check_payment_status($moneyspace_secret_id, $moneyspace_secret_key, $moneyspace_transaction) != true) {
-                $moneyspace_call_cancel = wp_remote_post(MNS_CANCEL_TRANSACTION, array(
+                $moneyspace_call_cancel = wp_remote_post(MONEYSPACE_CANCEL_TRANSACTION, array(
                     'method' => 'POST',
                     'timeout' => 120,
                     'body' => array(
@@ -107,7 +107,7 @@ if ($moneyspace_force_cancelling) {
 }
 
 function moneyspace_check_payment_status($moneyspace_secret_id, $moneyspace_secret_key, $moneyspace_transaction) {
-    $payment_status = wp_remote_post(MNS_CHECK_PAYMENT, array(
+    $payment_status = wp_remote_post(MONEYSPACE_CHECK_PAYMENT, array(
         'method' => 'POST',
         'timeout' => 120,
         'body' => array(

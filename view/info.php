@@ -3,7 +3,6 @@
 if ( ! defined( 'ABSPATH' ) ) exit;
 
 global $wp_version;
-global $woocommerce;
 
 use MoneySpace\Mslogs;
 use MoneySpace\MoneySpacePayment;

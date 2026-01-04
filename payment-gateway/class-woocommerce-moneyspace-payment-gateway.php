@@ -67,8 +67,8 @@ class MNS_Payment_Gateway extends WC_Payment_Gateway
         $tranId = $data_status[0]->transaction_ID ?? '';
         $linkPayment = $data_status[0]->link_payment ?? '';
 
-        update_post_meta($order_id, 'MNS_transaction_orderid', $ms_body['order_id'] ?? '');
-        update_post_meta($order_id, 'MNS_transaction', $tranId);
+        update_post_meta($order_id, 'MONEYSPACE_transaction_orderid', $ms_body['order_id'] ?? '');
+        update_post_meta($order_id, 'MONEYSPACE_transaction', $tranId);
 
         $allowed_host = wp_parse_url($linkPayment, PHP_URL_HOST);
         if (!empty($allowed_host)) {
@@ -250,8 +250,8 @@ class MNS_Payment_Gateway extends WC_Payment_Gateway
     public function process_payment($order_id)
     {
         if (get_woocommerce_currency() == "THB") {
-            update_post_meta($order_id, 'MNS_PAYMENT_TYPE', "Card");
-            delete_post_meta($order_id, 'MNS_transaction');
+            update_post_meta($order_id, 'MONEYSPACE_PAYMENT_TYPE', "Card");
+            delete_post_meta($order_id, 'MONEYSPACE_transaction');
 
             $order = wc_get_order($order_id);
             return $this->_process_external_payment($order);

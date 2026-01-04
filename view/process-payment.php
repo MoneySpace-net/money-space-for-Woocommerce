@@ -64,20 +64,9 @@ if ($moneyspace_order && $moneyspace_pid) {
         )
     ));
 
-    // Debug logging - only active when WP_DEBUG is enabled
-    if (defined('WP_DEBUG') && WP_DEBUG) {
-        $moneyspace_logger->error( 'MoneySpace Payment Status Check - Order ID: ' . $moneyspace_order_id, [ 'source' => 'moneyspace' ] );
-        $moneyspace_logger->error( 'MoneySpace Payment Status Check - Transaction Order ID: ' . $moneyspace_transaction_orderid, [ 'source' => 'moneyspace' ] );
-        $moneyspace_logger->error( 'MoneySpace Payment Status Check - Payment Type: ' . $moneyspace_payment_type, [ 'source' => 'moneyspace' ] );
-    }
-
     if (!is_wp_error($moneyspace_check_orderid)) {
         $moneyspace_response_body = wp_remote_retrieve_body($moneyspace_check_orderid);
-        
-        if (defined('WP_DEBUG') && WP_DEBUG) {
-            $moneyspace_logger->error( 'MoneySpace Payment Status Check - Raw Response: ' . $moneyspace_response_body, [ 'source' => 'moneyspace' ] );
-        }
-        
+
         $moneyspace_json_status = json_decode($moneyspace_response_body);
         
         // Add safety check for API response
@@ -88,17 +77,9 @@ if ($moneyspace_order && $moneyspace_pid) {
             exit;
         }
         
-        if (defined('WP_DEBUG') && WP_DEBUG) {
-            $moneyspace_logger->error( 'MoneySpace Payment Status Check - Parsed Response: ' . json_encode($moneyspace_json_status[0]), [ 'source' => 'moneyspace' ] );
-        }
-        
         // Access the order data using proper property notation
         $moneyspace_response_data = $moneyspace_json_status[0];
         $moneyspace_status_obj = isset($moneyspace_response_data->{'order id'}) ? $moneyspace_response_data->{'order id'} : null;
-        
-        if (defined('WP_DEBUG') && WP_DEBUG) {
-            $moneyspace_logger->error( 'MoneySpace Payment Status Check - Order Status Object: ' . json_encode($moneyspace_status_obj), [ 'source' => 'moneyspace' ] );
-        }
         
         // Additional safety check for order status
         if (empty($moneyspace_status_obj)) {
@@ -119,9 +100,6 @@ if ($moneyspace_order && $moneyspace_pid) {
             // Check for all possible success status values
             if ($moneyspace_status == "Pay Success" || $moneyspace_status == "Success") {
                 $moneyspace_is_payment_successful = true;
-                if (defined('WP_DEBUG') && WP_DEBUG) {
-                    $moneyspace_logger->error('MoneySpace Payment: Payment successful with status "' . $moneyspace_status . '" for payment type: ' . $moneyspace_payment_type, [ 'source' => 'moneyspace' ]);
-                }
             }
         }
 

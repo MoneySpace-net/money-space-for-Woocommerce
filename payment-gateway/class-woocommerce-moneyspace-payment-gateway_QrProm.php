@@ -89,10 +89,10 @@ class MNS_Payment_Gateway_QR extends WC_Payment_Gateway
             $image_qrprom = base64_encode(wp_remote_retrieve_body($response_qr));
         }
 
-        update_post_meta($order_id, 'MNS_transaction_orderid', $ms_body["order_id"] ?? '');
-        update_post_meta($order_id, 'MNS_transaction', $tranId);
-        update_post_meta($order_id, 'MNS_PAYMENT_IMAGE_QRPROMT', $image_qrprom);
-        update_post_meta($order_id, 'MNS_QR_TIME', $dt->getTimestamp());
+        update_post_meta($order_id, 'MONEYSPACE_transaction_orderid', $ms_body["order_id"] ?? '');
+        update_post_meta($order_id, 'MONEYSPACE_transaction', $tranId);
+        update_post_meta($order_id, 'MONEYSPACE_PAYMENT_IMAGE_QRPROMT', $image_qrprom);
+        update_post_meta($order_id, 'MONEYSPACE_QR_TIME', $dt->getTimestamp());
         $order = wc_get_order($order_id);
         $items = $order->get_items();
 
@@ -203,14 +203,14 @@ class MNS_Payment_Gateway_QR extends WC_Payment_Gateway
      */
     public function process_payment($order_id)
     {
-        $MNS_special_instructions_to_merchant = get_post_meta($order_id, 'MNS_special_instructions_to_merchant', true);
+        $moneyspace_special_instructions_to_merchant = get_post_meta($order_id, 'MONEYSPACE_special_instructions_to_merchant', true);
         // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Nonce verification handled by WooCommerce checkout process
         $message_qr = sanitize_text_field(wp_unslash($_POST["message_qr"] ?? ''));
-        if (strlen($MNS_special_instructions_to_merchant) <= 150) {
+        if (strlen($moneyspace_special_instructions_to_merchant) <= 150) {
             if (get_woocommerce_currency() == "THB") {
-                update_post_meta($order_id, 'MNS_special_instructions_to_merchant', $message_qr);
-                update_post_meta($order_id, 'MNS_PAYMENT_TYPE', "Qrnone");
-                delete_post_meta($order_id, 'MNS_transaction');
+                update_post_meta($order_id, 'MONEYSPACE_special_instructions_to_merchant', $message_qr);
+                update_post_meta($order_id, 'MONEYSPACE_PAYMENT_TYPE', "Qrnone");
+                delete_post_meta($order_id, 'MONEYSPACE_transaction');
                 $order = wc_get_order($order_id);
                 return $this->_process_external_payment($order);
             } else {
@@ -247,13 +247,13 @@ class MNS_Payment_Gateway_QR extends WC_Payment_Gateway
         $payment_gateway_qr = $payment_gateways->payment_gateways()[$payment_gateway_qr_id];
 
         $gateways = WC()->payment_gateways->get_available_payment_gateways();
-        $ms_order_select = $payment_gateway->settings['order_status_if_success'];
-        $ms_secret_id = $payment_gateway->settings['secret_id'];
-        $ms_secret_key = $payment_gateway->settings['secret_key'];
-        $ms_template_payment = $payment_gateway->settings['ms_template_payment'];
-        $MNS_special_instructions_to_merchant = get_post_meta($order_id, 'MNS_special_instructions_to_merchant', true);
+        $moneyspace_order_select = $payment_gateway->settings['order_status_if_success'];
+        $moneyspace_secret_id = $payment_gateway->settings['secret_id'];
+        $moneyspace_secret_key = $payment_gateway->settings['secret_key'];
+        $moneyspace_template_payment = $payment_gateway->settings['ms_template_payment'];
+        $moneyspace_special_instructions_to_merchant = get_post_meta($order_id, 'MONEYSPACE_special_instructions_to_merchant', true);
 
-        $ms_time = $dt->format("YmdHis"); // date("YmdHis");
+        $moneyspace_time = $dt->format("YmdHis"); // date("YmdHis");
 
         $items_order = new WC_Order($order_id);
         $items = $order->get_items();
@@ -263,17 +263,17 @@ class MNS_Payment_Gateway_QR extends WC_Payment_Gateway
             $order->get_order_key(),
             trailingslashit(get_site_url()) . 'process/payment/' . $order_id
         );
-        $ms_fee = "include";
+        $moneyspace_fee = "include";
         
         $error_list = array("wc-failed", "wc-cancelled", "wc-refunded");
-        if (in_array($ms_order_select, $error_list)) {
+        if (in_array($moneyspace_order_select, $error_list)) {
             wc_add_notice(MONEYSPACE_NOTICE_ERROR_CONTINUE, 'error');
         }
 
-        $body_post = moneyspace_set_body($order_id, $order, $gateways, $order_amount, $items_msg, $MNS_special_instructions_to_merchant, $ms_fee, $ms_time);
-        $ms_body = moneyspace_set_req_message($ms_secret_id, $ms_secret_key, $body_post, "qrnone", $return_url);
-        unset($ms_body["agreement"]);
-        return $this->create_payment_transaction($order_id, $ms_body, $ms_template_payment, $gateways, $payment_gateway_qr);
+        $body_post = moneyspace_set_body($order_id, $order, $gateways, $order_amount, $items_msg, $moneyspace_special_instructions_to_merchant, $moneyspace_fee, $moneyspace_time);
+        $moneyspace_body = moneyspace_set_req_message($moneyspace_secret_id, $moneyspace_secret_key, $body_post, "qrnone", $return_url);
+        unset($moneyspace_body["agreement"]);
+        return $this->create_payment_transaction($order_id, $moneyspace_body, $moneyspace_template_payment, $gateways, $payment_gateway_qr);
     }
 
     protected function _process_external_payment($order)

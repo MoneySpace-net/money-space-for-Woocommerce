@@ -468,24 +468,11 @@ class MNS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
             $fcy_permonths = isset( $_POST['FCY_permonths'] ) ? sanitize_text_field( wp_unslash( $_POST['FCY_permonths'] ) ) : ( isset( $_POST['fcy_permonths'] ) ? sanitize_text_field( wp_unslash( $_POST['fcy_permonths'] ) ) : '' );
             $message_card  = isset( $_POST['message_card'] ) ? sanitize_text_field( wp_unslash( $_POST['message_card'] ) ) : '';
             
-            if (defined('WP_DEBUG') && WP_DEBUG) {
-                $this->logger->error( 'MoneySpace Installment Payment Debug - Using traditional POST data (installment data extracted safely)', [ 'source' => 'moneyspace' ] );
-            }
-        }
-        
-        // Log the extracted installment data
-        if (defined('WP_DEBUG') && WP_DEBUG) {
-            $this->logger->error( 'MoneySpace Installment Payment Debug - Installment data extracted: ' . json_encode([
-                'selectbank' => $selectbank ?: 'EMPTY',
-                'ktc_permonths' => $ktc_permonths ?: 'EMPTY',
-                'bay_permonths' => $bay_permonths ?: 'EMPTY',
-                'fcy_permonths' => $fcy_permonths ?: 'EMPTY',
-                'message_card' => $message_card ?: 'EMPTY'
-            ]));
+
         }
 
         // Handle installment payment data safely
-        update_post_meta($order_id, 'MNS_special_instructions_to_merchant', $message_card);
+        update_post_meta($order_id, 'moneyspace_special_instructions_to_merchant', $message_card);
 
         if (!is_user_logged_in() && !$is_error) {
             wc_add_notice("Please login !", 'error');
@@ -513,10 +500,10 @@ class MNS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
         }
 
         if(!$is_error) {
-            delete_post_meta($order_id, 'MNS_transaction');
-            delete_post_meta($order_id, 'MNS_QR_URL');
-            update_post_meta($order_id, 'MNS_PAYMENT_TYPE', "Installment");
-            update_post_meta($order_id, 'MNS_INSTALLMENT_BANK', $selectbank);
+            delete_post_meta($order_id, 'MONEYSPACE_transaction');
+            delete_post_meta($order_id, 'MONEYSPACE_QR_URL');
+            update_post_meta($order_id, 'MONEYSPACE_PAYMENT_TYPE', "Installment");
+            update_post_meta($order_id, 'MONEYSPACE_INSTALLMENT_BANK', $selectbank);
             $endterm = "";
             $bankType = $selectbank;
             
@@ -532,11 +519,10 @@ class MNS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
                 $endterm = $fcy_permonths;
             }
 
-            update_post_meta($order_id, 'MNS_INSTALLMENT_BANK_TYPE', $bankType);
-            update_post_meta($order_id, 'MNS_INSTALLMENT_MONTHS', $endterm);
+            update_post_meta($order_id, 'MONEYSPACE_INSTALLMENT_BANK_TYPE', $bankType);
+            update_post_meta($order_id, 'MONEYSPACE_INSTALLMENT_MONTHS', $endterm);
             return $this->_process_external_payment($order); // go to paymentgateway_form
         } else {
-            moneyspace_debug_log('Installment Payment Error: Validation failed', true); // Always log errors
             return array(
                 'result' => 'failure',
                 'messages' => "Error : Message to the store (150 characters maximum)"
@@ -577,8 +563,8 @@ class MNS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
             return;
         }
 
-        $bankType = get_post_meta( $order_id, 'MNS_INSTALLMENT_BANK_TYPE', true);
-        $endTerm = get_post_meta( $order_id, 'MNS_INSTALLMENT_MONTHS', true);
+        $bankType = get_post_meta( $order_id, 'MONEYSPACE_INSTALLMENT_BANK_TYPE', true);
+        $endTerm = get_post_meta( $order_id, 'MONEYSPACE_INSTALLMENT_MONTHS', true);
         $payment_data = array("secret_id" => $ms_secret_id
         , "secret_key" => $ms_secret_key
         , "firstname" => $order->get_billing_first_name()
@@ -597,12 +583,6 @@ class MNS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
         , "bankType" => $bankType
         , "startTerm" => $endTerm
         , "endTerm" => $endTerm);
-        
-        if (defined('WP_DEBUG') && WP_DEBUG) {
-            $log_body = function_exists('moneyspace_filter_sensitive_data') ? moneyspace_filter_sensitive_data($payment_data) : $payment_data;
-            $this->logger->error( 'MoneySpace Installment API: Creating payment transaction for order ' . $order_id, [ 'source' => 'moneyspace' ] );
-            $this->logger->error( 'MoneySpace Installment API: Request body: ' . json_encode($log_body), [ 'source' => 'moneyspace' ] );
-        }
         
         $response = wp_remote_post(MONEYSPACE_API_URL_CREATE_INSTALLMENT, 
         array(
@@ -645,12 +625,12 @@ class MNS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
         $linkPayment = $json_tranId[0]->link_payment ?? '';
         
         // Save the transaction order ID for payment status checking
-        update_post_meta($order_id, 'MNS_transaction_orderid', $payment_data['order_id']);
-        update_post_meta($order_id, 'MNS_transaction', $tranId);
+        update_post_meta($order_id, 'moneyspace_transaction_orderid', $payment_data['order_id']);
+        update_post_meta($order_id, 'moneyspace_transaction', $tranId);
         
         // Save the payment link for pending payments
         if (!empty($linkPayment)) {
-            update_post_meta($order_id, 'MNS_PAYMENT_LINK', $linkPayment);
+            update_post_meta($order_id, 'MONEYSPACE_PAYMENT_LINK', $linkPayment);
         }
         
         if (defined('WP_DEBUG') && WP_DEBUG) {

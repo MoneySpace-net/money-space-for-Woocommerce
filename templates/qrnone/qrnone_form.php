@@ -2,7 +2,7 @@
 
 if ( ! defined( 'ABSPATH' ) ) exit;
 
-$moneyspace_qr_time = get_post_meta($moneyspace_order_id, 'MNS_QR_TIME', true);
+$moneyspace_qr_time = get_post_meta($moneyspace_order_id, 'MONEYSPACE_QR_TIME', true);
 $moneyspace_tz = 'Asia/Bangkok';
 $moneyspace_dt = new DateTime("now", new DateTimeZone($moneyspace_tz));
 
@@ -22,7 +22,7 @@ $moneyspace_cancel_url = add_query_arg(
 $moneyspace_check_url = add_query_arg(
     'key',
     $moneyspace_order_key,
-    get_site_url() . MNS_CHECK_PAYMENT_STATUS . $moneyspace_order_id
+    get_site_url() . MONEYSPACE_CHECK_PAYMENT_STATUS . $moneyspace_order_id
 );
 
 ?>
@@ -43,7 +43,7 @@ if(empty($moneyspace_auto_cancel)){
 }
 $moneyspace_dt->setTimestamp($moneyspace_qr_time + $moneyspace_limit_time);
 
-wc_enqueue_js('
+wp_add_inline_script( 'moneyspace-qrnone','
 let timeZone = "Asia/Bangkok";
 var autoCheckIntervalMs = ' . $moneyspace_auto_check_result_time . ';
 var cancelUrl = ' . wp_json_encode($moneyspace_cancel_url) . ';

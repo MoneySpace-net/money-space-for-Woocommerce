@@ -29,12 +29,7 @@ use MoneySpace\MNS_CheckPayment;
 use MoneySpace\Payments\MoneySpace_CreditCard;
 use MoneySpace\Payments\MoneySpace_QRCode;
 use MoneySpace\Payments\MoneySpace_CreditCard_Installment;
-use MoneySpace\Payments\MNS_Payment_Gateway_Test_Block;
-use WP_Scripts;
-
 use Automattic\WooCommerce\Blocks\Payments\PaymentMethodRegistry;
-use Automattic\WooCommerce\Blocks\Package;
-use Automattic\WooCommerce\Blocks\Assets\Api as AssetApi;
 
 MoneySpacePayment::Import('MNS_Bootstrapper.php');
 
@@ -111,13 +106,13 @@ class MoneySpacePayment {
             MoneySpacePayment::Import('includes/ms_log.php');
 
             add_action('init', array(MNS_Router_Utility::class, 'init'), -100, 0);
-            add_action(MNS_Router_Utility::PLUGIN_INIT_HOOK, array(MNS_Router_Page::class, 'init'), 0, 0);
-            add_action(MNS_Router_Utility::PLUGIN_INIT_HOOK, array(MNS_Router::class, 'init'), 1, 0);
-            add_action(MNS_Router_Utility::PLUGIN_INIT_HOOK, array(MNS_Processpayment::class, 'init'), 1, 0);
-            add_action(MNS_Router_Utility::PLUGIN_INIT_HOOK, array(MNS_Webhook::class, 'init'), 1, 0);
-            add_action(MNS_Router_Utility::PLUGIN_INIT_HOOK, array(MNS_Cancel::class, 'init'), 1, 0);
-            add_action(MNS_Router_Utility::PLUGIN_INIT_HOOK, array(MNS_Info::class, 'init'), 1, 0);
-            add_action(MNS_Router_Utility::PLUGIN_INIT_HOOK, array(MNS_CheckPayment::class, 'init'), 1, 0);
+            add_action(MNS_Router_Utility::MONEYSPACE_PLUGIN_INIT_HOOK, array(MNS_Router_Page::class, 'init'), 0, 0);
+            add_action(MNS_Router_Utility::MONEYSPACE_PLUGIN_INIT_HOOK, array(MNS_Router::class, 'init'), 1, 0);
+            add_action(MNS_Router_Utility::MONEYSPACE_PLUGIN_INIT_HOOK, array(MNS_Processpayment::class, 'init'), 1, 0);
+            add_action(MNS_Router_Utility::MONEYSPACE_PLUGIN_INIT_HOOK, array(MNS_Webhook::class, 'init'), 1, 0);
+            add_action(MNS_Router_Utility::MONEYSPACE_PLUGIN_INIT_HOOK, array(MNS_Cancel::class, 'init'), 1, 0);
+            add_action(MNS_Router_Utility::MONEYSPACE_PLUGIN_INIT_HOOK, array(MNS_Info::class, 'init'), 1, 0);
+            add_action(MNS_Router_Utility::MONEYSPACE_PLUGIN_INIT_HOOK, array(MNS_CheckPayment::class, 'init'), 1, 0);
 
             add_action('admin_enqueue_scripts', array($this, 'load_custom_wp_admin_style'));
             add_filter('wc_order_statuses', 'moneyspace_wc_renaming_order_status');

@@ -2,10 +2,6 @@
 
 if ( ! defined( 'ABSPATH' ) ) exit;
 
-global $wpdb;
-
-global $woocommerce;
-
 // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- External webhook uses HMAC signature verification instead of nonces.
 $moneyspace_transection_id = filter_input(INPUT_POST, 'transectionID', FILTER_SANITIZE_STRING);
 if (!empty($moneyspace_transection_id)) {
