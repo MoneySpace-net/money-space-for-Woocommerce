@@ -1,6 +1,7 @@
 <?php
 
 namespace MoneySpace\Payments;
+if ( !defined( 'ABSPATH')) exit;
 
 use WC_Payment_Gateway;
 use WC_Payment_Gateways;

@@ -16,6 +16,7 @@
  */
 
 namespace MoneySpace;
+if ( ! defined( 'ABSPATH' ) ) exit;
 
 use MoneySpace\MNS_Router_Utility;
 use MoneySpace\MNS_Router_Page;

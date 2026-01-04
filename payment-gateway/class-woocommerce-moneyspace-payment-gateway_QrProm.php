@@ -1,6 +1,7 @@
 <?php
 
 namespace MoneySpace\Payments;
+if ( !defined( 'ABSPATH')) exit;
 
 use WC_Payment_Gateway;
 use WC_Payment_Gateways;
@@ -203,7 +204,8 @@ class MNS_Payment_Gateway_QR extends WC_Payment_Gateway
     public function process_payment($order_id)
     {
         $MNS_special_instructions_to_merchant = get_post_meta($order_id, 'MNS_special_instructions_to_merchant', true);
-        $message_qr = sanitize_text_field($_POST["message_qr"] ?? '');
+        // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Nonce verification handled by WooCommerce checkout process
+        $message_qr = sanitize_text_field(wp_unslash($_POST["message_qr"] ?? ''));
         if (strlen($MNS_special_instructions_to_merchant) <= 150) {
             if (get_woocommerce_currency() == "THB") {
                 update_post_meta($order_id, 'MNS_special_instructions_to_merchant', $message_qr);

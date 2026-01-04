@@ -1,4 +1,7 @@
 <?php
+
+if ( ! defined( 'ABSPATH' ) ) exit;
+
 $moneyspace_order_id = $args['order_id'];
 $moneyspace_payment_gateway_qr = $args['payment_gateway_qr'];
 $moneyspace_image_qrprom = $args['image_qrprom'];

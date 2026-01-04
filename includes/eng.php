@@ -1,5 +1,7 @@
 <?php
 
+if ( ! defined( 'ABSPATH' ) ) exit;
+
 define('MONEYSPACE_DESCRIPTION', 'Integrates WooCommerce with MoneySpace Payment Gateway module. ');
 define('MONEYSPACE_DESCRIPTION_QR', '
 QR Payment, where you can easily pay via your preferred mobile banking application.

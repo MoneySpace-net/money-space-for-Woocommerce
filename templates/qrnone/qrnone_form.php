@@ -1,5 +1,7 @@
 <?php
 
+if ( ! defined( 'ABSPATH' ) ) exit;
+
 $moneyspace_qr_time = get_post_meta($moneyspace_order_id, 'MNS_QR_TIME', true);
 $moneyspace_tz = 'Asia/Bangkok';
 $moneyspace_dt = new DateTime("now", new DateTimeZone($moneyspace_tz));

@@ -1,16 +1,6 @@
 <?php
 
-$logger = wc_get_logger();
-/**
- * MoneySpace debug logging helper
- * Only logs when WP_DEBUG is enabled
- * NEVER logs sensitive payment data (PCI DSS compliance)
- */
-function moneyspace_debug_log($message, $always_log = false) {
-    if ($always_log || (defined('WP_DEBUG') && WP_DEBUG)) {
-        $logger->error( 'MoneySpace: ' . $message, [ 'source' => 'moneyspace' ] );
-    }
-}
+if ( ! defined( 'ABSPATH' ) ) exit;
 
 /**
  * Safely mask sensitive card data for logging
@@ -226,7 +216,6 @@ function moneyspace_update_order_status($order) {
             
             // Add safety check for API response
             if (empty($json_status) || !is_array($json_status) || !isset($json_status[0])) {
-                error_log('MoneySpace API: Invalid response format in helper.php');
                 return false;
             }
             
@@ -236,7 +225,6 @@ function moneyspace_update_order_status($order) {
             
             // Additional safety check for order status
             if (empty($ms_status)) {
-                error_log('MoneySpace API: No order status found in response in helper.php');
                 return false;
             }
     

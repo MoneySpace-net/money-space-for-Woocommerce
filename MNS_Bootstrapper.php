@@ -1,5 +1,7 @@
 <?php
 
+if ( ! defined( 'ABSPATH' ) ) exit;
+
 if ( ! defined( 'MONEYSPACE_PLUGIN_FILE' ) ) {
     define( 'MONEYSPACE_PLUGIN_FILE', __FILE__ );
 }

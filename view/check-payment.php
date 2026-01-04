@@ -1,5 +1,7 @@
 <?php
 
+if ( ! defined( 'ABSPATH' ) ) exit;
+
 $moneyspace_pid = absint($moneyspace_pid);
 $moneyspace_order = wc_get_order($moneyspace_pid);
 $moneyspace_provided_key = isset($moneyspace__GET['key']) ? sanitize_text_field(wp_unslash($moneyspace__GET['key'])) : '';

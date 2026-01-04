@@ -11,7 +11,7 @@ class MNS_Router_Utility
     const MIN_PHP_VERSION = '5.2';
     const MIN_WP_VERSION = '3.0';
     const DB_VERSION = 1;
-    const PLUGIN_INIT_HOOK = 'MNS_Router_init';
+    const MONEYSPACE_PLUGIN_INIT_HOOK = 'MONEYSPACE_Router_init';
 
     /**
      * @static
@@ -62,6 +62,7 @@ class MNS_Router_Utility
 
     public static function init()
     {
-        do_action(self::PLUGIN_INIT_HOOK);
+        // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.DynamicHooknameFound -- Constant contains proper 'MONEYSPACE' prefix
+        do_action(self::MONEYSPACE_PLUGIN_INIT_HOOK);
     }
 }

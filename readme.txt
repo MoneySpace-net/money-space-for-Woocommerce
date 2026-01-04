@@ -9,7 +9,7 @@ Requires WordPress: 4.9
 License: GPL-2.0+
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-Payment Gateway รับชำระด้วยบัตรเครดิตออนไลน์ได้ สามารถรองรับสกุลเงินต่างประเทศได้ถึง 27 สกุลเงิน ขยายฐานลูกค้าของคุณไปทั่วโลก
+Accept online credit card payments with MoneySpace Payment Gateway. Supports 27+ currencies, PromptPay QR, and installment plans for Thai merchants.
 
 == Description ==
 

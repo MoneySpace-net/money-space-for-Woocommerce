@@ -99,13 +99,15 @@ class Mslogs
         }
         $table_safe = esc_sql($table);
         $limit = 200;
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery
         $results = $wpdb->get_results(
             $wpdb->prepare(
                 // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
                 "SELECT * FROM `$table_safe` ORDER BY id DESC LIMIT %d",
                 $limit
             )
-        ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
+        ); 
+        
 
         wp_cache_set($cache_key, $results, 'moneyspace_ms_logs', 60);
 
@@ -137,7 +139,8 @@ class Mslogs
                 "SELECT * FROM `$table_safe` WHERE m_func_type = %s ORDER BY id DESC LIMIT %d",
                 [$m_func_type, $limit]
             )
-        );// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery
+        );
+        // phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery
 
         wp_cache_set($cache_key, $results, 'moneyspace_ms_logs', 60);
         return $results;

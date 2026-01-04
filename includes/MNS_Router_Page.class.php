@@ -2,6 +2,7 @@
 
 namespace MoneySpace;
 use WP_Query;
+if ( !defined( 'ABSPATH')) exit;
 
 class MNS_Router_Page extends MNS_Router_Utility
 {

@@ -5,6 +5,7 @@ namespace MoneySpace;
 use WP;
 use Exception;
 use WP_Query;
+if ( !defined( 'ABSPATH')) exit;
 
 class MNS_Router extends MNS_Router_Utility
 {
@@ -144,13 +145,11 @@ class MNS_Router extends MNS_Router_Utility
     public function __clone()
     {
         // cannot be cloned
-        trigger_error(__CLASS__ . ' may not be cloned', E_USER_ERROR);
     }
 
     public function __sleep()
     {
         // cannot be serialized
-        trigger_error(__CLASS__ . ' may not be serialized', E_USER_ERROR);
     }
 
     /**

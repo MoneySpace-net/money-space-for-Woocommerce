@@ -1,5 +1,7 @@
 <?php
 
+if ( ! defined( 'ABSPATH' ) ) exit;
+
 define('MONEYSPACE_DESCRIPTION', 'Integrates WooCommerce with MoneySpace Payment Gateway module. ');
 define('MONEYSPACE_DESCRIPTION_QR', '
 	QR Code PromptPay   คือ  วิธีการชำระเงินรูปแบบใหม่ เพิ่มความสะดวกสบายให้กับลูกค้า เพียงสแกน QR Code และชำระเงินค่าสินค้า  / บริการ  ด้วยแอพพลิเคชั่น Mobile Banking ของลูกค้า

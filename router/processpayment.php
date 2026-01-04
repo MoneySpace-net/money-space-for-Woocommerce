@@ -2,6 +2,7 @@
 
 namespace MoneySpace;
 use MoneySpace\MNS_Router;
+if ( !defined( 'ABSPATH')) exit;
 
 class MNS_Processpayment
 {
