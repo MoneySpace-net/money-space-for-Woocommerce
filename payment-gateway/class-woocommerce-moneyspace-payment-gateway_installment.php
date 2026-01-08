@@ -603,11 +603,6 @@ class MNS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
         $body = wp_remote_retrieve_body($response);
         $http_code = wp_remote_retrieve_response_code($response);
         
-        if (defined('WP_DEBUG') && WP_DEBUG) {
-            $this->logger->error( 'MoneySpace Installment API: HTTP Response Code - ' . $http_code, [ 'source' => 'moneyspace' ] );
-            $this->logger->error( 'MoneySpace Installment API: Response Body - ' . $body, [ 'source' => 'moneyspace' ] );
-        }
-        
         $log_body = function_exists('moneyspace_filter_sensitive_data') ? moneyspace_filter_sensitive_data($payment_data) : $payment_data;
         (new Mslogs())->insert($body, 4, 'Create Transaction Installment', gmdate("Y-m-d H:i:s"), json_encode($log_body));
 
@@ -631,12 +626,6 @@ class MNS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
         // Save the payment link for pending payments
         if (!empty($linkPayment)) {
             update_post_meta($order_id, 'MONEYSPACE_PAYMENT_LINK', $linkPayment);
-        }
-        
-        if (defined('WP_DEBUG') && WP_DEBUG) {
-            $this->logger->error( 'MoneySpace Installment API: Transaction created successfully - ID: ' . $tranId, [ 'source' => 'moneyspace' ] );
-            $this->logger->error( 'MoneySpace Installment API: Order ID saved: ' . $payment_data['order_id'], [ 'source' => 'moneyspace' ] );
-            $this->logger->error( 'MoneySpace Installment API: Payment link saved: ' . $linkPayment, [ 'source' => 'moneyspace' ] );
         }
 
         $is_include = ($fee_opt !== 'customer');
@@ -691,9 +680,6 @@ class MNS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
         <?php 
         // Use the modern payment link from API response instead of legacy form submission
         if (!empty($linkPayment)) {
-            if (defined('WP_DEBUG') && WP_DEBUG) {
-                $this->logger->error( 'MoneySpace Installment: Redirecting to payment link: ' . $linkPayment, [ 'source' => 'moneyspace' ] );
-            }
             ?>
             <div style="text-align: center; padding: 20px;">
                 <p>กำลังเปลี่ยนเส้นทางไปยังหน้าชำระเงิน...</p>

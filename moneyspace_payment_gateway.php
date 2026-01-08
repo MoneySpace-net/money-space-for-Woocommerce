@@ -48,7 +48,17 @@ class MoneySpacePayment {
 
     public function Initialize() {
         
-        $this->moneyspace_active_plugins = apply_filters('moneyspace_active_plugins', get_option('moneyspace_active_plugins'));
+        // Get active plugins from WordPress
+        $active_plugins = (array) get_option('active_plugins', array());
+        
+        // For multisite, also check network activated plugins
+        if (is_multisite()) {
+            $network_plugins = (array) get_site_option('active_sitewide_plugins', array());
+            $active_plugins = array_merge($active_plugins, array_keys($network_plugins));
+        }
+        
+        $this->moneyspace_active_plugins = apply_filters('moneyspace_active_plugins', $active_plugins);
+        
         if (in_array('woocommerce/woocommerce.php', $this->moneyspace_active_plugins)) {
             add_action('plugins_loaded', array($this, 'load_MS_Payment_Gateway'));
             add_filter('plugin_action_links_' . plugin_basename(__FILE__), array($this, 'add_action_links'));
