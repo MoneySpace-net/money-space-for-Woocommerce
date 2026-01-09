@@ -4,14 +4,19 @@
  * Plugin Name:       Money Space
  * Plugin URI:        https://github.com/MoneySpace-net/money-space-for-Woocommerce/releases
  * Description:       Would you like to provide a streamlined and secure checkout experience for your customer? Every business does. Payment process is vital to the success eCommerce businesses. While WooCommerce merchants maximize their online products, we can help you take care of  payments and deliver a better overall customer experience for your online customers. By integrating your Magento website to your MoneySpace Payment Gateway account, your customer can pay for their products securely through credit card online. MoneySpace also supports up to 27 foreign currencies and Alipay/ WechatPay payments so you can begin receiving payment and expand your customer base worldwide. MoneySpace is PCI DSS certified and had been approved by Bank of Thailand as a payment method. To get to know more about MoneySpace payment gateway, visit our website at https://www.moneyspace.net
- * Version:           2.14.0
+ * Version:           3.0.0
  * Author:            Money Space
  * Author URI:        https://moneyspace.net
+ * Text Domain:       money-space
+ * Domain Path:       /languages
+ * Copyright:         Copyright (c) 2024 Money Space
+ * License:           GPL-2.0+
  * 
  * @package MoneySpace
  */
 
 namespace MoneySpace;
+if ( ! defined( 'ABSPATH' ) ) exit;
 
 use MoneySpace\MNS_Router_Utility;
 use MoneySpace\MNS_Router_Page;
@@ -21,22 +26,16 @@ use MoneySpace\MNS_Webhook;
 use MoneySpace\MNS_Cancel;
 use MoneySpace\MNS_Info;
 use MoneySpace\MNS_CheckPayment;
-use MoneySpace\Moneyspace_Updater;
 use MoneySpace\Payments\MoneySpace_CreditCard;
 use MoneySpace\Payments\MoneySpace_QRCode;
 use MoneySpace\Payments\MoneySpace_CreditCard_Installment;
-use MoneySpace\Payments\MNS_Payment_Gateway_Test_Block;
-use WP_Scripts;
-
 use Automattic\WooCommerce\Blocks\Payments\PaymentMethodRegistry;
-use Automattic\WooCommerce\Blocks\Package;
-use Automattic\WooCommerce\Blocks\Assets\Api as AssetApi;
 
 MoneySpacePayment::Import('MNS_Bootstrapper.php');
 
 class MoneySpacePayment {
 
-    public $active_plugins;
+    public $moneyspace_active_plugins;
     public $updater;
 
     public function __construct() {
@@ -49,8 +48,18 @@ class MoneySpacePayment {
 
     public function Initialize() {
         
-        $this->active_plugins = apply_filters('active_plugins', get_option('active_plugins'));
-        if (in_array('woocommerce/woocommerce.php', $this->active_plugins)) {
+        // Get active plugins from WordPress
+        $active_plugins = (array) get_option('active_plugins', array());
+        
+        // For multisite, also check network activated plugins
+        if (is_multisite()) {
+            $network_plugins = (array) get_site_option('active_sitewide_plugins', array());
+            $active_plugins = array_merge($active_plugins, array_keys($network_plugins));
+        }
+        
+        $this->moneyspace_active_plugins = apply_filters('moneyspace_active_plugins', $active_plugins);
+        
+        if (in_array('woocommerce/woocommerce.php', $this->moneyspace_active_plugins)) {
             add_action('plugins_loaded', array($this, 'load_MS_Payment_Gateway'));
             add_filter('plugin_action_links_' . plugin_basename(__FILE__), array($this, 'add_action_links'));
         }
@@ -64,10 +73,8 @@ class MoneySpacePayment {
         
         // load the base class
         MoneySpacePayment::Import('includes/MNS_Router_Utility.class.php');
-        MoneySpacePayment::Import('includes/updater.php');
 
         add_action('MoneySpaceInit', array($this, 'MNS_Router_load'));
-        add_action('MoneySpaceInit', array($this, 'MoneySpaceUpdater'));
         do_action('MoneySpaceInit');
 
         
@@ -85,7 +92,7 @@ class MoneySpacePayment {
     public function add_action_links($links)
     {
         $mylinks = array(
-            '<a href="' . admin_url('admin.php?page=wc-settings&tab=checkout&section=moneyspace') . '">' . MNS_SETTING_LINK . '</a>',
+            '<a href="' . admin_url('admin.php?page=wc-settings&tab=checkout&section=moneyspace') . '">' . MONEYSPACE_SETTING_LINK . '</a>',
         );
         return array_merge($links, $mylinks);
     }
@@ -109,29 +116,22 @@ class MoneySpacePayment {
             MoneySpacePayment::Import('includes/ms_log.php');
 
             add_action('init', array(MNS_Router_Utility::class, 'init'), -100, 0);
-            add_action(MNS_Router_Utility::PLUGIN_INIT_HOOK, array(MNS_Router_Page::class, 'init'), 0, 0);
-            add_action(MNS_Router_Utility::PLUGIN_INIT_HOOK, array(MNS_Router::class, 'init'), 1, 0);
-            add_action(MNS_Router_Utility::PLUGIN_INIT_HOOK, array(MNS_Processpayment::class, 'init'), 1, 0);
-            add_action(MNS_Router_Utility::PLUGIN_INIT_HOOK, array(MNS_Webhook::class, 'init'), 1, 0);
-            add_action(MNS_Router_Utility::PLUGIN_INIT_HOOK, array(MNS_Cancel::class, 'init'), 1, 0);
-            add_action(MNS_Router_Utility::PLUGIN_INIT_HOOK, array(MNS_Info::class, 'init'), 1, 0);
-            add_action(MNS_Router_Utility::PLUGIN_INIT_HOOK, array(MNS_CheckPayment::class, 'init'), 1, 0);
+            add_action(MNS_Router_Utility::MONEYSPACE_PLUGIN_INIT_HOOK, array(MNS_Router_Page::class, 'init'), 0, 0);
+            add_action(MNS_Router_Utility::MONEYSPACE_PLUGIN_INIT_HOOK, array(MNS_Router::class, 'init'), 1, 0);
+            add_action(MNS_Router_Utility::MONEYSPACE_PLUGIN_INIT_HOOK, array(MNS_Processpayment::class, 'init'), 1, 0);
+            add_action(MNS_Router_Utility::MONEYSPACE_PLUGIN_INIT_HOOK, array(MNS_Webhook::class, 'init'), 1, 0);
+            add_action(MNS_Router_Utility::MONEYSPACE_PLUGIN_INIT_HOOK, array(MNS_Cancel::class, 'init'), 1, 0);
+            add_action(MNS_Router_Utility::MONEYSPACE_PLUGIN_INIT_HOOK, array(MNS_Info::class, 'init'), 1, 0);
+            add_action(MNS_Router_Utility::MONEYSPACE_PLUGIN_INIT_HOOK, array(MNS_CheckPayment::class, 'init'), 1, 0);
 
             add_action('admin_enqueue_scripts', array($this, 'load_custom_wp_admin_style'));
-            add_filter('wc_order_statuses', 'wc_renaming_order_status');
+            add_filter('wc_order_statuses', 'moneyspace_wc_renaming_order_status');
         }
     }
 
-    public function MoneySpaceUpdater() {
-        $updater = new Moneyspace_Updater( __FILE__ );
-        $updater->set_username( 'MoneySpace-net' );
-        $updater->set_repository( 'money-space-for-woocommerce' );
-        $updater->initialize();
-    }
-
     public function load_custom_wp_admin_style(){
-        wp_register_style( "moneyspace-style", MNS_PAYMENT_FORM_CSS, array(), "1.0.0", "");
-        wp_enqueue_style( "moneyspace-style", MNS_PAYMENT_FORM_CSS, array(), "1.0.0", "");
+        wp_register_style( "moneyspace-style", MONEYSPACE_PAYMENT_FORM_CSS, array(), "1.0.0", "");
+        wp_enqueue_style( "moneyspace-style", MONEYSPACE_PAYMENT_FORM_CSS, array(), "1.0.0", "");
         wp_register_style( 'custom_wp_admin_css', plugin_dir_url( __FILE__ )."includes/css/admin-style.css", false, '1.0.0' );
         wp_enqueue_style( 'custom_wp_admin_css' );
     }

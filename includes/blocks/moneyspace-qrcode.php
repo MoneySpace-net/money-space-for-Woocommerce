@@ -21,8 +21,10 @@ class MoneySpace_QRCode extends AbstractPaymentMethodType {
 	 * @var MNS_Payment_Gateway_QR
 	 */
 	private $gateway;
+	private $logger;
 	
 	public function __construct( ) {
+		$this->logger = wc_get_logger();
 		// Set name with fallback
 		$this->name = defined('MNS_ID_QRPROM') ? MNS_ID_QRPROM : 'moneyspace_qrprom';
 	}
@@ -43,15 +45,15 @@ class MoneySpace_QRCode extends AbstractPaymentMethodType {
 					$this->gateway = $gateways[$this->name];
 				} else {
 					// Log error but don't throw exception to prevent critical error
-					error_log('MoneySpace: QR gateway not found during initialization: ' . $this->name);
+					$this->logger->error( 'MoneySpace: QR gateway not found during initialization: ' . $this->name, [ 'source' => 'moneyspace' ] );
 					$this->gateway = null;
 				}
 			} else {
-				error_log('MoneySpace: WooCommerce payment gateways not available during QR initialization');
+				$this->logger->error('MoneySpace: WooCommerce payment gateways not available during QR initialization', [ 'source' => 'moneyspace' ] );
 				$this->gateway = null;
 			}
 		} catch (\Exception $e) {
-			error_log('MoneySpace: Error during QR initialization: ' . $e->getMessage());
+			$this->logger->error( 'MoneySpace: Error during QR initialization: ' . $e->getMessage(), [ 'source' => 'moneyspace' ] );
 			$this->gateway = null;
 		}
 	}

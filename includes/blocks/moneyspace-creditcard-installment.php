@@ -21,8 +21,11 @@ class MoneySpace_CreditCard_Installment extends AbstractPaymentMethodType {
 	 * @var MNS_Payment_Gateway_INSTALLMENT
 	 */
 	private $gateway;
+
+	private $logger;
 	
 	public function __construct( ) {
+		$this->logger = wc_get_logger();
 		// Set name with fallback
 		$this->name = defined('MNS_ID_INSTALLMENT') ? MNS_ID_INSTALLMENT : 'moneyspace_installment';
 	}
@@ -43,15 +46,15 @@ class MoneySpace_CreditCard_Installment extends AbstractPaymentMethodType {
 					$this->gateway = $gateways[$this->name];
 				} else {
 					// Log error but don't throw exception to prevent critical error
-					error_log('MoneySpace: Installment gateway not found during initialization: ' . $this->name);
+					$this->logger->error( 'MoneySpace: Installment gateway not found during initialization: ' . $this->name, [ 'source' => 'moneyspace' ] );
 					$this->gateway = null;
 				}
 			} else {
-				error_log('MoneySpace: WooCommerce payment gateways not available during installment initialization');
+				$this->logger->error('MoneySpace: WooCommerce payment gateways not available during installment initialization', [ 'source' => 'moneyspace' ] );
 				$this->gateway = null;
 			}
 		} catch (\Exception $e) {
-			error_log('MoneySpace: Error during installment initialization: ' . $e->getMessage());
+			$this->logger->error( 'MoneySpace: Error during installment initialization: ' . $e->getMessage(), [ 'source' => 'moneyspace' ] );
 			$this->gateway = null;
 		}
 	}
