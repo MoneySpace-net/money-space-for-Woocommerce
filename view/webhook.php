@@ -10,9 +10,9 @@ if (!empty($moneyspace_transection_id)) {
     preg_match_all('!\d+!', $moneyspace_getorderid, $moneyspace_arroid);
     $moneyspace_order = wc_get_order($moneyspace_arroid[0][0] ?? 0);
     
-    $moneyspace_payment_gateway_id = defined('MONEYSPACE_ID_CREDITCARD') ? MONEYSPACE_ID_CREDITCARD : (defined('MNS_ID') ? MNS_ID : 'moneyspace');
-    $moneyspace_payment_gateway_qr_id = defined('MONEYSPACE_ID_QRPROM') ? MONEYSPACE_ID_QRPROM : (defined('MNS_ID_QRPROM') ? MNS_ID_QRPROM : 'moneyspace_qrnone');
-    $moneyspace_payment_gateway_installment_id = defined('MONEYSPACE_ID_INSTALLMENT') ? MONEYSPACE_ID_INSTALLMENT : (defined('MNS_ID_INSTALLMENT') ? MNS_ID_INSTALLMENT : 'moneyspace_installment');
+    $moneyspace_payment_gateway_id = defined('MONEYSPACE_ID') ? MONEYSPACE_ID : (defined('MONEYSPACE_ID') ? MONEYSPACE_ID : 'moneyspace');
+    $moneyspace_payment_gateway_qr_id = defined('MONEYSPACE_ID_QRPROM') ? MONEYSPACE_ID_QRPROM : (defined('MONEYSPACE_ID_QRPROM') ? MONEYSPACE_ID_QRPROM : 'moneyspace_qrnone');
+    $moneyspace_payment_gateway_installment_id = defined('MONEYSPACE_ID_INSTALLMENT') ? MONEYSPACE_ID_INSTALLMENT : (defined('MONEYSPACE_ID_INSTALLMENT') ? MONEYSPACE_ID_INSTALLMENT : 'moneyspace_installment');
 
     $moneyspace_payment_gateways = WC_Payment_Gateways::instance();
     $moneyspace_payment_gateway = $moneyspace_payment_gateways->payment_gateways()[$moneyspace_payment_gateway_id] ?? null;
@@ -31,8 +31,8 @@ if (!empty($moneyspace_transection_id)) {
     $moneyspace_time = gmdate("YmdHis");
     $moneyspace_order_id = $moneyspace_order ? $moneyspace_order->get_id() : 0;
 
-    $moneyspace_transaction_orderid = get_post_meta($moneyspace_order_id, 'MNS_transaction_orderid', true);
-    $moneyspace_payment_type = get_post_meta($moneyspace_order_id, 'MNS_PAYMENT_TYPE', true);
+    $moneyspace_transaction_orderid = get_post_meta($moneyspace_order_id, 'MONEYSPACE_transaction_orderid', true);
+    $moneyspace_payment_type = get_post_meta($moneyspace_order_id, 'MONEYSPACE_PAYMENT_TYPE', true);
     $moneyspace_order_amount = $moneyspace_order ? $moneyspace_order->get_total() : 0;
 
     $moneyspace_order_select = $moneyspace_payment_gateway->settings['order_status_if_success'] ?? '';
@@ -46,8 +46,8 @@ if (!empty($moneyspace_transection_id)) {
     $moneyspace_process_payment_hash = hash_hmac('sha256', $moneyspace_process_transactionID . $moneyspace_amount . $moneyspace_status . $moneyspace_getorderid, $moneyspace_secret_key);
 
     if ($moneyspace_hash === $moneyspace_process_payment_hash && $moneyspace_status === "paysuccess"){
+            
         if($moneyspace_payment_type === "Card"){
-
             if ($moneyspace_stock_setting !== "Disable") {
                 wc_reduce_stock_levels($moneyspace_order_id);
             }
