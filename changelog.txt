@@ -1,5 +1,11 @@
 == Changelog ==
 
+= 3.1.0 - 2026-01-09 =
+* Cleanup: Removed E2E test suite (Playwright) and related test files (e2e directory)
+* Cleanup: Removed development documentation files (docs/INDEX.md, docs/TROUBLESHOOTING.md)
+* Cleanup: Optimized repository structure for production deployment
+* Improve: Reduced repository size by removing non-essential development files
+
 = 3.0.0 - 2026-01-09 =
 * Fix: Corrected non-existent WooCommerce hook woocommerce_thankyou_custom to proper woocommerce_thankyou_{payment_method_id}
 * Fix: Standardized all database meta keys to use consistent UPPERCASE naming convention  
