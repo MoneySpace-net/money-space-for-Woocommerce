@@ -2,9 +2,10 @@
 
 if ( ! defined( 'ABSPATH' ) ) exit;
 
-$moneyspace_pid = absint($moneyspace_pid);
+$moneyspace_pid = absint($pid);
 $moneyspace_order = wc_get_order($moneyspace_pid);
-$moneyspace_provided_key = isset($moneyspace__GET['key']) ? sanitize_text_field(wp_unslash($moneyspace__GET['key'])) : '';
+// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Order key validation used instead
+$moneyspace_provided_key = isset($_GET['key']) ? sanitize_text_field(wp_unslash($_GET['key'])) : '';
 
 header('Content-Type: application/json; charset=' . get_option('blog_charset'));
 
@@ -22,7 +23,7 @@ $moneyspace_ms_secret_id = $moneyspace_gateways[$moneyspace_payment_gateway_id]-
 $moneyspace_ms_secret_key = $moneyspace_gateways[$moneyspace_payment_gateway_id]->settings['secret_key'];
 
 $moneyspace_ms_body = array(
-    "transaction_ID" => get_post_meta($moneyspace_pid, 'MONEYSPACE_transaction', true),
+    "transaction_ID" => get_post_meta($moneyspace_pid, 'MONEYSPACE_TRANSACTION', true),
     "secret_id" => $moneyspace_ms_secret_id,
     "secret_key" => $moneyspace_ms_secret_key
 );
