@@ -11,7 +11,7 @@ class MNS_Router_Utility
     const MIN_PHP_VERSION = '5.2';
     const MIN_WP_VERSION = '3.0';
     const DB_VERSION = 1;
-    const PLUGIN_INIT_HOOK = 'MNS_Router_init';
+    const MONEYSPACE_PLUGIN_INIT_HOOK = 'MONEYSPACE_Router_init';
 
     /**
      * @static
@@ -49,11 +49,20 @@ class MNS_Router_Utility
 
     public static function failed_to_load_notices($php_version = self::MIN_PHP_VERSION, $wp_version = self::MIN_WP_VERSION)
     {
-        printf('<div class="error"><p>%s</p></div>', sprintf(__('%1$s requires WordPress %2$s or higher and PHP %3$s or higher.', 'ms-router'), self::PLUGIN_NAME, $wp_version, $php_version));
+        $message = sprintf(
+            // translators: 1: Plugin name. 2: Minimum WordPress version. 3: Minimum PHP version.
+            __('%1$s requires WordPress %2$s or higher and PHP %3$s or higher.', 'money-space'),
+            self::PLUGIN_NAME,
+            $wp_version,
+            $php_version
+        );
+
+        printf('<div class="error"><p>%s</p></div>', esc_html($message));
     }
 
     public static function init()
     {
-        do_action(self::PLUGIN_INIT_HOOK);
+        // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.DynamicHooknameFound -- Constant contains proper 'MONEYSPACE' prefix
+        do_action(self::MONEYSPACE_PLUGIN_INIT_HOOK);
     }
 }

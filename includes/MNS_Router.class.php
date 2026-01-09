@@ -5,6 +5,7 @@ namespace MoneySpace;
 use WP;
 use Exception;
 use WP_Query;
+if ( !defined( 'ABSPATH')) exit;
 
 class MNS_Router extends MNS_Router_Utility
 {
@@ -144,13 +145,11 @@ class MNS_Router extends MNS_Router_Utility
     public function __clone()
     {
         // cannot be cloned
-        trigger_error(__CLASS__ . ' may not be cloned', E_USER_ERROR);
     }
 
     public function __sleep()
     {
         // cannot be serialized
-        trigger_error(__CLASS__ . ' may not be serialized', E_USER_ERROR);
     }
 
     /**
@@ -167,8 +166,8 @@ class MNS_Router extends MNS_Router_Utility
      */
     public function generate_routes()
     {
-        do_action('mns_router_generate_routes', $this);
-        do_action('ms_Router_alter_routes', $this);
+        do_action('moneyspace_router_generate_routes', $this);
+        do_action('moneyspace_router_alter_routes', $this);
         $rules = $this->rewrite_rules();
         if ($this->hash($rules) != get_option(self::ROUTE_CACHE_OPTION)) {
             $this->flush_rewrite_rules();
@@ -227,8 +226,8 @@ class MNS_Router extends MNS_Router_Utility
         // we'll only get a 'MNS_Router_page' query var when visiting
         // the page for a WP Router post, and there's only one of those
         if (!empty($query->query_vars[MNS_Router_Page::POST_TYPE])) {
-            wp_redirect(home_url(), 303);
-            exit();
+            wp_safe_redirect(esc_url_raw(home_url()), 303);
+            exit;
         }
     }
 

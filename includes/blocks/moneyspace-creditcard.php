@@ -14,6 +14,7 @@ class MoneySpace_CreditCard extends AbstractPaymentMethodType {
 	 * @var string
 	 */
 	protected $name = "moneyspace";
+	private $logger;
 
 	/**
 	 * The gateway instance.
@@ -23,6 +24,7 @@ class MoneySpace_CreditCard extends AbstractPaymentMethodType {
 	private $gateway;
 	
 	public function __construct( ) {
+		$this->logger = wc_get_logger();
 	}
 
 	/**
@@ -41,15 +43,15 @@ class MoneySpace_CreditCard extends AbstractPaymentMethodType {
 					$this->gateway = $gateways[$this->name];
 				} else {
 					// Log error but don't throw exception to prevent critical error
-					error_log('MoneySpace: Gateway not found during initialization: ' . $this->name);
+					$this->logger->error('MoneySpace: Gateway not found during initialization: ' . $this->name, [ 'source' => 'moneyspace' ] );
 					$this->gateway = null;
 				}
 			} else {
-				error_log('MoneySpace: WooCommerce payment gateways not available during initialization');
+				$this->logger->error('MoneySpace: WooCommerce payment gateways not available during initialization', [ 'source' => 'moneyspace' ] );
 				$this->gateway = null;
 			}
 		} catch (\Exception $e) {
-			error_log('MoneySpace: Error during initialization: ' . $e->getMessage());
+			$this->logger->error('MoneySpace: Error during initialization: ' . $e->getMessage(), [ 'source' => 'moneyspace' ] );
 			$this->gateway = null;
 		}
 	}
@@ -107,7 +109,7 @@ class MoneySpace_CreditCard extends AbstractPaymentMethodType {
 		
 		// Safety check for gateway existence
 		if (!isset($gateways[$payment_gateway_id]) || !is_object($gateways[$payment_gateway_id])) {
-			error_log('MoneySpace: Gateway not found for ID: ' . $payment_gateway_id);
+			$this->logger->error( 'MoneySpace: Gateway not found for ID: ' . $payment_gateway_id, [ 'source' => 'moneyspace' ] );
 			$ms_template_payment = 1; // Default value
 		} else {
 			$ms_template_payment = isset($gateways[$payment_gateway_id]->settings['ms_template_payment']) 

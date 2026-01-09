@@ -5,7 +5,7 @@
 [![PHP](https://img.shields.io/badge/PHP-8.0+-777BB4.svg)](https://php.net/)
 [![Build Status](https://img.shields.io/badge/build-passing-brightgreen.svg)](https://github.com/MoneySpace-net/money-space-for-woocommerce/actions)
 [![License](https://img.shields.io/badge/License-GPL--2.0+-red.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-2.14.0-blue.svg)](https://github.com/MoneySpace-net/money-space-for-woocommerce/releases)
+[![Version](https://img.shields.io/badge/version-3.0.0-blue.svg)](https://github.com/MoneySpace-net/money-space-for-woocommerce/releases)
 A comprehensive WordPress/WooCommerce payment gateway plugin that enables secure online payments through **credit cards**, **QR codes (PromptPay)**, and **installment plans**. This plugin integrates with MoneySpace Payment Gateway to provide Thai businesses with a complete, PCI DSS-compliant payment solution.
 
 A comprehensive WordPress/WooCommerce payment gateway plugin that enables secure online payments through **credit cards**, **QR codes (PromptPay)**, and **installment plans**. This plugin integrates with MoneySpace Payment Gateway to provide Thai businesses with a complete, PCI DSS-compliant payment solution.
@@ -466,6 +466,15 @@ A comprehensive WordPress/WooCommerce payment gateway plugin that enables secure
 ****
 
 # Changelog
+
+- 2026-01-09 : Version 3.0.0 - Critical bug fixes and standardization
+- 2026-01-09 : Fix: Corrected non-existent WooCommerce hook `woocommerce_thankyou_custom` to proper `woocommerce_thankyou_{$payment_method_id}`
+- 2026-01-09 : Fix: Standardized all database meta keys to use consistent UPPERCASE naming convention
+- 2026-01-09 : Fix: Added missing script registration for QR code payment JavaScript (wp_register_script/wp_enqueue_script)
+- 2026-01-09 : Fix: Corrected typo in check-payment endpoint ($_GET variable access)
+- 2026-01-09 : Fix: JavaScript typo in QR payment checking function (refreshIdOfCheckPayment)
+- 2026-01-09 : Improve: Thank you page now properly calls moneyspace_update_order_status() instead of returning empty string
+- 2026-01-09 : Improve: Meta key consistency across all payment methods (credit card, QR, installment)
 
 - 2025-12-23 : Security - Improve access control for payment callback/status endpoints
 - 2025-12-23 : Security - Harden sensitive data handling (avoid logging secrets)

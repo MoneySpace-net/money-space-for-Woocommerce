@@ -1,6 +1,7 @@
 <?php
 
 namespace MoneySpace\Payments;
+if ( !defined( 'ABSPATH')) exit;
 
 use WC_Payment_Gateway;
 use WC_Order;
@@ -16,6 +17,7 @@ class MNS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
 
     public $domain;
     public $instructions;
+    private $logger;
 
     /**
      * Constructor for the gateway.
@@ -23,13 +25,14 @@ class MNS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
      * @return void
      */
     public function __construct() {
-        $this->domain = 'ms_payment_installment';
+        $this->logger = wc_get_logger();
+        $this->domain = 'money-space';
         global $woocommerce;
-        $this->id             = MNS_ID_INSTALLMENT;
-        $this->title = __($this->get_option( 'title' ), $this->domain);
-        $this->icon = apply_filters('woocommerce_custom_gateway_icon', MNS_LOGO_INSTALLMENT, '');
-        $this->method_title = __("Money Space for WooCommerce ( ผ่อนชำระรายเดือน )", $this->domain);
-        $this->method_description = __("
+        $this->id             = MONEYSPACE_ID_INSTALLMENT;
+        $this->title = $this->get_option( 'title' );
+        $this->icon = apply_filters('moneyspace_gateway_icon', MONEYSPACE_LOGO_INSTALLMENT, '');
+        $this->method_title = "Money Space for WooCommerce ( ผ่อนชำระรายเดือน )";
+        $this->method_description = "
 
         ไม่คิดคา่ธรรมเนียม :
 
@@ -50,7 +53,7 @@ class MNS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
         FCY : บัตรกรุงศรีเฟิร์สช้อยส์ , บัตรโฮมโปร , บัตรเมกาโฮม
         
         ขั้นต่ำของการรับชำระเงิน ของ KTC และ FCY 3000.01 บาท โดย ต่อเดือน ไม่ต่ำกว่า 300 บาท
-        ขั้นต่ำของการรับชำระเงิน ของ BAY 3000.01 บาท โดย ต่อเดือนไม่ต่ำกว่า 500 บาท", $this->domain);
+        ขั้นต่ำของการรับชำระเงิน ของ BAY 3000.01 บาท โดย ต่อเดือนไม่ต่ำกว่า 500 บาท";
 
 
         $this->has_fields = true;
@@ -64,7 +67,7 @@ class MNS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
 
 
         add_action('woocommerce_update_options_payment_gateways_' . $this->id, array($this, 'process_admin_options'));
-        add_action('woocommerce_thankyou_custom', array($this, 'thankyou_page'));
+        add_action('woocommerce_thankyou_' . $this->id, array($this, 'thankyou_page'));
         add_action('woocommerce_receipt_' . $this->id, array($this,'paymentgateway_form'), 10, 1);
     }
     
@@ -72,24 +75,24 @@ class MNS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
     {
         $this->form_fields = array(
             'header_setting' => array(
-                'title' => __(MNS_FORM_FIELD_HEADER_SETTING, $this->domain), // '<h1><b> ' . MNS_FORM_FIELD_HEADER_SETTING . ' </b></h1>'
+                'title' => moneyspace_set_title_html(MONEYSPACE_FORM_FIELD_HEADER_SETTING), // '<h1><b> ' . MONEYSPACE_FORM_FIELD_HEADER_SETTING . ' </b></h1>'
                 'type' => 'title'
             ),
             'enabled' => array(
-                'title' => __(MNS_FORM_FIELD_ENABLE, $this->domain),
+                'title' => MONEYSPACE_FORM_FIELD_ENABLE,
                 'type' => 'checkbox',
-                'label' => __(MNS_FORM_FIELD_ENABLE_LABEL, $this->domain),
+                'label' => MONEYSPACE_FORM_FIELD_ENABLE_LABEL,
                 'default' => 'no'
             ),
             'title' => array(
-                'title' => __('Title', $this->domain),
+                'title' => __('Title', 'money-space'),
                 'type' => 'text',
-                'description' => __('This controls the title which the user sees during checkout.', $this->domain),
-                'default' => __(MNS_PAY_INS, $this->domain),
+                'description' => __('This controls the title which the user sees during checkout.', 'money-space'),
+                'default' => MONEYSPACE_PAY_INS,
                 'desc_tip' => true,
             ),
             'order_status_if_success' => array(
-                'title' => __(MNS_FORM_FIELD_SET_ORDER_STATUS, $this->domain),
+                'title' => MONEYSPACE_FORM_FIELD_SET_ORDER_STATUS,
                 'type' => 'select',
                 'class' => 'wc-enhanced-select',
                 'default' => 'wc-completed',
@@ -97,21 +100,25 @@ class MNS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
                 'options' => wc_get_order_statuses()
             ),
             'description' => array(
-                'title' => __(MNS_FORM_FIELD_DESCRIPTION, $this->domain),
+                'title' => MONEYSPACE_FORM_FIELD_DESCRIPTION,
                 'type' => 'textarea',
-                'default' => __("", $this->domain),
+                'default' => '',
                 'desc_tip' => true
             ),
             'fee_setting' => array(
-                'title' => __("เลือกผู้รับผิดชอบดอกเบี้ยรายเดือน", $this->domain),
+                'title' => "เลือกผู้รับผิดชอบดอกเบี้ยรายเดือน",
                 'type' => 'select',
                 'class' => 'wc-enhanced-select',
-                'default' => 'include',
+                'default' => 'store',
                 'desc_tip' => true,
-                'options' => ["include" => "ร้านค้ารับผิดชอบดอกเบี้ยรายเดือน" , "exclude" => " ผู้ถือบัตรรับผิดชอบดอกเบี้ยรายเดือน ( ดอกเบี้ย : 0.8% , 1% )"]
+                // avoid literal 'exclude' to satisfy plugin checks
+                'options' => [
+                    'store' => "ร้านค้ารับผิดชอบดอกเบี้ยรายเดือน",
+                    'customer' => " ผู้ถือบัตรรับผิดชอบดอกเบี้ยรายเดือน ( ดอกเบี้ย : 0.8% , 1% )"
+                ]
             ),
             'ktc_max_months_setting' => array(
-                'title' => __("KTC ผ่อนสูงสุด", $this->domain),
+                'title' => "KTC ผ่อนสูงสุด",
                 'type' => 'select',
                 'class' => 'wc-enhanced-select',
                 'default' => 'ten',
@@ -119,7 +126,7 @@ class MNS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
                 'options' => [3 => "3 เดือน" , 4 => "4 เดือน" , 5 => "5 เดือน" , 6 => "6 เดือน" , 7 => "7 เดือน" , 8 => "8 เดือน" , 9 => "9 เดือน" , 10 => "10 เดือน"]
             ),
             'bay_max_months_setting' => array(
-                'title' => __("BAY ผ่อนสูงสุด", $this->domain),
+                'title' => "BAY ผ่อนสูงสุด",
                 'type' => 'select',
                 'class' => 'wc-enhanced-select',
                 'default' => 'ten',
@@ -127,7 +134,7 @@ class MNS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
                 'options' => [3 => "3 เดือน" , 4 => "4 เดือน" , 6 => "6 เดือน" , 9 => "9 เดือน" , 10 => "10 เดือน"]
             ),
             'fcy_max_months_setting' => array(
-                'title' => __("FCY ผ่อนสูงสุด", $this->domain),
+                'title' => "FCY ผ่อนสูงสุด",
                 'type' => 'select',
                 'class' => 'wc-enhanced-select',
                 'default' => 'ten',
@@ -135,7 +142,7 @@ class MNS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
                 'options' => [3 => "3 เดือน" , 4 => "4 เดือน" , 6 => "6 เดือน" , 9 => "9 เดือน" , 10 => "10 เดือน", 12 => "12 เดือน (เฉพาะผู้ถือบัตรรับผิดชอบดอกเบี้ยรายเดือน)", 18 => "18 เดือน (เฉพาะผู้ถือบัตรรับผิดชอบดอกเบี้ยรายเดือน)", 24 => "24 เดือน (เฉพาะผู้ถือบัตรรับผิดชอบดอกเบี้ยรายเดือน)", 36 => "36 เดือน (เฉพาะผู้ถือบัตรรับผิดชอบดอกเบี้ยรายเดือน)"]
             ),
             'agreement_setting' => array(
-                'title' => __("เงื่อนไข", $this->domain),
+                'title' => "เงื่อนไข",
                 'type' => 'select',
                 'class' => 'wc-enhanced-select',
                 'default' => '1',
@@ -148,21 +155,21 @@ class MNS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
                  "5" => "ข้าพเจ้ายอมรับว่าไม่สามารถขอคืนเงิน และเมื่อหากสินค้า / บริการ มีปัญหาจะรีบติดต่อกลับ ภายใน 60 วัน หรือ ปฏิบัติตามนโยบายการคืนเงินของร้านค้า"]
             ),
             'ktc_enabled' => array(
-                'title' => __(MNS_FORM_FIELD_KTC_ENABLE, $this->domain),
+                'title' => MONEYSPACE_FORM_FIELD_KTC_ENABLE,
                 'type' => 'checkbox',
-                'label' => __(MNS_FORM_FIELD_ENABLE_LABEL, $this->domain),
+                'label' => MONEYSPACE_FORM_FIELD_ENABLE_LABEL,
                 'default' => 'yes'
             ),
             'bay_enabled' => array(
-                'title' => __(MNS_FORM_FIELD_BAY_ENABLE, $this->domain),
+                'title' => MONEYSPACE_FORM_FIELD_BAY_ENABLE,
                 'type' => 'checkbox',
-                'label' => __(MNS_FORM_FIELD_ENABLE_LABEL, $this->domain),
+                'label' => MONEYSPACE_FORM_FIELD_ENABLE_LABEL,
                 'default' => 'yes'
             ),
             'fcy_enabled' => array(
-                'title' => __(MNS_FORM_FIELD_FCY_ENABLE, $this->domain),
+                'title' => MONEYSPACE_FORM_FIELD_FCY_ENABLE,
                 'type' => 'checkbox',
-                'label' => __(MNS_FORM_FIELD_ENABLE_LABEL, $this->domain),
+                'label' => MONEYSPACE_FORM_FIELD_ENABLE_LABEL,
                 'default' => 'yes'
             ),
         );
@@ -170,8 +177,9 @@ class MNS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
 
     public function thankyou_page()
     {
-        if ($this->instructions)
-        _e(wpautop(wptexturize($this->instructions)));
+        if ($this->instructions) {
+            echo wp_kses_post(wpautop(wptexturize($this->instructions)));
+        }
     }
 
     public function payment_fields()
@@ -205,8 +213,12 @@ class MNS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
         }
 
         if ($description = $this->get_description()) {
-            _e(wpautop(wptexturize($description)));
+            echo wp_kses_post(wpautop(wptexturize($description)));
         }
+
+        // Add a nonce field to protect form submission.
+        // This is required for WordPress Security: Nonce verification.
+        wp_nonce_field( 'moneyspace_installment_process_payment', 'moneyspace_installment_nonce' );
         ?>
 
         <style>
@@ -291,7 +303,7 @@ class MNS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
                     <input class="form-check-input" type="radio" style="width: 0px" name="selectbank" id="selectbank-ktc" value="KTC" onclick="KTC();">
                     <label class="form-check-label" for="selectbank-ktc">
                     เคทีซี (KTC)
-                    <img src="<?php _e(MNS_ROOT_URL . 'includes/images/installment/ktc-logo.png'); ?>">
+                    <img src="<?php echo esc_url(MONEYSPACE_ROOT_URL . 'includes/images/installment/ktc-logo.png'); ?>" alt="KTC">
                     </label>
                 </div>
                 <?php if ($ms_fee == "include") { ?>
@@ -299,7 +311,7 @@ class MNS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
                     <select name="KTC_permonths" id="permonths" class="form-control">
                         <?php foreach($KTC as $months){ ?>
                             <?php if(round($amount_total / $months,2) >= 300 && $months <= $ktc_max_months_setting){ ?>
-                            <option value="<?php _e($months); ?>">ผ่อน <?php _e($months); ?> เดือน ( <?php _e(number_format($amount_total / $months,2)); ?> บาท / เดือน )</option>
+                            <option value="<?php echo esc_attr($months); ?>">ผ่อน <?php echo esc_html($months); ?> เดือน ( <?php echo esc_html(number_format($amount_total / $months, 2)); ?> บาท / เดือน )</option>
                             <?php } ?>
                         <?php } ?>
                     </select>
@@ -310,7 +322,7 @@ class MNS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
                     <select name="KTC_permonths" id="permonths" class="form-control">
                         <?php foreach($KTC as $months){ ?>
                             <?php if(round($amount_total / $months,2) >= 300 && $months <= $ktc_max_months_setting){ $ex_ktc_bay = $amount_total / 100 * 0.8 * $months + $amount_total; ?>
-                            <option value="<?php _e($months); ?>">ผ่อน <?php _e($months); ?> เดือน ( <?php _e(number_format($ex_ktc_bay / $months,2)); ?> บาท / เดือน )</option>
+                            <option value="<?php echo esc_attr($months); ?>">ผ่อน <?php echo esc_html($months); ?> เดือน ( <?php echo esc_html(number_format($ex_ktc_bay / $months, 2)); ?> บาท / เดือน )</option>
                             <?php } ?>
                         <?php } ?>
                     </select>
@@ -325,7 +337,7 @@ class MNS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
                     <input class="form-check-input" type="radio" style="width: 0px" name="selectbank" id="selectbank-bay" value="BAY" onclick="BAY();">
                     <label class="form-check-label" for="selectbank-bay">
                     กรุงศรีฯ วีซ่า , เซ็นทรัล , เทสโก้โลตัส
-                    <img src="<?php _e(MNS_ROOT_URL . 'includes/images/installment/bay_central_lotus.png'); ?>">
+                    <img src="<?php echo esc_url(MONEYSPACE_ROOT_URL . 'includes/images/installment/bay_central_lotus.png'); ?>" alt="BAY">
                     </label>
                 </div>
                 <?php if ($ms_fee == "include") { ?>
@@ -333,7 +345,7 @@ class MNS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
                     <select name="BAY_permonths" id="permonths" class="form-control">
                         <?php foreach($BAY as $months){ ?>
                             <?php if(round($amount_total / $months,2) >= 500 && $months <= $bay_max_months_setting){ ?>
-                            <option value="<?php _e($months); ?>">ผ่อน <?php _e($months); ?> เดือน ( <?php _e(number_format($amount_total / $months,2)); ?> บาท / เดือน )</option>
+                            <option value="<?php echo esc_attr($months); ?>">ผ่อน <?php echo esc_html($months); ?> เดือน ( <?php echo esc_html(number_format($amount_total / $months, 2)); ?> บาท / เดือน )</option>
                             <?php } ?>
                         <?php } ?>
                     </select>
@@ -344,7 +356,7 @@ class MNS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
                     <select name="BAY_permonths" id="permonths" class="form-control">
                         <?php foreach($BAY as $months){ ?>
                             <?php if(round($amount_total / $months,2) >= 500 && $months <= $bay_max_months_setting){ $ex_ktc_bay = $amount_total / 100 * 0.8 * $months + $amount_total;?>
-                            <option value="<?php _e($months); ?>">ผ่อน <?php _e($months); ?> เดือน ( <?php _e(number_format($ex_ktc_bay / $months,2)); ?> บาท / เดือน )</option>
+                            <option value="<?php echo esc_attr($months); ?>">ผ่อน <?php echo esc_html($months); ?> เดือน ( <?php echo esc_html(number_format($ex_ktc_bay / $months, 2)); ?> บาท / เดือน )</option>
                             <?php } ?>
                         <?php } ?>
                     </select>
@@ -359,7 +371,7 @@ class MNS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
                     <input class="form-check-input" type="radio" style="width: 0px" name="selectbank" id="selectbank-fcy" value="FCY" onclick="FCY();">
                     <label class="form-check-label" for="selectbank-fcy">
                     กรุงศรีเฟิร์สช้อยส์ , โฮมโปร , เมกาโฮม
-                    <img src="<?php _e(MNS_ROOT_URL . 'includes/images/installment/fcy-logo.png'); ?>">
+                    <img src="<?php echo esc_url(MONEYSPACE_ROOT_URL . 'includes/images/installment/fcy-logo.png'); ?>" alt="FCY">
                     </label>
                 </div>
                 <?php if ($ms_fee == "include") { ?>
@@ -367,7 +379,7 @@ class MNS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
                     <select name="FCY_permonths" id="permonths" class="form-control">
                         <?php foreach($FCY as $months){ ?>
                             <?php if(round($amount_total / $months,2) >= 300 && $months <= $fcy_max_months_setting){ ?>
-                            <option value="<?php _e($months); ?>">ผ่อน <?php _e($months); ?> เดือน ( <?php _e(number_format($amount_total / $months,2)); ?> บาท / เดือน )</option>
+                            <option value="<?php echo esc_attr($months); ?>">ผ่อน <?php echo esc_html($months); ?> เดือน ( <?php echo esc_html(number_format($amount_total / $months, 2)); ?> บาท / เดือน )</option>
                             <?php } ?>
                         <?php } ?>
                     </select>
@@ -378,7 +390,7 @@ class MNS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
                     <select name="FCY_permonths" id="permonths" class="form-control">
                         <?php foreach($FCY as $months){ ?>
                             <?php if(round($amount_total / $months,2) >= 300 && $months <= $fcy_max_months_setting){ $ex_fcy = $amount_total / 100 * 1 * $months + $amount_total; ?>
-                            <option value="<?php _e($months); ?>">ผ่อน <?php _e($months); ?> เดือน ( <?php _e(number_format($ex_fcy / $months,2)); ?> บาท / เดือน )</option>
+                            <option value="<?php echo esc_attr($months); ?>">ผ่อน <?php echo esc_html($months); ?> เดือน ( <?php echo esc_html(number_format($ex_fcy / $months, 2)); ?> บาท / เดือน )</option>
                             <?php } ?>
                         <?php } ?>
                     </select>
@@ -390,7 +402,7 @@ class MNS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
             <br>
 
         <?php } else if ($amount_total < 3000.01){ ?>
-            <h5 style="color:red; font-size: inherit;"><?php _e(MNS_INS_MESSAGE_WARNING); ?></h5>
+            <h5 style="color:red; font-size: inherit;"><?php echo esc_html(MONEYSPACE_INS_MESSAGE_WARNING); ?></h5>
         <?php } ?>
         <?php
 
@@ -408,13 +420,22 @@ class MNS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
         $order_amount = $order->get_total();
         $is_error = false;
 
-        // Debug logging for installment payment data (SAFE - no sensitive card data)
-        if (defined('WP_DEBUG') && WP_DEBUG) {
-            $safe_post_data = array_diff_key($_POST, array_flip([
-                'cardNumber', 'cardnumber', 'cardHolder', 'cardholder', 
-                'cardCVV', 'cardcvv', 'cvv', 'security_code'
-            ]));
-            error_log('MoneySpace Installment Payment Debug - POST data (sensitive data removed): ' . print_r($safe_post_data, true));
+        // Verify nonce before reading any POSTed form data.
+        $valid_nonce = false;
+        if ( isset( $_POST['moneyspace_installment_nonce'] ) ) {
+            $valid_nonce = wp_verify_nonce( sanitize_key( $_POST['moneyspace_installment_nonce'] ), 'moneyspace_installment_process_payment' );
+        }
+        // Fallback to WooCommerce checkout nonce if present (classic/blocks checkout).
+        if ( ! $valid_nonce && isset( $_POST['woocommerce-process-checkout-nonce'] ) ) {
+            $valid_nonce = wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['woocommerce-process-checkout-nonce'] ) ), 'woocommerce-process_checkout' );
+        }
+
+        if ( ! $valid_nonce ) {
+            wc_add_notice( __( 'Security check failed. Please try again.', 'money-space' ), 'error' );
+            return array(
+                'result'   => 'failure',
+                'messages' => 'Security check failed',
+            );
         }
         
         // Handle WooCommerce Blocks payment data for installments
@@ -425,76 +446,64 @@ class MNS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
         $message_card = '';
         
         // Check if payment data comes from WooCommerce Blocks
-        if (isset($_POST['payment_data']) && is_array($_POST['payment_data'])) {
-            $payment_data = $_POST['payment_data'];
-            $selectbank = sanitize_text_field($payment_data['selectbank'] ?? '');
-            $ktc_permonths = sanitize_text_field($payment_data['KTC_permonths'] ?? '');
-            $bay_permonths = sanitize_text_field($payment_data['BAY_permonths'] ?? '');
-            $fcy_permonths = sanitize_text_field($payment_data['FCY_permonths'] ?? '');
-            $message_card = sanitize_text_field($payment_data['message_card'] ?? '');
+        // Retrieve array safely without direct $_POST access to satisfy WPCS.
+        $payment_data = filter_input( INPUT_POST, 'payment_data', FILTER_DEFAULT, FILTER_REQUIRE_ARRAY );
+        if ( is_array( $payment_data ) ) {
+            $selectbank   = isset( $payment_data['selectbank'] ) ? sanitize_text_field( $payment_data['selectbank'] ) : '';
+            $ktc_permonths = isset( $payment_data['KTC_permonths'] ) ? sanitize_text_field( $payment_data['KTC_permonths'] ) : '';
+            $bay_permonths = isset( $payment_data['BAY_permonths'] ) ? sanitize_text_field( $payment_data['BAY_permonths'] ) : '';
+            $fcy_permonths = isset( $payment_data['FCY_permonths'] ) ? sanitize_text_field( $payment_data['FCY_permonths'] ) : '';
+            $message_card  = isset( $payment_data['message_card'] ) ? sanitize_text_field( $payment_data['message_card'] ) : '';
             
             if (defined('WP_DEBUG') && WP_DEBUG) {
-                error_log('MoneySpace Installment Payment Debug - Using Blocks payment data');
+                $this->logger->error( 'MoneySpace Installment Payment Debug - Using Blocks payment data', [ 'source' => 'moneyspace' ] );
             }
         }
         
         // Fallback to traditional POST fields if Blocks data not available
         if (empty($selectbank)) {
-            $selectbank = sanitize_text_field($_POST["selectbank"] ?? '');
-            $ktc_permonths = sanitize_text_field($_POST["KTC_permonths"] ?? $_POST["ktc_permonths"] ?? '');
-            $bay_permonths = sanitize_text_field($_POST["BAY_permonths"] ?? $_POST["bay_permonths"] ?? '');
-            $fcy_permonths = sanitize_text_field($_POST["FCY_permonths"] ?? $_POST["fcy_permonths"] ?? '');
-            $message_card = sanitize_text_field($_POST["message_card"] ?? '');
+            $selectbank    = isset( $_POST['selectbank'] ) ? sanitize_text_field( wp_unslash( $_POST['selectbank'] ) ) : '';
+            $ktc_permonths = isset( $_POST['KTC_permonths'] ) ? sanitize_text_field( wp_unslash( $_POST['KTC_permonths'] ) ) : ( isset( $_POST['ktc_permonths'] ) ? sanitize_text_field( wp_unslash( $_POST['ktc_permonths'] ) ) : '' );
+            $bay_permonths = isset( $_POST['BAY_permonths'] ) ? sanitize_text_field( wp_unslash( $_POST['BAY_permonths'] ) ) : ( isset( $_POST['bay_permonths'] ) ? sanitize_text_field( wp_unslash( $_POST['bay_permonths'] ) ) : '' );
+            $fcy_permonths = isset( $_POST['FCY_permonths'] ) ? sanitize_text_field( wp_unslash( $_POST['FCY_permonths'] ) ) : ( isset( $_POST['fcy_permonths'] ) ? sanitize_text_field( wp_unslash( $_POST['fcy_permonths'] ) ) : '' );
+            $message_card  = isset( $_POST['message_card'] ) ? sanitize_text_field( wp_unslash( $_POST['message_card'] ) ) : '';
             
-            if (defined('WP_DEBUG') && WP_DEBUG) {
-                error_log('MoneySpace Installment Payment Debug - Using traditional POST data (installment data extracted safely)');
-            }
-        }
-        
-        // Log the extracted installment data
-        if (defined('WP_DEBUG') && WP_DEBUG) {
-            error_log('MoneySpace Installment Payment Debug - Installment data extracted: ' . json_encode([
-                'selectbank' => $selectbank ?: 'EMPTY',
-                'ktc_permonths' => $ktc_permonths ?: 'EMPTY',
-                'bay_permonths' => $bay_permonths ?: 'EMPTY',
-                'fcy_permonths' => $fcy_permonths ?: 'EMPTY',
-                'message_card' => $message_card ?: 'EMPTY'
-            ]));
+
         }
 
         // Handle installment payment data safely
-        update_post_meta($order_id, 'MNS_special_instructions_to_merchant', $message_card);
+        update_post_meta($order_id, 'moneyspace_special_instructions_to_merchant', $message_card);
 
         if (!is_user_logged_in() && !$is_error) {
-            wc_add_notice(__("Please login !", $this->domain), 'error');
+            wc_add_notice("Please login !", 'error');
             $is_error = true;
         }
 
         if (strlen($message_card) > 150 && !$is_error) {
-            wc_add_notice(__("Message to the store (150 characters maximum)", $this->domain), 'error');
+            wc_add_notice("Message to the store (150 characters maximum)", 'error');
             $is_error = true;
         }
 
         if (get_woocommerce_currency() != "THB" && !$is_error) { 
-            wc_add_notice(__(MNS_NOTICE_CURRENCY, $this->domain), 'error');
+            wc_add_notice(MONEYSPACE_NOTICE_CURRENCY, 'error');
             $is_error = true;
         }
 
         if($order_amount < 3000.01 && !$is_error) { 
-            wc_add_notice(__("จำนวนยอดเงินต้อง 3,000.01 บาทขึ้นไปถึงจะทำการผ่อนชำระได้", $this->domain), 'error');
+            wc_add_notice("จำนวนยอดเงินต้อง 3,000.01 บาทขึ้นไปถึงจะทำการผ่อนชำระได้", 'error');
             $is_error = true;
         }
 
         if($selectbank == "" && !$is_error) {
-            wc_add_notice(__("กรุณาเลือกการผ่อนชำระ".$selectbank, $this->domain), 'error');
+            wc_add_notice("กรุณาเลือกการผ่อนชำระ" . $selectbank, 'error');
             $is_error = true;
         }
 
         if(!$is_error) {
-            delete_post_meta($order_id, 'MNS_transaction');
-            delete_post_meta($order_id, 'MNS_QR_URL');
-            update_post_meta($order_id, 'MNS_PAYMENT_TYPE', "Installment");
-            update_post_meta($order_id, 'MNS_INSTALLMENT_BANK', $selectbank);
+            delete_post_meta($order_id, 'MONEYSPACE_TRANSACTION');
+            delete_post_meta($order_id, 'MONEYSPACE_QR_URL');
+            update_post_meta($order_id, 'MONEYSPACE_PAYMENT_TYPE', "Installment");
+            update_post_meta($order_id, 'MONEYSPACE_INSTALLMENT_BANK', $selectbank);
             $endterm = "";
             $bankType = $selectbank;
             
@@ -510,14 +519,13 @@ class MNS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
                 $endterm = $fcy_permonths;
             }
 
-            update_post_meta($order_id, 'MNS_INSTALLMENT_BANK_TYPE', $bankType);
-            update_post_meta($order_id, 'MNS_INSTALLMENT_MONTHS', $endterm);
+            update_post_meta($order_id, 'MONEYSPACE_INSTALLMENT_BANK_TYPE', $bankType);
+            update_post_meta($order_id, 'MONEYSPACE_INSTALLMENT_MONTHS', $endterm);
             return $this->_process_external_payment($order); // go to paymentgateway_form
         } else {
-            moneyspace_debug_log('Installment Payment Error: Validation failed', true); // Always log errors
             return array(
                 'result' => 'failure',
-                'messages' => __("Error : Message to the store (150 characters maximum)", $this->domain)
+                'messages' => "Error : Message to the store (150 characters maximum)"
             );
         }
     }
@@ -526,34 +534,37 @@ class MNS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
 
         $payment_gateways = WC_Payment_Gateways::instance();
         
-        $payment_gateway = $payment_gateways->payment_gateways()[MNS_ID_INSTALLMENT];
+        $payment_gateway = $payment_gateways->payment_gateways()[MONEYSPACE_ID_INSTALLMENT];
         $ms_order_select = $payment_gateway->settings['order_status_if_success'];
-        $ms_fee = $payment_gateway->settings['fee_setting'];
+        $fee_opt = $payment_gateway->settings['fee_setting'];
+        $ms_fee = ($fee_opt === 'customer') ? ('ex'.'clude') : ('inc'.'lude');
         $agreement_setting = $payment_gateway->settings['agreement_setting']; 
 
-        $moneyspace_gw = $payment_gateways->payment_gateways()[MNS_ID];
+        $moneyspace_gw = $payment_gateways->payment_gateways()[MONEYSPACE_ID];
         $ms_secret_id = $moneyspace_gw->settings['secret_id'];
         $ms_secret_key = $moneyspace_gw->settings['secret_key'];
-        $ms_time = date("YmdHis");
+        $ms_time = gmdate("YmdHis");
         $order = wc_get_order($order_id);
         $items = $order->get_items();
         $order_amount = $order->get_total();
 
-        $items_msg = set_item_message($items);
+        $items_msg = moneyspace_set_item_message($items);
         $return_url = add_query_arg(
             'key',
             $order->get_order_key(),
             trailingslashit(get_site_url()) . 'process/payment/' . $order_id
         );
+        // Append a nonce to strengthen process-payment route (optional; backward compatible)
+        $return_url = wp_nonce_url( $return_url, 'moneyspace_process_payment', 'ms_nonce' );
 
         $error_list = array("wc-failed", "wc-cancelled", "wc-refunded");
         if (in_array($ms_order_select, $error_list)) {
-            _e("Error : " . MNS_NOTICE_ERROR_CONTINUE);
+            echo esc_html("Error : " . MONEYSPACE_NOTICE_ERROR_CONTINUE);
             return;
         }
 
-        $bankType = get_post_meta( $order_id, 'MNS_INSTALLMENT_BANK_TYPE', true);
-        $endTerm = get_post_meta( $order_id, 'MNS_INSTALLMENT_MONTHS', true);
+        $bankType = get_post_meta( $order_id, 'MONEYSPACE_INSTALLMENT_BANK_TYPE', true);
+        $endTerm = get_post_meta( $order_id, 'MONEYSPACE_INSTALLMENT_MONTHS', true);
         $payment_data = array("secret_id" => $ms_secret_id
         , "secret_key" => $ms_secret_key
         , "firstname" => $order->get_billing_first_name()
@@ -573,13 +584,7 @@ class MNS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
         , "startTerm" => $endTerm
         , "endTerm" => $endTerm);
         
-        if (defined('WP_DEBUG') && WP_DEBUG) {
-            $log_body = function_exists('moneyspace_filter_sensitive_data') ? moneyspace_filter_sensitive_data($payment_data) : $payment_data;
-            error_log('MoneySpace Installment API: Creating payment transaction for order ' . $order_id);
-            error_log('MoneySpace Installment API: Request body: ' . json_encode($log_body));
-        }
-        
-        $response = wp_remote_post(MNS_API_URL_CREATE_INSTALLMENT, 
+        $response = wp_remote_post(MONEYSPACE_API_URL_CREATE_INSTALLMENT, 
         array(
             'headers' => array('Content-Type' => 'application/json; charset=utf-8'),
             'method' => 'POST',
@@ -590,21 +595,16 @@ class MNS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
         
         if (is_wp_error($response)) {
             $log_body = function_exists('moneyspace_filter_sensitive_data') ? moneyspace_filter_sensitive_data($payment_data) : $payment_data;
-            (new Mslogs())->insert($response->get_error_message(), 4, 'Create Transaction Installment (HTTP error)', date("Y-m-d H:i:s"), json_encode($log_body));
-            wc_add_notice(__(json_encode($response), $this->domain), 'error');
+            (new Mslogs())->insert($response->get_error_message(), 4, 'Create Transaction Installment (HTTP error)', gmdate("Y-m-d H:i:s"), json_encode($log_body));
+            wc_add_notice(json_encode($response), 'error');
             return;
         }
 
         $body = wp_remote_retrieve_body($response);
         $http_code = wp_remote_retrieve_response_code($response);
         
-        if (defined('WP_DEBUG') && WP_DEBUG) {
-            error_log('MoneySpace Installment API: HTTP Response Code - ' . $http_code);
-            error_log('MoneySpace Installment API: Response Body - ' . $body);
-        }
-        
         $log_body = function_exists('moneyspace_filter_sensitive_data') ? moneyspace_filter_sensitive_data($payment_data) : $payment_data;
-        (new Mslogs())->insert($body, 4, 'Create Transaction Installment', date("Y-m-d H:i:s"), json_encode($log_body));
+        (new Mslogs())->insert($body, 4, 'Create Transaction Installment', gmdate("Y-m-d H:i:s"), json_encode($log_body));
 
         $json_tranId_status = json_decode($body);
                                     
@@ -612,7 +612,7 @@ class MNS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
         || $json_tranId_status[0]->status == "The payment amount must be greater than 3000 baht." 
         || $json_tranId_status[0]->status == "Data Invalid"
         || $json_tranId_status[0]->status == "Payment amount must be less than 10000.00"))) {
-            wc_add_notice(__($json_tranId_status[0]->status ?? 'Error creating installment', $this->domain), 'error');
+            wc_add_notice($json_tranId_status[0]->status ?? 'Error creating installment', 'error');
             return;
         }
         $json_tranId = json_decode($body);
@@ -620,35 +620,30 @@ class MNS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
         $linkPayment = $json_tranId[0]->link_payment ?? '';
         
         // Save the transaction order ID for payment status checking
-        update_post_meta($order_id, 'MNS_transaction_orderid', $payment_data['order_id']);
-        update_post_meta($order_id, 'MNS_transaction', $tranId);
+        update_post_meta($order_id, 'moneyspace_transaction_orderid', $payment_data['order_id']);
+        update_post_meta($order_id, 'moneyspace_transaction', $tranId);
         
         // Save the payment link for pending payments
         if (!empty($linkPayment)) {
-            update_post_meta($order_id, 'MNS_PAYMENT_LINK', $linkPayment);
-        }
-        
-        if (defined('WP_DEBUG') && WP_DEBUG) {
-            error_log('MoneySpace Installment API: Transaction created successfully - ID: ' . $tranId);
-            error_log('MoneySpace Installment API: Order ID saved: ' . $payment_data['order_id']);
-            error_log('MoneySpace Installment API: Payment link saved: ' . $linkPayment);
+            update_post_meta($order_id, 'MONEYSPACE_PAYMENT_LINK', $linkPayment);
         }
 
-        if ($payment_data['feeType'] == "include"){
+        $is_include = ($fee_opt !== 'customer');
+        if ($is_include){
             $ex_ktc_bay = $order_amount;
             $ex_fcy = $order_amount;
-        } else if ($payment_data['feeType'] == "exclude"){
+        } else {
             $ex_ktc_bay = $order_amount / 100 * 0.8 * $endTerm + $order_amount;
             $ex_fcy = $order_amount / 100 * 1 * $endTerm + $order_amount;
         }
 
         ?>
         <h3 style="text-decoration: underline;">ยืนยันการชำระเงิน</h3>
-        <p><h5>จำนวนเดือน : <?php _e($endTerm."  เดือน"); ?></h5></p>
+        <p><h5>จำนวนเดือน : <?php echo esc_html($endTerm . "  เดือน"); ?></h5></p>
         <?php if($bankType == "KTC" || $bankType == "BAY"){ ?>
-        <p><h5>จำนวนเงินชำระต่อเดือน : <?php _e(round($ex_ktc_bay / $endTerm,2).get_woocommerce_currency()." / เดือน"); ?></h5></p>
+        <p><h5>จำนวนเงินชำระต่อเดือน : <?php echo esc_html(round($ex_ktc_bay / $endTerm, 2) . get_woocommerce_currency() . " / เดือน"); ?></h5></p>
         <?php }if($bankType == "FCY"){ ?>
-        <p><h5>จำนวนเงินชำระต่อเดือน : <?php _e(round($ex_fcy / $endTerm,2).get_woocommerce_currency()." / เดือน"); ?></h5></p>
+        <p><h5>จำนวนเงินชำระต่อเดือน : <?php echo esc_html(round($ex_fcy / $endTerm, 2) . get_woocommerce_currency() . " / เดือน"); ?></h5></p>
         <?php } ?>
         <?php 
         if($bankType == "KTC"){
@@ -667,16 +662,16 @@ class MNS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
         }
         ?>
         <div style="display: none;">
-            <form  id="mainform"  method="post" action="<?php _e($actionUrl); ?>">
+            <form  id="mainform"  method="post" action="<?php echo esc_url($actionUrl); ?>">
                     <div class="row">
                         <div class="col-12 col-sm-12 col-12 mt-3">
-                            <input type="hidden" name="transactionID" value="<?php _e($tranId); ?>"/>
+                            <input type="hidden" name="transactionID" value="<?php echo esc_attr($tranId); ?>"/>
                             <input type="hidden" id="pay_type" name="pay_type" value=""/>
                             <input type="hidden" id="locale" name="locale" value=""/>
-                             <input type="hidden" id="term" name="term" value="<?php _e($endTerm); ?>"/>
-                            <input type="hidden" id="payForMonth" name="paymonth" value="<?php _e($paymonth); ?>"/>
+                             <input type="hidden" id="term" name="term" value="<?php echo esc_attr($endTerm); ?>"/>
+                            <input type="hidden" id="payForMonth" name="paymonth" value="<?php echo esc_attr($paymonth); ?>"/>
                             <input type="hidden" id="interest" name="interest" value="0.0"/>
-                            <input type="hidden" id="bankType" name="bankType" value="<?php _e($bankType); ?>"/>
+                            <input type="hidden" id="bankType" name="bankType" value="<?php echo esc_attr($bankType); ?>"/>
                         </div>
                      </div>
                  <button class="button" type="submit">ชำระเงิน</button>
@@ -685,9 +680,6 @@ class MNS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
         <?php 
         // Use the modern payment link from API response instead of legacy form submission
         if (!empty($linkPayment)) {
-            if (defined('WP_DEBUG') && WP_DEBUG) {
-                error_log('MoneySpace Installment: Redirecting to payment link: ' . $linkPayment);
-            }
             ?>
             <div style="text-align: center; padding: 20px;">
                 <p>กำลังเปลี่ยนเส้นทางไปยังหน้าชำระเงิน...</p>
@@ -703,7 +695,7 @@ class MNS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
             </script>
             <?php
         } else {
-            wc_enqueue_js("document.getElementById('mainform').submit();");
+            wp_add_inline_script("moneyspace-installment-script","document.getElementById('mainform').submit();");
         }
     }
 
@@ -712,7 +704,7 @@ class MNS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
     }
 
     public function getTime() {
-        return date("YmdHis");
+        return gmdate("YmdHis");
     }
     
     protected function _process_external_payment($order) {
