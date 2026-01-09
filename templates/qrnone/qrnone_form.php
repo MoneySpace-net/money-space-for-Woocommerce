@@ -12,7 +12,6 @@ $moneyspace_auto_check_result_time = ! empty( $moneyspace_payment_gateway_qr->se
     ? (int) $moneyspace_payment_gateway_qr->settings['auto_check_result_time']
     : 2000;
 $moneyspace_enable_auto_check_result = $moneyspace_payment_gateway_qr->settings['enable_auto_check_result'];
-
 $moneyspace_order_key = $moneyspace_order ? (string) $moneyspace_order->get_order_key() : '';
 $moneyspace_cancel_url = add_query_arg(
     'key',
@@ -43,6 +42,8 @@ if(empty($moneyspace_auto_cancel)){
 }
 $moneyspace_dt->setTimestamp($moneyspace_qr_time + $moneyspace_limit_time);
 
+wp_register_script('moneyspace-qrnone', '', array(), false, true);
+wp_enqueue_script('moneyspace-qrnone');
 wp_add_inline_script( 'moneyspace-qrnone','
 let timeZone = "Asia/Bangkok";
 var autoCheckIntervalMs = ' . $moneyspace_auto_check_result_time . ';
@@ -76,10 +77,10 @@ function checkPayment(duration, pid) {
     var countDownDate = new Date();
     countDownDate.setMinutes(countDownDate.getMinutes() + Math.round(duration/60000));
 
-    var refreshIdOfChechPayment = setInterval(function() {
+    var refreshIdOfCheckPayment = setInterval(function() {
         var now = new Date().getTime();
         if (countDownDate.getTime() <=  now) {
-            clearInterval(refreshIdOfChechPayment);
+            clearInterval(refreshIdOfCheckPayment);
         }
         fetch(checkUrl)
         .then(function(res) {
@@ -87,7 +88,7 @@ function checkPayment(duration, pid) {
         })
         .then(function(res) {
             if (res.status === "Pay Success") {
-                clearInterval(refreshIdOfChechPayment);
+                clearInterval(refreshIdOfCheckPayment);
                 window.location = "'.wc_get_order($moneyspace_order_id)->get_checkout_order_received_url().'";
             }
         });        

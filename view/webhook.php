@@ -31,7 +31,7 @@ if (!empty($moneyspace_transection_id)) {
     $moneyspace_time = gmdate("YmdHis");
     $moneyspace_order_id = $moneyspace_order ? $moneyspace_order->get_id() : 0;
 
-    $moneyspace_transaction_orderid = get_post_meta($moneyspace_order_id, 'MONEYSPACE_transaction_orderid', true);
+    $moneyspace_transaction_orderid = get_post_meta($moneyspace_order_id, 'MONEYSPACE_TRANSACTION_ORDERID', true);
     $moneyspace_payment_type = get_post_meta($moneyspace_order_id, 'MONEYSPACE_PAYMENT_TYPE', true);
     $moneyspace_order_amount = $moneyspace_order ? $moneyspace_order->get_total() : 0;
 

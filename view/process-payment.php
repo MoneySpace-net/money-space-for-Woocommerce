@@ -51,24 +51,25 @@ if ($moneyspace_order && $moneyspace_pid) {
 
     $moneyspace_time = gmdate("YmdHis");
     $moneyspace_order_id = $moneyspace_order ? $moneyspace_order->get_id() : 0;
-    $moneyspace_transaction_orderid = get_post_meta($moneyspace_order_id, 'MONEYSPACE_transaction_orderid', true);
+    
+    $moneyspace_transaction_orderid = get_post_meta($moneyspace_order_id, 'MONEYSPACE_TRANSACTION_ORDERID', true);
     $moneyspace_payment_type = get_post_meta($moneyspace_order_id, 'MONEYSPACE_PAYMENT_TYPE', true);
     $moneyspace_order_amount = $moneyspace_order ? $moneyspace_order->get_total() : 0;
+    
     $moneyspace_check_orderid = wp_remote_post(MONEYSPACE_API_URL_CHECK, array(
         'method' => 'POST',
         'timeout' => 120,
         'body' => array(
             'secret_id' => $moneyspace_secret_id,
             'secret_key' => $moneyspace_secret_key,
-            'order_id' => $MONEYSPACE_transaction_orderid,
+            'order_id' => $moneyspace_transaction_orderid,
         )
     ));
-
+    
     if (!is_wp_error($moneyspace_check_orderid)) {
         $moneyspace_response_body = wp_remote_retrieve_body($moneyspace_check_orderid);
 
         $moneyspace_json_status = json_decode($moneyspace_response_body);
-        
         // Add safety check for API response
         if (empty($moneyspace_json_status) || !is_array($moneyspace_json_status) || !isset($moneyspace_json_status[0])) {
             $moneyspace_logger->error( 'MoneySpace API: Invalid response format in process-payment.php - Response: ' . $moneyspace_response_body, [ 'source' => 'moneyspace' ] );

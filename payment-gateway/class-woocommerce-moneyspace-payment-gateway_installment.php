@@ -67,7 +67,7 @@ class MNS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
 
 
         add_action('woocommerce_update_options_payment_gateways_' . $this->id, array($this, 'process_admin_options'));
-        add_action('woocommerce_thankyou_custom', array($this, 'thankyou_page'));
+        add_action('woocommerce_thankyou_' . $this->id, array($this, 'thankyou_page'));
         add_action('woocommerce_receipt_' . $this->id, array($this,'paymentgateway_form'), 10, 1);
     }
     
@@ -500,7 +500,7 @@ class MNS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
         }
 
         if(!$is_error) {
-            delete_post_meta($order_id, 'MONEYSPACE_transaction');
+            delete_post_meta($order_id, 'MONEYSPACE_TRANSACTION');
             delete_post_meta($order_id, 'MONEYSPACE_QR_URL');
             update_post_meta($order_id, 'MONEYSPACE_PAYMENT_TYPE', "Installment");
             update_post_meta($order_id, 'MONEYSPACE_INSTALLMENT_BANK', $selectbank);

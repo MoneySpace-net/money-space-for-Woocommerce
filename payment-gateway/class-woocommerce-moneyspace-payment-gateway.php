@@ -31,9 +31,10 @@ class MNS_Payment_Gateway extends WC_Payment_Gateway
         $this->enabled = $this->get_option('enabled');
         $this->description = $this->get_option('description');
 
-        add_action('woocommerce_receipt_' . $this->id, array($this, 'paymentgateway_form'), 10, 1);
+        
         add_action('woocommerce_update_options_payment_gateways_' . $this->id, array($this, 'process_admin_options'));
-        add_action('woocommerce_thankyou_custom', array($this, 'thankyou_page'));
+        add_action('woocommerce_thankyou_' . $this->id, array($this, 'thankyou_page'));
+        add_action('woocommerce_receipt_' . $this->id, array($this, 'paymentgateway_form'), 10, 1);
         add_filter('woocommerce_thankyou_order_received_text', array($this, 'avia_thank_you'), 10, 2 );
     }
 
@@ -67,8 +68,8 @@ class MNS_Payment_Gateway extends WC_Payment_Gateway
         $tranId = $data_status[0]->transaction_ID ?? '';
         $linkPayment = $data_status[0]->link_payment ?? '';
 
-        update_post_meta($order_id, 'MONEYSPACE_transaction_orderid', $ms_body['order_id'] ?? '');
-        update_post_meta($order_id, 'MONEYSPACE_transaction', $tranId);
+        update_post_meta($order_id, 'MONEYSPACE_TRANSACTION_ORDERID', $ms_body['order_id'] ?? '');
+        update_post_meta($order_id, 'MONEYSPACE_TRANSACTION', $tranId);
 
         $allowed_host = wp_parse_url($linkPayment, PHP_URL_HOST);
         if (!empty($allowed_host)) {
@@ -251,7 +252,7 @@ class MNS_Payment_Gateway extends WC_Payment_Gateway
     {
         if (get_woocommerce_currency() == "THB") {
             update_post_meta($order_id, 'MONEYSPACE_PAYMENT_TYPE', "Card");
-            delete_post_meta($order_id, 'MONEYSPACE_transaction');
+            delete_post_meta($order_id, 'MONEYSPACE_TRANSACTION');
 
             $order = wc_get_order($order_id);
             return $this->_process_external_payment($order);
@@ -309,8 +310,8 @@ class MNS_Payment_Gateway extends WC_Payment_Gateway
     
     public function avia_thank_you($thank_you_text, $order)
     {
-        $added_text = '';
-        return $added_text;
+        moneyspace_update_order_status($order);
+        return $thank_you_text;
     }
 
 }

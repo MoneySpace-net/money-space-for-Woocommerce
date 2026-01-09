@@ -35,7 +35,7 @@ class MNS_Payment_Gateway_QR extends WC_Payment_Gateway
         $this->description = $this->get_option('description');
 
         add_action('woocommerce_update_options_payment_gateways_' . $this->id, array($this, 'process_admin_options'));
-        add_action('woocommerce_thankyou_custom', array($this, 'thankyou_page'));
+        add_action('woocommerce_thankyou_' . $this->id, array($this, 'thankyou_page'));
         add_action('woocommerce_receipt_' . $this->id, array($this, 'paymentgateway_form'), 10, 1);
         add_filter('woocommerce_thankyou_order_received_text', array($this, 'avia_thank_you_qr'), 10, 2);
 
@@ -89,8 +89,8 @@ class MNS_Payment_Gateway_QR extends WC_Payment_Gateway
             $image_qrprom = base64_encode(wp_remote_retrieve_body($response_qr));
         }
 
-        update_post_meta($order_id, 'MONEYSPACE_transaction_orderid', $ms_body["order_id"] ?? '');
-        update_post_meta($order_id, 'MONEYSPACE_transaction', $tranId);
+        update_post_meta($order_id, 'MONEYSPACE_TRANSACTION_ORDERID', $ms_body["order_id"] ?? '');
+        update_post_meta($order_id, 'MONEYSPACE_TRANSACTION', $tranId);
         update_post_meta($order_id, 'MONEYSPACE_PAYMENT_IMAGE_QRPROMT', $image_qrprom);
         update_post_meta($order_id, 'MONEYSPACE_QR_TIME', $dt->getTimestamp());
         $order = wc_get_order($order_id);
@@ -203,14 +203,14 @@ class MNS_Payment_Gateway_QR extends WC_Payment_Gateway
      */
     public function process_payment($order_id)
     {
-        $moneyspace_special_instructions_to_merchant = get_post_meta($order_id, 'MONEYSPACE_special_instructions_to_merchant', true);
+        $moneyspace_special_instructions_to_merchant = get_post_meta($order_id, 'MONEYSPACE_SPECIAL_INSTRUCTIONS_TO_MERCHANT', true);
         // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Nonce verification handled by WooCommerce checkout process
         $message_qr = sanitize_text_field(wp_unslash($_POST["message_qr"] ?? ''));
         if (strlen($moneyspace_special_instructions_to_merchant) <= 150) {
             if (get_woocommerce_currency() == "THB") {
-                update_post_meta($order_id, 'MONEYSPACE_special_instructions_to_merchant', $message_qr);
+                update_post_meta($order_id, 'MONEYSPACE_SPECIAL_INSTRUCTIONS_TO_MERCHANT', $message_qr);
                 update_post_meta($order_id, 'MONEYSPACE_PAYMENT_TYPE', "Qrnone");
-                delete_post_meta($order_id, 'MONEYSPACE_transaction');
+                delete_post_meta($order_id, 'MONEYSPACE_TRANSACTION');
                 $order = wc_get_order($order_id);
                 return $this->_process_external_payment($order);
             } else {
@@ -251,7 +251,7 @@ class MNS_Payment_Gateway_QR extends WC_Payment_Gateway
         $moneyspace_secret_id = $payment_gateway->settings['secret_id'];
         $moneyspace_secret_key = $payment_gateway->settings['secret_key'];
         $moneyspace_template_payment = $payment_gateway->settings['ms_template_payment'];
-        $moneyspace_special_instructions_to_merchant = get_post_meta($order_id, 'MONEYSPACE_special_instructions_to_merchant', true);
+        $moneyspace_special_instructions_to_merchant = get_post_meta($order_id, 'MONEYSPACE_SPECIAL_INSTRUCTIONS_TO_MERCHANT', true);
 
         $moneyspace_time = $dt->format("YmdHis"); // date("YmdHis");
 
