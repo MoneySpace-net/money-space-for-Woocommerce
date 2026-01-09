@@ -72,7 +72,7 @@ function moneyspace_asset_version($relative_path) {
     if (file_exists($file)) {
         return (string) filemtime($file);
     }
-    return '3.1.0';
+    return '3.1.1';
 }
 
 ?>

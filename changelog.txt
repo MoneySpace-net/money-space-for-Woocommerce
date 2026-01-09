@@ -1,5 +1,8 @@
 == Changelog ==
 
+= 3.1.1 - 2026-01-09 =
+* Cleanup: Removed .vscode IDE settings directory from repository
+
 = 3.1.0 - 2026-01-09 =
 * Cleanup: Removed E2E test suite (Playwright) and related test files (e2e directory)
 * Cleanup: Removed development documentation files (docs/INDEX.md, docs/TROUBLESHOOTING.md)

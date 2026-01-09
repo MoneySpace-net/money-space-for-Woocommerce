@@ -5,7 +5,7 @@
 [![PHP](https://img.shields.io/badge/PHP-8.0+-777BB4.svg)](https://php.net/)
 [![Build Status](https://img.shields.io/badge/build-passing-brightgreen.svg)](https://github.com/MoneySpace-net/money-space-for-woocommerce/actions)
 [![License](https://img.shields.io/badge/License-GPL--2.0+-red.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-3.1.0-blue.svg)](https://github.com/MoneySpace-net/money-space-for-woocommerce/releases)
+[![Version](https://img.shields.io/badge/version-3.1.1-blue.svg)](https://github.com/MoneySpace-net/money-space-for-woocommerce/releases)
 A comprehensive WordPress/WooCommerce payment gateway plugin that enables secure online payments through **credit cards**, **QR codes (PromptPay)**, and **installment plans**. This plugin integrates with MoneySpace Payment Gateway to provide Thai businesses with a complete, PCI DSS-compliant payment solution.
 
 A comprehensive WordPress/WooCommerce payment gateway plugin that enables secure online payments through **credit cards**, **QR codes (PromptPay)**, and **installment plans**. This plugin integrates with MoneySpace Payment Gateway to provide Thai businesses with a complete, PCI DSS-compliant payment solution.

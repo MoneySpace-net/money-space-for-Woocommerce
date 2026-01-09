@@ -1,8 +1,0 @@
-{
-    "intelephense.environment.includePaths": [
-        "/Users/bus.ekapop/workspaces/moneyspace/woo-webapp/_data",
-        "/Users/bus.ekapop/workspaces/moneyspace/woo-webapp/_data/wp-content/plugins/woocommerce",
-        "/Users/bus.ekapop/workspaces/moneyspace/woo-webapp/_data/wp-includes",
-        "/Users/bus.ekapop/workspaces/moneyspace/woo-webapp/_data/wp-admin"
-    ],
-}
