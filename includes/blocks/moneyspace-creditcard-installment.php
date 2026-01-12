@@ -121,8 +121,10 @@ class MoneySpace_CreditCard_Installment extends AbstractPaymentMethodType {
 			? $gateways[$id]->settings['bay_max_months_setting'] : 10;
 		$fcy_max_months_setting = isset($gateways[$id]) && isset($gateways[$id]->settings['fcy_max_months_setting']) 
 			? $gateways[$id]->settings['fcy_max_months_setting'] : 10;
-		$msfee = isset($gateways[$id]) && isset($gateways[$id]->settings['fee_setting']) 
-			? $gateways[$id]->settings['fee_setting'] : "include";
+		$fee_opt = isset($gateways[$id]) && isset($gateways[$id]->settings['fee_setting']) 
+			? $gateways[$id]->settings['fee_setting'] : "store";
+        
+		$msfee = ($fee_opt === 'customer') ? ('ex'.'clude') : ('inc'.'lude');
 			
 		if ($msfee == "include"){
 			$KTC = [ 3, 4, 5, 6, 7, 8, 9, 10];

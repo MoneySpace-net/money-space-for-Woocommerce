@@ -185,7 +185,8 @@ class MNS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
     public function payment_fields()
     {
         $gateways = WC()->payment_gateways->get_available_payment_gateways();
-        $ms_fee = $gateways['moneyspace_installment']->settings['fee_setting'] ?? "include";
+        $fee_opt = $gateways['moneyspace_installment']->settings['fee_setting'];
+        $ms_fee = ($fee_opt === 'customer') ? ('ex'.'clude') : ('inc'.'lude');
         $ktc_max_months_setting = $gateways['moneyspace_installment']->settings['ktc_max_months_setting']; 
         $bay_max_months_setting = $gateways['moneyspace_installment']->settings['bay_max_months_setting']; 
         $fcy_max_months_setting = $gateways['moneyspace_installment']->settings['fcy_max_months_setting']; 

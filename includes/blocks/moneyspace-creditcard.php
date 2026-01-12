@@ -117,9 +117,10 @@ class MoneySpace_CreditCard extends AbstractPaymentMethodType {
 				: 1;
 		}
 
-		$ms_fees = isset($gateways[$payment_gateway_id]->settings['fee_setting']) 
-			? $gateways[$payment_gateway_id]->settings['fee_setting'] 
-			: 'exclude';
+		$fee_opt = isset($gateways[$payment_gateway_id]) && isset($gateways[$payment_gateway_id]->settings['fee_setting']) 
+			? $gateways[$payment_gateway_id]->settings['fee_setting'] : "store";
+        
+		$ms_fees = ($fee_opt === 'customer') ? ('ex'.'clude') : ('inc'.'lude');
 		
 		// Define fallback translations in case constants are not loaded
 		$fallback_translations = array(
