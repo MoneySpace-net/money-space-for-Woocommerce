@@ -3,7 +3,7 @@ Contributors: moneyspace
 Tags: woocommerce, moneyspace, payment gateway, credit card, installment
 Requires at least: 4.9
 Tested up to: 6.9
-Stable tag: 3.1.1
+Stable tag: 3.1.2
 Requires PHP: 7.0
 Requires WordPress: 4.9
 License: GPL-2.0+
