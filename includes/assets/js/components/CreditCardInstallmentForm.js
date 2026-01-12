@@ -641,9 +641,9 @@ const CreditCardInstallmentForm = (props) => {
                                     })
                                 ) : (
                                     <>
-                                        <option value="3">3 months (Test)</option>
-                                        <option value="6">6 months (Test)</option>
-                                        <option value="12">12 months (Test)</option>
+                                        <option value="3">3 months</option>
+                                        <option value="6">6 months</option>
+                                        <option value="12">12 months</option>
                                     </>
                                 )}
                             </select>

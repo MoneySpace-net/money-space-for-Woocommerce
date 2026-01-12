@@ -3,7 +3,7 @@ Contributors: moneyspace
 Tags: woocommerce, moneyspace, payment gateway, credit card, installment
 Requires at least: 4.9
 Tested up to: 6.9
-Stable tag: 3.1.1
+Stable tag: 3.1.2
 Requires PHP: 7.0
 Requires WordPress: 4.9
 License: GPL-2.0+
@@ -61,6 +61,13 @@ Yes! In Live Mode, an SSL certificate must be installed on your site to use Mone
 3. Pay with a saved payment method, a new card, and allow customers to save the payment card for future transactions.
 
 == Changelog ==
+= 3.1.2 - 2026-01-13 =
+
+* Fix: Corrected fee setting handling to properly map 'store'/'customer' options
+* Fix: Payment gateways now correctly convert fee_setting to include/exclude values
+* Improve: Added consistent fee handling across Credit Card, Installment, and QR payment methods
+* Debug: Added logging for installment settings in WooCommerce Blocks
+
 = 3.1.1 - 2026-01-09 =
 
 * Cleanup: Removed .vscode IDE settings directory from repository

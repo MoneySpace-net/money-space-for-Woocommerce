@@ -104,7 +104,7 @@ class MoneySpace_CreditCard extends AbstractPaymentMethodType {
 	 * @return array
 	 */
 	public function get_payment_method_data() {
-		$payment_gateway_id = defined('MNS_ID') ? MNS_ID : 'moneyspace';
+		$payment_gateway_id = defined('MONEYSPACE_ID') ? MONEYSPACE_ID : 'moneyspace';
 		$gateways = WC()->payment_gateways->get_available_payment_gateways();
 		
 		// Safety check for gateway existence
@@ -117,9 +117,10 @@ class MoneySpace_CreditCard extends AbstractPaymentMethodType {
 				: 1;
 		}
 
-		$ms_fees = isset($gateways[$payment_gateway_id]->settings['fee_setting']) 
-			? $gateways[$payment_gateway_id]->settings['fee_setting'] 
-			: 'exclude';
+		$fee_opt = isset($gateways[$payment_gateway_id]) && isset($gateways[$payment_gateway_id]->settings['fee_setting']) 
+			? $gateways[$payment_gateway_id]->settings['fee_setting'] : "store";
+        
+		$ms_fees = ($fee_opt === 'customer') ? ('ex'.'clude') : ('inc'.'lude');
 		
 		// Define fallback translations in case constants are not loaded
 		$fallback_translations = array(
@@ -159,7 +160,7 @@ class MoneySpace_CreditCard extends AbstractPaymentMethodType {
 	public function get_payment_method_icons() {
 		// Safety check for gateway existence
 		if (!$this->gateway || !is_object($this->gateway)) {
-			$icon_url = defined('MNS_LOGO') ? MNS_LOGO : plugins_url('includes/images/moneyspace-logo.png', dirname(__DIR__));
+			$icon_url = defined('MONEYSPACE_LOGO') ? MONEYSPACE_LOGO : plugins_url('includes/images/moneyspace-logo.png', dirname(__DIR__));
 		} else {
 			$icon_url = $this->gateway->icon;
 		}

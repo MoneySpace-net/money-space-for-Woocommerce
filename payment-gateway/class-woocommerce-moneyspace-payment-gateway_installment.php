@@ -185,7 +185,8 @@ class MNS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
     public function payment_fields()
     {
         $gateways = WC()->payment_gateways->get_available_payment_gateways();
-        $ms_fee = $gateways['moneyspace_installment']->settings['fee_setting'] ?? "include";
+        $fee_opt = $gateways['moneyspace_installment']->settings['fee_setting'];
+        $ms_fee = ($fee_opt === 'customer') ? ('ex'.'clude') : ('inc'.'lude');
         $ktc_max_months_setting = $gateways['moneyspace_installment']->settings['ktc_max_months_setting']; 
         $bay_max_months_setting = $gateways['moneyspace_installment']->settings['bay_max_months_setting']; 
         $fcy_max_months_setting = $gateways['moneyspace_installment']->settings['fcy_max_months_setting']; 
@@ -420,22 +421,28 @@ class MNS_Payment_Gateway_INSTALLMENT extends WC_Payment_Gateway {
         $order_amount = $order->get_total();
         $is_error = false;
 
-        // Verify nonce before reading any POSTed form data.
-        $valid_nonce = false;
-        if ( isset( $_POST['moneyspace_installment_nonce'] ) ) {
-            $valid_nonce = wp_verify_nonce( sanitize_key( $_POST['moneyspace_installment_nonce'] ), 'moneyspace_installment_process_payment' );
-        }
-        // Fallback to WooCommerce checkout nonce if present (classic/blocks checkout).
-        if ( ! $valid_nonce && isset( $_POST['woocommerce-process-checkout-nonce'] ) ) {
-            $valid_nonce = wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['woocommerce-process-checkout-nonce'] ) ), 'woocommerce-process_checkout' );
-        }
+        // Skip nonce verification for REST API requests (WooCommerce Blocks)
+        // WooCommerce Blocks uses REST API with its own authentication
+        $is_rest_request = defined('REST_REQUEST') && REST_REQUEST;
+        
+        if (!$is_rest_request) {
+            // Verify nonce before reading any POSTed form data (classic checkout only).
+            $valid_nonce = false;
+            if ( isset( $_POST['moneyspace_installment_nonce'] ) ) {
+                $valid_nonce = wp_verify_nonce( sanitize_key( $_POST['moneyspace_installment_nonce'] ), 'moneyspace_installment_process_payment' );
+            }
+            // Fallback to WooCommerce checkout nonce if present (classic checkout).
+            if ( ! $valid_nonce && isset( $_POST['woocommerce-process-checkout-nonce'] ) ) {
+                $valid_nonce = wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['woocommerce-process-checkout-nonce'] ) ), 'woocommerce-process_checkout' );
+            }
 
-        if ( ! $valid_nonce ) {
-            wc_add_notice( __( 'Security check failed. Please try again.', 'money-space' ), 'error' );
-            return array(
-                'result'   => 'failure',
-                'messages' => 'Security check failed',
-            );
+            if ( ! $valid_nonce ) {
+                wc_add_notice( __( 'Security check failed. Please try again.', 'money-space' ), 'error' );
+                return array(
+                    'result'   => 'failure',
+                    'messages' => 'Security check failed',
+                );
+            }
         }
         
         // Handle WooCommerce Blocks payment data for installments

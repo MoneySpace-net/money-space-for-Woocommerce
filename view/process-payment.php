@@ -27,7 +27,7 @@ if (isset($_GET['ms_nonce']) && ! $moneyspace_nonce_valid) {
 
 if ($moneyspace_order && $moneyspace_pid) {
 
-    $moneyspace_payment_gateway_id = defined('MONEYSPACE_ID_CREDITCARD') ? MONEYSPACE_ID_CREDITCARD : (defined('MONEYSPACE_ID') ? MONEYSPACE_ID : 'moneyspace');
+    $moneyspace_payment_gateway_id = defined('MONEYSPACE_ID') ? MONEYSPACE_ID : (defined('MONEYSPACE_ID') ? MONEYSPACE_ID : 'moneyspace');
     $moneyspace_payment_gateway_qr_id = defined('MONEYSPACE_ID_QRPROM') ? MONEYSPACE_ID_QRPROM : (defined('MONEYSPACE_ID_QRPROM') ? MONEYSPACE_ID_QRPROM : 'moneyspace_qrnone');
     $moneyspace_payment_gateway_installment_id = defined('MONEYSPACE_ID_INSTALLMENT') ? MONEYSPACE_ID_INSTALLMENT : (defined('MONEYSPACE_ID_INSTALLMENT') ? MONEYSPACE_ID_INSTALLMENT : 'moneyspace_installment');
 

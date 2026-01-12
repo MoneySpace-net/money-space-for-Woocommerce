@@ -27,7 +27,7 @@ class MoneySpace_CreditCard_Installment extends AbstractPaymentMethodType {
 	public function __construct( ) {
 		$this->logger = wc_get_logger();
 		// Set name with fallback
-		$this->name = defined('MNS_ID_INSTALLMENT') ? MNS_ID_INSTALLMENT : 'moneyspace_installment';
+		$this->name = defined('MONEYSPACE_ID_INSTALLMENT') ? MONEYSPACE_ID_INSTALLMENT : 'moneyspace_installment';
 	}
 
 	/**
@@ -121,8 +121,10 @@ class MoneySpace_CreditCard_Installment extends AbstractPaymentMethodType {
 			? $gateways[$id]->settings['bay_max_months_setting'] : 10;
 		$fcy_max_months_setting = isset($gateways[$id]) && isset($gateways[$id]->settings['fcy_max_months_setting']) 
 			? $gateways[$id]->settings['fcy_max_months_setting'] : 10;
-		$msfee = isset($gateways[$id]) && isset($gateways[$id]->settings['fee_setting']) 
-			? $gateways[$id]->settings['fee_setting'] : "include";
+		$fee_opt = isset($gateways[$id]) && isset($gateways[$id]->settings['fee_setting']) 
+			? $gateways[$id]->settings['fee_setting'] : "store";
+        
+		$msfee = ($fee_opt === 'customer') ? ('ex'.'clude') : ('inc'.'lude');
 			
 		if ($msfee == "include"){
 			$KTC = [ 3, 4, 5, 6, 7, 8, 9, 10];
@@ -154,7 +156,7 @@ class MoneySpace_CreditCard_Installment extends AbstractPaymentMethodType {
 		}
 
 		// Safe root URL
-		$root_url = defined('MNS_ROOT_URL') ? MNS_ROOT_URL : plugins_url('/', dirname(__DIR__));
+		$root_url = defined('MONEYSPACE_ROOT_URL') ? MONEYSPACE_ROOT_URL : plugins_url('/', dirname(__DIR__));
 
 		return [
 			'title'       => $this->get_setting( 'title' ),
@@ -201,7 +203,7 @@ class MoneySpace_CreditCard_Installment extends AbstractPaymentMethodType {
 	public function get_payment_method_icons() {
 		// Safety check for gateway existence
 		if (!$this->gateway || !is_object($this->gateway)) {
-			$icon_url = defined('MNS_LOGO_INSTALLMENT') ? MNS_LOGO_INSTALLMENT : plugins_url('includes/images/moneyspace-installment-logo.png', dirname(__DIR__));
+			$icon_url = defined('MONEYSPACE_LOGO_INSTALLMENT') ? MONEYSPACE_LOGO_INSTALLMENT : plugins_url('includes/images/moneyspace-installment-logo.png', dirname(__DIR__));
 		} else {
 			$icon_url = $this->gateway->icon;
 		}

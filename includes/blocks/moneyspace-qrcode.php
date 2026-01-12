@@ -26,7 +26,7 @@ class MoneySpace_QRCode extends AbstractPaymentMethodType {
 	public function __construct( ) {
 		$this->logger = wc_get_logger();
 		// Set name with fallback
-		$this->name = defined('MNS_ID_QRPROM') ? MNS_ID_QRPROM : 'moneyspace_qrprom';
+		$this->name = defined('MONEYSPACE_ID_QRPROM') ? MONEYSPACE_ID_QRPROM : 'moneyspace_qrprom';
 	}
 
 	/**
@@ -118,7 +118,7 @@ class MoneySpace_QRCode extends AbstractPaymentMethodType {
 	public function get_payment_method_icons() {
 		// Safety check for gateway existence
 		if (!$this->gateway || !is_object($this->gateway)) {
-			$icon_url = defined('MNS_LOGO_QR') ? MNS_LOGO_QR : plugins_url('includes/images/moneyspace-qr-logo.png', dirname(__DIR__));
+			$icon_url = defined('MONEYSPACE_LOGO_QR') ? MONEYSPACE_LOGO_QR : plugins_url('includes/images/moneyspace-qr-logo.png', dirname(__DIR__));
 		} else {
 			$icon_url = $this->gateway->icon;
 		}
