@@ -8,7 +8,7 @@ class MNS_Router_Utility
     const QUERY_VAR = 'MNS_Route';
     const PLUGIN_NAME = 'MS Router';
     const DEBUG = FALSE;
-    const MIN_PHP_VERSION = '5.2';
+    const MIN_PHP_VERSION = '7.4';
     const MIN_WP_VERSION = '3.0';
     const DB_VERSION = 1;
     const MONEYSPACE_PLUGIN_INIT_HOOK = 'MONEYSPACE_Router_init';

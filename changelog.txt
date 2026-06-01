@@ -1,5 +1,9 @@
 == Changelog ==
 
+= 3.1.3 - 2026-06-01 =
+* Compatibility: Tested up to WordPress 7.0
+* Compatibility: Updated minimum PHP requirement to 7.4 (WordPress 7.0 drops PHP 7.2/7.3 support)
+
 = 3.1.2 - 2026-01-13 =
 * Fix: Corrected fee setting handling to properly map 'store'/'customer' options
 * Fix: Payment gateways now correctly convert fee_setting to include/exclude values

@@ -5,7 +5,7 @@
 [![PHP](https://img.shields.io/badge/PHP-8.0+-777BB4.svg)](https://php.net/)
 [![Build Status](https://img.shields.io/badge/build-passing-brightgreen.svg)](https://github.com/MoneySpace-net/money-space-for-woocommerce/actions)
 [![License](https://img.shields.io/badge/License-GPL--2.0+-red.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-3.1.2-blue.svg)](https://github.com/MoneySpace-net/money-space-for-woocommerce/releases)
+[![Version](https://img.shields.io/badge/version-3.1.3-blue.svg)](https://github.com/MoneySpace-net/money-space-for-woocommerce/releases)
 A comprehensive WordPress/WooCommerce payment gateway plugin that enables secure online payments through **credit cards**, **QR codes (PromptPay)**, and **installment plans**. This plugin integrates with MoneySpace Payment Gateway to provide Thai businesses with a complete, PCI DSS-compliant payment solution.
 
 A comprehensive WordPress/WooCommerce payment gateway plugin that enables secure online payments through **credit cards**, **QR codes (PromptPay)**, and **installment plans**. This plugin integrates with MoneySpace Payment Gateway to provide Thai businesses with a complete, PCI DSS-compliant payment solution.
@@ -467,6 +467,9 @@ A comprehensive WordPress/WooCommerce payment gateway plugin that enables secure
 
 # Changelog
 
+- 2026-06-01 : Version 3.1.3 - WordPress 7.0 compatibility
+- 2026-06-01 : Compatibility: Tested up to WordPress 7.0
+- 2026-06-01 : Compatibility: Updated minimum PHP requirement to 7.4
 - 2026-01-13 : Version 3.1.2 - Fee setting handling fix
 - 2026-01-13 : Fix: Corrected fee setting handling to properly map 'store'/'customer' options
 - 2026-01-13 : Fix: Payment gateways now correctly convert fee_setting to include/exclude values
